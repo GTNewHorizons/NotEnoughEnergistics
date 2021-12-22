@@ -4,7 +4,7 @@ buildscript {
         jcenter()
         maven {
             name = "github"
-            url = "https://github.com/juanmuscaria/maven/raw/master"
+            url = "raw.githubusercontent.com/juanmuscaria/maven/master"
         }
         maven {
             name = "gt"
@@ -16,7 +16,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-1.4.5-SNAPSHOT'
+        classpath "com.github.GTNewHorizons:ForgeGradle:1.2.4"
     }
 }
 
@@ -37,8 +37,8 @@ minecraft {
 
 repositories {
     maven {
-        name 'chickenbones'
-        url 'http://chickenbones.net/maven'
+        name = 'chickenbones'
+        url = "http://chickenbones.net/maven"
     }
     maven {
         name = "gt"

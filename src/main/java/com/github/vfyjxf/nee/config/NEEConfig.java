@@ -23,7 +23,7 @@ public class NEEConfig {
     public static boolean matchOtherItems = true;
     public static boolean drawHighlight = true;
     public static boolean allowSynchronousSwitchIngredient = true;
-    public static boolean useStackSizeFromNEI = false;
+    public static boolean useStackSizeFromNEI = true;
 
     public static int draggedStackDefaultSize = 1;
 
@@ -53,7 +53,7 @@ public class NEEConfig {
         allowSynchronousSwitchIngredient = config.get("client", "allowSynchronousSwitchIngredient", true,
                 "If true, it will make all similar ingredient switch at the same time").getBoolean(true);
 
-        useStackSizeFromNEI = config.get("client","useStackSizeFromNEI",false,
+        useStackSizeFromNEI = config.get("client","useStackSizeFromNEI",true,
                 "Use the StackSize set by NEI").getBoolean();
 
         draggedStackDefaultSize = config.get("client", "draggedStackDefaultSize", 1,
@@ -80,7 +80,7 @@ public class NEEConfig {
         allowSynchronousSwitchIngredient = config.get("client", "allowSynchronousSwitchIngredient", true,
                 "If true, it will make all similar ingredient switch at the same time").getBoolean(true);
 
-        useStackSizeFromNEI = config.get("client","useStackSizeFromNEI",false,
+        useStackSizeFromNEI = config.get("client","useStackSizeFromNEI",true,
                 "Use the StackSize set by NEI").getBoolean();
 
         draggedStackDefaultSize = config.get("client", "draggedStackDefaultSize", 1,
