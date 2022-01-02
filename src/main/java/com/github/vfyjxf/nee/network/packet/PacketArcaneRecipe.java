@@ -60,7 +60,7 @@ public class PacketArcaneRecipe implements IMessage, IMessageHandler<PacketArcan
                     }
                     craftMatrix[i].putStack(currentItem);
                 }
-                ((ContainerKnowledgeInscriber) container).func_75130_a(craftMatrix[0].inventory);
+                container.onCraftMatrixChanged(craftMatrix[0].inventory);
             }
         }
         return null;
