@@ -1,0 +1,18 @@
+repositories {
+    maven {
+        name "GTNH Maven"
+        url "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+    }
+    maven {
+        name "Curse Maven"
+        url "https://cursemaven.com"
+    }
+    maven {
+        name "OvermindDL1 Maven"
+        url "http://gregtech.overminddl1.com/"
+    }
+    maven {
+        name "Jitpack"
+        url "https://jitpack.io"
+    }
+}
