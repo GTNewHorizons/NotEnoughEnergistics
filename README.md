@@ -36,23 +36,23 @@ This mod removes that functionality and allows the player to use NEI's transfer 
 - [x]  IndustrialCraft2
 - [x]  Avaritia
 - [x]  EnderIO 
-- [x]  Forestry(Doesn't support Fermenter and Still,because they don't have an item output)
+- [x]  Forestry (Doesn't support Fermenter and Still,because they don't have an item output)
 - [x]  Thaumcraft NEI Plugin
-- [x]  Thaumic Energistics(Allows you to transfer ArcaneRecipe from NEI to Knowledge Inscriber, it requires Thaumcraft NEI Plugin)
+- [x]  Thaumic Energistics (Allows you to transfer ArcaneRecipe from NEI to Knowledge Inscriber, it requires Thaumcraft NEI Plugin)
 - [x]  ThermalExpansion
 - [x]  ImmersiveEngineering
 - [x]  Mekanism
 - [x]  BloodMagic
 - [x]  BuildCraft
-- [x]  Avaritiaddons(auto extreme crafting table support)
+- [x]  Avaritiaddons (auto extreme crafting table support)
 - [x]  GT++
 
-If you want other Mod support,see [RecipeProcessor](./src/main/java/com/github/vfyjxf/nee/processor/RecipeProcessor.java) and [Mod support Issue](https://github.com/vfyjxf/NotEnoughEnergistics/issues/1)
+If you want other Mod support, see [RecipeProcessor](./src/main/java/com/github/vfyjxf/nee/processor/RecipeProcessor.java) and [Mod support Issue](https://github.com/vfyjxf/NotEnoughEnergistics/issues/1)
 
 ## TODO
 
-- [x]  Add item blackList ,if item in the blacklist, it will not be transferred.
-- [x]  Add item  priority list, if item in tne priority list, it will be transferred first.
+- [x]  Add item blackList, if item in the blacklist, it will not be transferred.
+- [x]  Add item priority list, if item in tne priority list, it will be transferred first.
 - [x]  Combine like stacks in processing patterns.
 
 ## Credits
