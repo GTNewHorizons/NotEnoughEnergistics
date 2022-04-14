@@ -16,4 +16,6 @@ dependencies {
     compileOnly("com.gregoriust.gregtech:gregtech_1.7.10:6.14.23:dev") { transitive = false }
     compileOnly("curse.maven:thaumcraft-nei-plugin-225095:2241913") { transitive = false }
     compileOnly("curse.maven:thermal-expansion-69163:2388759") { transitive = false }
+
+    runtime("curse.maven:cofh-core-69162:2388751")
 }

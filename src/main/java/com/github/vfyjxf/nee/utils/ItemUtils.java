@@ -6,6 +6,7 @@ import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -204,6 +205,25 @@ public final class ItemUtils {
             }
         }
         return false;
+    }
+
+    public static void transformGTTool(ItemStack stack) {
+        if (!Loader.isModLoaded("gregtech")) return;
+        try {
+            Class<?> GTToolClazz = Class.forName("gregtech.api.items.GT_MetaGenerated_Tool");
+            if (GTToolClazz.isAssignableFrom(stack.getItem().getClass())) {
+                NBTTagCompound NBT = stack.getTagCompound();
+                if (NBT == null) {
+                    NBT = new NBTTagCompound();
+                    NBTTagCompound NBTToolStats = new NBTTagCompound();
+                    NBTToolStats.setString("PrimaryMaterial", "Neutronium");
+                    NBTToolStats.setString("SecondaryMaterial", "Neutronium");
+                    NBTToolStats.setInteger("MaxDamage", 65536000);
+                    NBT.setTag("GT.ToolStats", NBTToolStats);
+                    stack.setTagCompound(NBT);
+                }
+            }
+        } catch (ClassNotFoundException ignored) {}
     }
 
 }

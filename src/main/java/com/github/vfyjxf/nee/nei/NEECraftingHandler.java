@@ -172,6 +172,8 @@ public class NEECraftingHandler implements IOverlayHandler {
                     }
                 }
 
+                ItemUtils.transformGTTool(stack);
+
                 //Fix ItemStack with wrong meta
                 if (stack.getItemDamage() == 32767) {
                     stack.setItemDamage(0);
