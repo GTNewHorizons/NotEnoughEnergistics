@@ -36,6 +36,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.input.Keyboard;
 
 import java.io.ByteArrayOutputStream;
@@ -109,8 +110,7 @@ public class NEECraftingHelper implements IOverlayHandler {
                     }
                 }
 
-                //Fix ItemStack with wrong meta
-                if (stack.getItemDamage() == 32767) {
+                if (stack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                     stack.setItemDamage(0);
                 }
 

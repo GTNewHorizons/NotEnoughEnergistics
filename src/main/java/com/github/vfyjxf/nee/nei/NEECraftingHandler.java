@@ -19,6 +19,7 @@ import com.github.vfyjxf.nee.utils.ItemUtils;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.*;
 
@@ -118,8 +119,7 @@ public class NEECraftingHandler implements IOverlayHandler {
                             continue;
                         }
 
-                        //Fix ItemStack with wrong meta
-                        if (currentStack.getItemDamage() == 32767) {
+                        if (currentStack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                             currentStack.setItemDamage(0);
                         }
 
@@ -134,8 +134,7 @@ public class NEECraftingHandler implements IOverlayHandler {
                         }
 
                         ItemStack outputStack = positionedStack.item.copy();
-                        //Fix ItemStack with wrong meta(maybe ?)
-                        if (outputStack.getItemDamage() == 32767) {
+                        if (outputStack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                             outputStack.setItemDamage(0);
                         }
 
@@ -174,8 +173,7 @@ public class NEECraftingHandler implements IOverlayHandler {
 
                 ItemUtils.transformGTTool(stack);
 
-                //Fix ItemStack with wrong meta
-                if (stack.getItemDamage() == 32767) {
+                if (stack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                     stack.setItemDamage(0);
                 }
 
