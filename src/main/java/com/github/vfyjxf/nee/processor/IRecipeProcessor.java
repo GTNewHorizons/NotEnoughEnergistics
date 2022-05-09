@@ -27,4 +27,8 @@ public interface IRecipeProcessor {
     @Nonnull
     List<PositionedStack> getRecipeOutput(IRecipeHandler recipe, int recipeIndex, String identifier);
 
+    default boolean mergeStacks(IRecipeHandler recipe, int recipeIndex, String identifier) {
+        return true;
+    }
+
 }

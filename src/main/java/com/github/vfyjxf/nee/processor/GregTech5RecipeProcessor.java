@@ -106,4 +106,8 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         return recipeOutputs;
     }
 
+    @Override
+    public boolean mergeStacks(IRecipeHandler recipe, int recipeIndex, String identifier) {
+        return !"gt.recipe.fakeAssemblylineProcess".equals(identifier);
+    }
 }

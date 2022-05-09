@@ -73,7 +73,7 @@ public class NEECraftingHandler implements IOverlayHandler {
                 List<PositionedStack> inputs = processor.getRecipeInput(recipe, recipeIndex, identifier);
                 List<PositionedStack> outputs = processor.getRecipeOutput(recipe, recipeIndex, identifier);
                 String recipeProcessorId = processor.getRecipeProcessorId();
-                List<PositionedStack> tInputs = new ArrayList<>();
+                List<PositionedStack> mergedInputs = new ArrayList<>();
 
                 if (!inputs.isEmpty() && !outputs.isEmpty()) {
                     NEECraftingHandler.ingredients.clear();
@@ -81,10 +81,10 @@ public class NEECraftingHandler implements IOverlayHandler {
                         ItemStack currentStack = positionedStack.items[0];
                         boolean find = false;
                         ItemCombination currentValue = ItemCombination.valueOf(NEEConfig.itemCombinationMode);
-                        if (currentValue != ItemCombination.DISABLED) {
+                        if (currentValue != ItemCombination.DISABLED && processor.mergeStacks(recipe, recipeIndex, identifier)) {
                             boolean isWhitelist = currentValue == ItemCombination.WHITELIST && Arrays.asList(NEEConfig.itemCombinationWhitelist).contains(identifier);
                             if (currentValue == ItemCombination.ENABLED || isWhitelist) {
-                                for (PositionedStack storedStack : tInputs) {
+                                for (PositionedStack storedStack : mergedInputs) {
                                     ItemStack firstStack = storedStack.items[0];
                                     boolean areItemStackEqual = firstStack.isItemEqual(currentStack) && ItemStack.areItemStackTagsEqual(firstStack, currentStack);
                                     if (areItemStackEqual && (firstStack.stackSize + currentStack.stackSize) <= firstStack.getMaxStackSize()) {
@@ -95,10 +95,10 @@ public class NEECraftingHandler implements IOverlayHandler {
                             }
                         }
                         if (!find) {
-                            tInputs.add(positionedStack.copy());
+                            mergedInputs.add(positionedStack.copy());
                         }
                     }
-                    for (PositionedStack positionedStack : tInputs) {
+                    for (PositionedStack positionedStack : mergedInputs) {
                         ItemStack currentStack = positionedStack.items[0];
                         ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
 
