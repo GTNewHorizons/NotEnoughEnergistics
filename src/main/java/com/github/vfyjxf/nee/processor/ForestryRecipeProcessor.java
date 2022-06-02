@@ -12,7 +12,7 @@ public class ForestryRecipeProcessor implements IRecipeProcessor {
     @Override
     public Set<String> getAllOverlayIdentifier() {
         return new HashSet<>(Arrays.asList(
-                "bottler", "carpenter", "centrifuge", "fabricator", "fermenter", "moistener", "squeezer", "still"
+                "forestry.bottler", "forestry.carpenter", "forestry.centrifuge", "forestry.fabricator", "forestry.fermenter", "forestry.moistener", "forestry.squeezer", "forestry.still"
         ));
     }
 
