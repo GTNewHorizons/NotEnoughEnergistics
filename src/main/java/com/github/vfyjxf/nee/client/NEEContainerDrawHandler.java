@@ -195,7 +195,7 @@ public class NEEContainerDrawHandler {
                     recipeIndex = gui.page * handler.recipiesPerPage() + i;
                 }
 
-                if (recipeIndex >= 0 && handler != null) {
+                if (recipeIndex >= 0 && handler != null && recipeIndex < handler.numRecipes()) {
                     IngredientTracker tracker = this.isCraftingTerm ? new IngredientTracker(gui.firstGui, handler, recipeIndex) : new IngredientTracker(gui, handler, recipeIndex);
                     trackerMap.put(overlayButton.id, tracker);
                 }
