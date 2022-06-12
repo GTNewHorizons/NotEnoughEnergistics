@@ -194,7 +194,7 @@ public class PacketNEIPatternRecipe implements IMessage{
             final IInventory outputMatrix = cct.getInventoryByName("output");
 
             if (inv != null && message.input != null && security != null) {
-                for (int i = 0; i < craftMatrix.getSizeInventory(); i++) {
+                for (int i = 0; i < Math.min(craftMatrix.getSizeInventory(), recipeInput.length); i++) {
                     ItemStack currentItem = null;
                     if (recipeInput[i] != null) {
                         currentItem = recipeInput[i].copy();
