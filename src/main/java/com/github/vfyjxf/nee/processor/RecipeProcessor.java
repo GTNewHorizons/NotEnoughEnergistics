@@ -20,6 +20,11 @@ public class RecipeProcessor {
             recipeProcessors.add(new AppengRecipeProcessor());
         }
 
+        if (Loader.isModLoaded("Botania")) {
+            NotEnoughEnergistics.logger.info("Found Botania,install Botania support");
+            recipeProcessors.add(new BotaniaRecipeProcessor());
+        }
+
         if (Loader.isModLoaded("gregtech") && !Loader.isModLoaded("gregapi")) {
             NotEnoughEnergistics.logger.info("Found GregTech5,install GregTech5 support");
             recipeProcessors.add(new GregTech5RecipeProcessor());
