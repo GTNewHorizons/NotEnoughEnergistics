@@ -20,10 +20,8 @@ import com.github.vfyjxf.nee.container.ContainerCraftingConfirm;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
-import com.github.vfyjxf.nee.utils.ModIDs;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ObfuscationReflectionHelper;
-import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import java.util.Collections;
 import java.util.List;
@@ -76,25 +74,11 @@ public class GuiEventHandler implements INEIGuiHandler {
                     tracker = null;
                 }
             }
-
-            if (GuiUtils.isWirelessGuiCraftConfirm(event.gui)) {
-                assert event.gui instanceof net.p455w0rd.wirelesscraftingterminal.client.gui.GuiCraftConfirm;
-                if (getCancelButton((net.p455w0rd.wirelesscraftingterminal.client.gui.GuiCraftConfirm) event.gui)
-                        == event.button) {
-                    tracker = null;
-                }
-            }
         }
     }
 
     private GuiButton getCancelButton(GuiCraftConfirm gui) {
         return ObfuscationReflectionHelper.getPrivateValue(GuiCraftConfirm.class, gui, "cancel");
-    }
-
-    @Optional.Method(modid = ModIDs.WCT)
-    private GuiButton getCancelButton(net.p455w0rd.wirelesscraftingterminal.client.gui.GuiCraftConfirm gui) {
-        return ObfuscationReflectionHelper.getPrivateValue(
-                net.p455w0rd.wirelesscraftingterminal.client.gui.GuiCraftConfirm.class, gui, "cancel");
     }
 
     private boolean isContainerCraftConfirm(Container container) {

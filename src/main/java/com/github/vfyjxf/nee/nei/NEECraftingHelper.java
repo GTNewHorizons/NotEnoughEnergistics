@@ -26,6 +26,7 @@ import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.utils.ModIDs;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -229,7 +230,7 @@ public class NEECraftingHelper implements IOverlayHandler {
         }
     }
 
-    @Optional.Method(modid = "ae2wct")
+    @Optional.Method(modid = ModIDs.WCT)
     private void moveItemsForWirelessCrafting(GuiContainer firstGui, List<PositionedStack> ingredients) {
         try {
             net.p455w0rd.wirelesscraftingterminal.core.sync.network.NetworkHandler.instance.sendToServer(

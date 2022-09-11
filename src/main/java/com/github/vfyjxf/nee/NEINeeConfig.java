@@ -14,6 +14,7 @@ import com.github.vfyjxf.nee.nei.NEECraftingHandler;
 import com.github.vfyjxf.nee.nei.NEECraftingHelper;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
+import com.github.vfyjxf.nee.utils.ModIDs;
 import cpw.mods.fml.common.Loader;
 import java.util.*;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -114,7 +115,7 @@ public class NEINeeConfig implements IConfigureNEI {
     }
 
     private void installWirelessCraftingTermSupport() {
-        if (Loader.isModLoaded("ae2wct")) {
+        if (Loader.isModLoaded(ModIDs.WCT)) {
             API.registerGuiOverlayHandler(GuiWirelessCraftingTerminal.class, NEECraftingHelper.INSTANCE, "crafting");
             API.registerGuiOverlayHandler(GuiWirelessCraftingTerminal.class, NEECraftingHelper.INSTANCE, "crafting2x2");
         }

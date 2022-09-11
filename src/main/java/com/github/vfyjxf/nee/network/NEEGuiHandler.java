@@ -210,7 +210,7 @@ public class NEEGuiHandler implements IGuiHandler {
         player.openGui(instance, (ID << 4), world, x, y, z);
     }
 
-    @Optional.Method(modid = "ae2wct")
+    @Optional.Method(modid = ModIDs.WCT)
     private WirelessTerminalGuiObject getWirelessTerminalGui(EntityPlayer player, World world, int x, int y, int z) {
         final IWirelessCraftingTermHandler wh = (IWirelessCraftingTermHandler) AEApi.instance()
                 .registries()
