@@ -24,6 +24,15 @@ public final class ItemUtils {
     public static List<StackProcessor> transformItemBlacklist = getTransformItemBlacklist();
     public static List<StackProcessor> transformItemPriorityList = getTransformItemPriorityList();
 
+    private static Class<?> GT_MetaGenerated_ToolClass;
+
+    static {
+        try {
+            GT_MetaGenerated_ToolClass = Class.forName("gregtech.api.items.GT_MetaGenerated_Tool");
+        } catch (ClassNotFoundException ignored) {
+        }
+    }
+
     public static void reloadConfig() {
         transformItemBlacklist = getTransformItemBlacklist();
         transformItemPriorityList = getTransformItemPriorityList();
@@ -215,21 +224,18 @@ public final class ItemUtils {
 
     public static void transformGTTool(ItemStack stack) {
         if (!Loader.isModLoaded("gregtech")) return;
-        try {
-            Class<?> GTToolClazz = Class.forName("gregtech.api.items.GT_MetaGenerated_Tool");
-            if (GTToolClazz.isAssignableFrom(stack.getItem().getClass())) {
-                NBTTagCompound NBT = stack.getTagCompound();
-                if (NBT == null) {
-                    NBT = new NBTTagCompound();
-                    NBTTagCompound NBTToolStats = new NBTTagCompound();
-                    NBTToolStats.setString("PrimaryMaterial", "Neutronium");
-                    NBTToolStats.setString("SecondaryMaterial", "Neutronium");
-                    NBTToolStats.setInteger("MaxDamage", 65536000);
-                    NBT.setTag("GT.ToolStats", NBTToolStats);
-                    stack.setTagCompound(NBT);
-                }
+        if (GT_MetaGenerated_ToolClass != null
+                && GT_MetaGenerated_ToolClass.isAssignableFrom(stack.getItem().getClass())) {
+            NBTTagCompound NBT = stack.getTagCompound();
+            if (NBT == null) {
+                NBT = new NBTTagCompound();
+                NBTTagCompound NBTToolStats = new NBTTagCompound();
+                NBTToolStats.setString("PrimaryMaterial", "Neutronium");
+                NBTToolStats.setString("SecondaryMaterial", "Neutronium");
+                NBTToolStats.setInteger("MaxDamage", 65536000);
+                NBT.setTag("GT.ToolStats", NBTToolStats);
+                stack.setTagCompound(NBT);
             }
-        } catch (ClassNotFoundException ignored) {
         }
     }
 }

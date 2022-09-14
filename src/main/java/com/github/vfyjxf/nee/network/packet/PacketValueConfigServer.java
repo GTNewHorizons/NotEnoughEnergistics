@@ -73,10 +73,8 @@ public class PacketValueConfigServer implements IMessage {
                     tile.updateCraftingList();
                 }
             } else if ("PatternInterface.check".equals(message.name)) {
-                if (container instanceof AEBaseContainer || GuiUtils.isWirelessCraftingTermContainer(container)) {
-                    IGrid grid = container instanceof AEBaseContainer
-                            ? message.getNetwork((AEBaseContainer) container)
-                            : message.getNetwork((ContainerWirelessCraftingTerminal) container);
+                if (container instanceof AEBaseContainer) {
+                    IGrid grid = message.getNetwork((AEBaseContainer) container);
                     if (grid != null) {
 
                         for (IGridNode gridNode : grid.getMachines(TilePatternInterface.class)) {

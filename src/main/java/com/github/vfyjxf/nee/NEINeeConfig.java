@@ -129,7 +129,6 @@ public class NEINeeConfig implements IConfigureNEI {
         }
         if (Loader.isModLoaded("thaumcraftneiplugin")) {
             NotEnoughEnergistics.logger.info("Install ThaumicEnergistics support");
-
             API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapedrecipes");
             API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapelessrecipes");
             API.registerGuiOverlayHandler(GuiKnowledgeInscriber.class, new NEECraftingHandler(), "arcaneshapedrecipes");
@@ -139,11 +138,6 @@ public class NEINeeConfig implements IConfigureNEI {
     }
 
     private void installPatternTerminalExSupport(Set<String> identifiers) {
-        try {
-            Class.forName("appeng.client.gui.implementations.GuiPatternTermEx");
-        } catch (ClassNotFoundException e) {
-            return;
-        }
         identifiers.remove("crafting");
         identifiers.remove("crafting2x2");
         // PatternTermEx Support
@@ -161,7 +155,6 @@ public class NEINeeConfig implements IConfigureNEI {
         }
         if (Loader.isModLoaded("avaritiaddons")) {
             NotEnoughEnergistics.logger.info("Install Avaritiaddons support");
-
             API.registerGuiOverlay(GuiExtremeAutoCrafter.class, "extreme");
             API.registerGuiOverlayHandler(GuiExtremeAutoCrafter.class, new NEECraftingHandler(), "extreme");
         }

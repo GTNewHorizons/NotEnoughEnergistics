@@ -121,7 +121,9 @@ public class PacketCraftingRequest implements IMessage {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             Container container = player.openContainer;
 
-            if (container instanceof AEBaseContainer) {
+            if (GuiUtils.isWirelessCraftingTermContainer(container)) {
+                message.handlerWirelessCraftingRequest((ContainerWirelessCraftingTerminal) container, message, player);
+            } else if (container instanceof AEBaseContainer) {
                 AEBaseContainer baseContainer = (AEBaseContainer) container;
                 Object target = baseContainer.getTarget();
                 if (target instanceof IGridHost) {
@@ -145,8 +147,6 @@ public class PacketCraftingRequest implements IMessage {
                         }
                     }
                 }
-            } else if (GuiUtils.isWirelessCraftingTermContainer(container)) {
-                message.handlerWirelessCraftingRequest((ContainerWirelessCraftingTerminal) container, message, player);
             }
 
             return null;

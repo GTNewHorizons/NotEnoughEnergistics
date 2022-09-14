@@ -10,6 +10,17 @@ import javax.annotation.Nonnull;
 
 public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
 
+    private static Class<?> thermalNeiRecipeBaseClass;
+
+    static {
+        try {
+            thermalNeiRecipeBaseClass =
+                    Class.forName("cofh.thermalexpansion.plugins.nei.handlers.RecipeHandlerBase$NEIRecipeBase");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
@@ -37,15 +48,8 @@ public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
             if (recipe instanceof RecipeHandlerBase) {
-                Class<?> NEIRecipeBase = null;
-                try {
-                    NEIRecipeBase =
-                            Class.forName("cofh.thermalexpansion.plugins.nei.handlers.RecipeHandlerBase$NEIRecipeBase");
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if (NEIRecipeBase != null) {
-                    Field secondaryInputField = ReflectionHelper.findField(NEIRecipeBase, "secondaryInput");
+                if (thermalNeiRecipeBaseClass != null) {
+                    Field secondaryInputField = ReflectionHelper.findField(thermalNeiRecipeBaseClass, "secondaryInput");
                     PositionedStack secondaryInput = null;
                     try {
                         secondaryInput = (PositionedStack)
@@ -71,17 +75,11 @@ public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutputs.add(recipe.getResultStack(recipeIndex));
             if (recipe instanceof RecipeHandlerBase) {
-                Class<?> NEIRecipeBase = null;
-                try {
-                    NEIRecipeBase =
-                            Class.forName("cofh.thermalexpansion.plugins.nei.handlers.RecipeHandlerBase$NEIRecipeBase");
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                if (NEIRecipeBase != null) {
-                    Field secondaryOutputField = ReflectionHelper.findField(NEIRecipeBase, "secondaryOutput");
+                if (thermalNeiRecipeBaseClass != null) {
+                    Field secondaryOutputField =
+                            ReflectionHelper.findField(thermalNeiRecipeBaseClass, "secondaryOutput");
                     Field secondaryOutputChanceField =
-                            ReflectionHelper.findField(NEIRecipeBase, "secondaryOutputChance");
+                            ReflectionHelper.findField(thermalNeiRecipeBaseClass, "secondaryOutputChance");
                     PositionedStack secondaryOutput = null;
                     int secondaryOutputChance = 0;
                     try {

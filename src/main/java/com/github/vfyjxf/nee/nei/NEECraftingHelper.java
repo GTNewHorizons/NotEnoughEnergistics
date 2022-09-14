@@ -5,6 +5,7 @@ import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
 
 import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.client.gui.implementations.GuiPatternTerm;
+import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.container.slot.SlotCraftingMatrix;
 import appeng.container.slot.SlotFakeCraftingMatrix;
 import appeng.core.AELog;
@@ -267,7 +268,7 @@ public class NEECraftingHelper implements IOverlayHandler {
                 if (event.button.id >= OVERLAY_BUTTON_ID_START
                         && event.button.id < OVERLAY_BUTTON_ID_START + overlayButtons.size()) {
                     boolean isPatternTerm = guiRecipe.firstGui instanceof GuiPatternTerm
-                            || GuiUtils.isPatternTermExGui(guiRecipe.firstGui);
+                            || guiRecipe.firstGui instanceof GuiPatternTermEx;
                     boolean isCraftingTerm = guiRecipe.firstGui instanceof GuiCraftingTerm
                             || GuiUtils.isGuiWirelessCrafting(guiRecipe.firstGui);
                     if (isCraftingTerm || isPatternTerm) {
