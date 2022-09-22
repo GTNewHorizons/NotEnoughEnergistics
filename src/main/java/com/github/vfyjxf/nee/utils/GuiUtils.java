@@ -8,6 +8,10 @@ import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.implementations.ContainerPatternTermEx;
 import appeng.helpers.IContainerCraftingPacket;
 import com.github.vfyjxf.nee.container.WCTContainerCraftingConfirm;
+import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
+import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
+import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
+import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
 import cpw.mods.fml.common.Loader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -21,6 +25,7 @@ import net.minecraft.inventory.Slot;
 public class GuiUtils {
 
     private static final boolean isWirelessCraftingTerminalModLoaded = Loader.isModLoaded(ModIDs.WCT);
+    private static final boolean isFluidCraftModloaded = Loader.isModLoaded(ModIDs.FC);
 
     public static boolean isGuiWirelessCrafting(GuiScreen gui) {
         if (!isWirelessCraftingTerminalModLoaded) return false;
@@ -57,20 +62,32 @@ public class GuiUtils {
             return false;
         }
         Container container = Minecraft.getMinecraft().thePlayer.openContainer;
-        if (!(container instanceof ContainerPatternTerm) && !(container instanceof ContainerPatternTermEx)) {
+        if (!isPatternContainer(container)) {
             return false;
         }
         IContainerCraftingPacket cct = (IContainerCraftingPacket) container;
         IInventory craftMatrix = cct.getInventoryByName("crafting");
         return craftMatrix.equals(slot.inventory);
     }
-
+    public static boolean isPatternContainer(Container container){
+        if(isFluidCraftModloaded){
+            return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx || container instanceof ContainerFluidPatternTerminal || container instanceof ContainerFluidPatternTerminalEx;
+        }else{
+            return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx;
+        }
+    }
     public static boolean isGuiCraftingTerm(GuiScreen guiScreen) {
         return guiScreen instanceof GuiCraftingTerm || isGuiWirelessCrafting(guiScreen);
     }
-
+    public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen){
+        return isFluidCraftModloaded && (guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx);
+    }
     public static boolean isPatternTerm(GuiScreen guiScreen) {
-        return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx;
+        if (isFluidCraftModloaded) {
+            return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx || guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx;
+        }else{
+            return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx;
+        }
     }
 
     public static boolean isGuiCraftConfirm(GuiScreen gui) {

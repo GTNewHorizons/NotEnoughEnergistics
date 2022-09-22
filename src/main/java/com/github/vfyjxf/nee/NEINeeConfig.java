@@ -15,6 +15,8 @@ import com.github.vfyjxf.nee.nei.NEECraftingHelper;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
+import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import cpw.mods.fml.common.Loader;
 import java.util.*;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -54,11 +56,35 @@ public class NEINeeConfig implements IConfigureNEI {
 
         installWirelessCraftingTermSupport();
 
-        installPatternTerminalExSupport(identifiers);
+        installFluidPatternTerminalSupport(new HashSet<String>(identifiers));
 
         installThaumicEnergisticsSupport();
 
         installAvaritiaddonsSupport();
+
+        installPatternTerminalExSupport(new HashSet<String>(identifiers));
+
+        installFluidPatternTerminalExSupport(new HashSet<String>(identifiers));
+    }
+
+    private void installFluidPatternTerminalExSupport(Set<String> identifiers) {
+        if (Loader.isModLoaded(ModIDs.FC)) {
+            identifiers.remove("crafting");
+            identifiers.remove("crafting2x2");
+            for (String ident : identifiers) {
+                API.registerGuiOverlay(GuiFluidPatternTerminalEx.class, ident);
+                API.registerGuiOverlayHandler(GuiFluidPatternTerminalEx.class, new NEECraftingHandler(), ident);
+            }
+        }
+    }
+
+    private void installFluidPatternTerminalSupport(Set<String> identifiers) {
+        if (Loader.isModLoaded(ModIDs.FC)) {
+            for (String ident : identifiers) {
+                API.registerGuiOverlay(GuiFluidPatternTerminal.class, ident);
+                API.registerGuiOverlayHandler(GuiFluidPatternTerminal.class, NEECraftingHandler.INSTANCE, ident);
+            }
+        }
     }
 
     @Override

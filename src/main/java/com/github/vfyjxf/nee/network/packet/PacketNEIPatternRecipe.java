@@ -6,9 +6,14 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.ISecurityGrid;
 import appeng.api.networking.storage.IStorageGrid;
+import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.implementations.ContainerPatternTermEx;
 import appeng.helpers.IContainerCraftingPacket;
+import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
+import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -67,11 +72,27 @@ public class PacketNEIPatternRecipe implements IMessage {
                 ((ContainerPatternTermEx) container).getPatternTerminal().setInverted(false);
                 message.processRecipeHandler((ContainerPatternTermEx) container, message);
             }
+            addFluidCraftSupport(message,ctx);
             return null;
+        }
+        @Optional.Method(modid = ModIDs.FC)
+        private void addFluidCraftSupport(PacketNEIPatternRecipe message, MessageContext ctx){
+            EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+            Container container = player.openContainer;
+            if(container instanceof ContainerFluidPatternTerminal && message.output == null) {
+                ((ContainerFluidPatternTerminal) container).getPatternTerminal().setCraftingRecipe(true);
+                message.craftingTableRecipeHandler((ContainerFluidPatternTerminal) container, message);
+            } else if (container instanceof ContainerFluidPatternTerminal) {
+                ((ContainerFluidPatternTerminal) container).getPatternTerminal().setCraftingRecipe(false);
+                message.processRecipeHandler((ContainerFluidPatternTerminal) container, message);
+            }else if (container instanceof ContainerFluidPatternTerminalEx) {
+                message.processRecipeHandler((ContainerFluidPatternTerminalEx) container, message);
+            }
         }
     }
 
-    private void craftingTableRecipeHandler(ContainerPatternTerm container, PacketNEIPatternRecipe message) {
+
+    private void craftingTableRecipeHandler(AEBaseContainer container, PacketNEIPatternRecipe message) {
         ItemStack[] recipeInput = new ItemStack[9];
         NBTTagCompound currentStack;
 
@@ -80,7 +101,7 @@ public class PacketNEIPatternRecipe implements IMessage {
             recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
         }
 
-        final IContainerCraftingPacket cct = container;
+        final IContainerCraftingPacket cct = (IContainerCraftingPacket) container;
         final IGridNode node = cct.getNetworkNode();
 
         if (node != null) {
@@ -106,22 +127,8 @@ public class PacketNEIPatternRecipe implements IMessage {
         }
     }
 
-    private void processRecipeHandler(ContainerPatternTerm container, PacketNEIPatternRecipe message) {
-
-        ItemStack[] recipeInput = new ItemStack[9];
-        ItemStack[] recipeOutput = new ItemStack[3];
-
-        for (int i = 0; i < recipeInput.length; i++) {
-            NBTTagCompound currentStack = (NBTTagCompound) message.input.getTag("#" + i);
-            recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
-        }
-
-        for (int i = 0; i < recipeOutput.length; i++) {
-            NBTTagCompound currentStack = (NBTTagCompound) message.output.getTag(OUTPUT_KEY + i);
-            recipeOutput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
-        }
-
-        final IContainerCraftingPacket cct = container;
+    private void processRecipeHandler(AEBaseContainer container, PacketNEIPatternRecipe message) {
+        final IContainerCraftingPacket cct = (IContainerCraftingPacket) container;
         final IGridNode node = cct.getNetworkNode();
 
         if (node != null) {
@@ -133,7 +140,18 @@ public class PacketNEIPatternRecipe implements IMessage {
             final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
             final IInventory craftMatrix = cct.getInventoryByName("crafting");
             final IInventory outputMatrix = cct.getInventoryByName("output");
+            ItemStack[] recipeInput = new ItemStack[craftMatrix.getSizeInventory()];
+            ItemStack[] recipeOutput = new ItemStack[outputMatrix.getSizeInventory()];
 
+            for (int i = 0; i < recipeInput.length; i++) {
+                NBTTagCompound currentStack = (NBTTagCompound) message.input.getTag("#" + i);
+                recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+            }
+
+            for (int i = 0; i < recipeOutput.length; i++) {
+                NBTTagCompound currentStack = (NBTTagCompound) message.output.getTag(OUTPUT_KEY + i);
+                recipeOutput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+            }
             if (inv != null && message.input != null && security != null) {
                 for (int i = 0; i < craftMatrix.getSizeInventory(); i++) {
                     ItemStack currentItem = null;
@@ -146,55 +164,6 @@ public class PacketNEIPatternRecipe implements IMessage {
                 for (int i = 0; i < outputMatrix.getSizeInventory(); i++) {
                     ItemStack currentItem = null;
                     if (recipeOutput[i] != null) {
-                        currentItem = recipeOutput[i].copy();
-                    }
-                    outputMatrix.setInventorySlotContents(i, currentItem);
-                }
-                container.onCraftMatrixChanged(craftMatrix);
-            }
-        }
-    }
-
-    private void processRecipeHandler(ContainerPatternTermEx container, PacketNEIPatternRecipe message) {
-
-        ItemStack[] recipeInput = new ItemStack[16];
-        ItemStack[] recipeOutput = new ItemStack[4];
-
-        for (int i = 0; i < recipeInput.length; i++) {
-            NBTTagCompound currentStack = (NBTTagCompound) message.input.getTag("#" + i);
-            recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
-        }
-
-        for (int i = 0; i < recipeOutput.length; i++) {
-            NBTTagCompound currentStack = (NBTTagCompound) message.output.getTag(OUTPUT_KEY + i);
-            recipeOutput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
-        }
-
-        final IContainerCraftingPacket cct = container;
-        final IGridNode node = cct.getNetworkNode();
-
-        if (node != null) {
-            final IGrid grid = node.getGrid();
-            if (grid == null) {
-                return;
-            }
-            final IStorageGrid inv = grid.getCache(IStorageGrid.class);
-            final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
-            final IInventory craftMatrix = cct.getInventoryByName("crafting");
-            final IInventory outputMatrix = cct.getInventoryByName("output");
-
-            if (inv != null && message.input != null && security != null) {
-                for (int i = 0; i < craftMatrix.getSizeInventory(); i++) {
-                    ItemStack currentItem = null;
-                    if (i < recipeInput.length && recipeInput[i] != null) {
-                        currentItem = recipeInput[i].copy();
-                    }
-                    craftMatrix.setInventorySlotContents(i, currentItem);
-                }
-
-                for (int i = 0; i < outputMatrix.getSizeInventory(); i++) {
-                    ItemStack currentItem = null;
-                    if (i < recipeOutput.length && recipeOutput[i] != null) {
                         currentItem = recipeOutput[i].copy();
                     }
                     outputMatrix.setInventorySlotContents(i, currentItem);

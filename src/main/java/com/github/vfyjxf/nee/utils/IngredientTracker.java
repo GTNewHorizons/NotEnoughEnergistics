@@ -1,6 +1,7 @@
 package com.github.vfyjxf.nee.utils;
 
 import static com.github.vfyjxf.nee.nei.NEECraftingHelper.noPreview;
+import static com.github.vfyjxf.nee.utils.GuiUtils.isFluidCraftPatternTerm;
 
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IItemList;
@@ -13,6 +14,7 @@ import codechicken.nei.recipe.IRecipeHandler;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
+import com.glodblock.github.client.gui.GuiFCBaseMonitor;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +76,13 @@ public class IngredientTracker {
             }
         }
     }
+    private ItemRepo getRepo() throws IllegalAccessException {
+        if(isFluidCraftPatternTerm(termGui)){
+            return (ItemRepo) ReflectionHelper.findField(GuiFCBaseMonitor.class, "repo").get(termGui);
+        }else{
+            return (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private List<IAEItemStack> getCraftableStacks() {
@@ -82,10 +91,8 @@ public class IngredientTracker {
             IItemList<IAEItemStack> list = null;
             try {
                 if (!GuiUtils.isGuiWirelessCrafting(termGui)) {
-                    ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo")
-                            .get(termGui);
-                    list = (IItemList<IAEItemStack>)
-                            ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
+                    ItemRepo repo = getRepo();
+                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
                 } else {
                     // wireless crafting terminal support
                     ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")

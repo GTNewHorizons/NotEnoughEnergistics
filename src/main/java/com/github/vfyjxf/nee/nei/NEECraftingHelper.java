@@ -2,10 +2,10 @@ package com.github.vfyjxf.nee.nei;
 
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
+import static com.github.vfyjxf.nee.utils.GuiUtils.isGuiCraftingTerm;
+import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
 import appeng.client.gui.implementations.GuiCraftingTerm;
-import appeng.client.gui.implementations.GuiPatternTerm;
-import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.container.slot.SlotCraftingMatrix;
 import appeng.container.slot.SlotFakeCraftingMatrix;
 import appeng.core.AELog;
@@ -267,10 +267,8 @@ public class NEECraftingHelper implements IOverlayHandler {
                 }
                 if (event.button.id >= OVERLAY_BUTTON_ID_START
                         && event.button.id < OVERLAY_BUTTON_ID_START + overlayButtons.size()) {
-                    boolean isPatternTerm = guiRecipe.firstGui instanceof GuiPatternTerm
-                            || guiRecipe.firstGui instanceof GuiPatternTermEx;
-                    boolean isCraftingTerm = guiRecipe.firstGui instanceof GuiCraftingTerm
-                            || GuiUtils.isGuiWirelessCrafting(guiRecipe.firstGui);
+                    boolean isPatternTerm = isPatternTerm(guiRecipe.firstGui);
+                    boolean isCraftingTerm = isGuiCraftingTerm(guiRecipe.firstGui);
                     if (isCraftingTerm || isPatternTerm) {
                         int recipesPerPage = 2;
                         IRecipeHandler handler = (IRecipeHandler) guiRecipe.currenthandlers.get(guiRecipe.recipetype);

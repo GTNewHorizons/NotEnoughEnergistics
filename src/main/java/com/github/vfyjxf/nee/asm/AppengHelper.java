@@ -1,10 +1,9 @@
 package com.github.vfyjxf.nee.asm;
 
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.INPUT_KEY;
+import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
 import appeng.client.gui.implementations.GuiInterface;
-import appeng.client.gui.implementations.GuiPatternTerm;
-import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.container.slot.SlotFake;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.PositionedStack;
@@ -33,8 +32,7 @@ public class AppengHelper {
      */
     public static boolean handleMouseWheelInput(int dWheel) {
         Minecraft mc = Minecraft.getMinecraft();
-        boolean isPatternTerm =
-                mc.currentScreen instanceof GuiPatternTerm || mc.currentScreen instanceof GuiPatternTermEx;
+        boolean isPatternTerm = isPatternTerm(mc.currentScreen);
         boolean isInterface = mc.currentScreen instanceof GuiInterface;
         if (isPatternTerm || isInterface) {
             if (dWheel != 0) {

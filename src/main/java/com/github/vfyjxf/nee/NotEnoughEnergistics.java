@@ -29,7 +29,7 @@ public class NotEnoughEnergistics {
     public static final String NAME = "NotEnoughEnergistics";
     public static final String VERSION = "GRADLETOKEN_VERSION";
     public static final String DEPENDENCIES =
-            "required-after:NotEnoughItems;required-after:appliedenergistics2@[rv3.beta.22,),[rv3.beta-22,),[rv3-beta.22,),[rv3-beta-22,);after:ae2wct";
+            "required-after:NotEnoughItems;required-after:appliedenergistics2@[rv3.beta.22,),[rv3.beta-22,),[rv3-beta.22,),[rv3-beta-22,);after:ae2wct;after:ae2fc";
     public static final String GUI_FACTORY = "com.github.vfyjxf.nee.config.NEEConfigGuiFactory";
     public static final Logger logger = LogManager.getLogger("NotEnoughEnergistics");
 
