@@ -76,11 +76,14 @@ public class IngredientTracker {
             }
         }
     }
+
     private ItemRepo getRepo() throws IllegalAccessException {
-        if(isFluidCraftPatternTerm(termGui)){
-            return (ItemRepo) ReflectionHelper.findField(GuiFCBaseMonitor.class, "repo").get(termGui);
-        }else{
-            return (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
+        if (isFluidCraftPatternTerm(termGui)) {
+            return (ItemRepo)
+                    ReflectionHelper.findField(GuiFCBaseMonitor.class, "repo").get(termGui);
+        } else {
+            return (ItemRepo)
+                    ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
         }
     }
 
@@ -92,7 +95,8 @@ public class IngredientTracker {
             try {
                 if (!GuiUtils.isGuiWirelessCrafting(termGui)) {
                     ItemRepo repo = getRepo();
-                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
+                    list = (IItemList<IAEItemStack>)
+                            ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
                 } else {
                     // wireless crafting terminal support
                     ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")

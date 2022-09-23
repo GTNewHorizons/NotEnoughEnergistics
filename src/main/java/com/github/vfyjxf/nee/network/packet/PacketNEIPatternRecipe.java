@@ -72,25 +72,25 @@ public class PacketNEIPatternRecipe implements IMessage {
                 ((ContainerPatternTermEx) container).getPatternTerminal().setInverted(false);
                 message.processRecipeHandler((ContainerPatternTermEx) container, message);
             }
-            addFluidCraftSupport(message,ctx);
+            addFluidCraftSupport(message, ctx);
             return null;
         }
+
         @Optional.Method(modid = ModIDs.FC)
-        private void addFluidCraftSupport(PacketNEIPatternRecipe message, MessageContext ctx){
+        private void addFluidCraftSupport(PacketNEIPatternRecipe message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             Container container = player.openContainer;
-            if(container instanceof ContainerFluidPatternTerminal && message.output == null) {
+            if (container instanceof ContainerFluidPatternTerminal && message.output == null) {
                 ((ContainerFluidPatternTerminal) container).getPatternTerminal().setCraftingRecipe(true);
                 message.craftingTableRecipeHandler((ContainerFluidPatternTerminal) container, message);
             } else if (container instanceof ContainerFluidPatternTerminal) {
                 ((ContainerFluidPatternTerminal) container).getPatternTerminal().setCraftingRecipe(false);
                 message.processRecipeHandler((ContainerFluidPatternTerminal) container, message);
-            }else if (container instanceof ContainerFluidPatternTerminalEx) {
+            } else if (container instanceof ContainerFluidPatternTerminalEx) {
                 message.processRecipeHandler((ContainerFluidPatternTerminalEx) container, message);
             }
         }
     }
-
 
     private void craftingTableRecipeHandler(AEBaseContainer container, PacketNEIPatternRecipe message) {
         ItemStack[] recipeInput = new ItemStack[9];

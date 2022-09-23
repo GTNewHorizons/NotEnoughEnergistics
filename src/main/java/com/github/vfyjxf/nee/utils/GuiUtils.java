@@ -69,23 +69,34 @@ public class GuiUtils {
         IInventory craftMatrix = cct.getInventoryByName("crafting");
         return craftMatrix.equals(slot.inventory);
     }
-    public static boolean isPatternContainer(Container container){
-        if(isFluidCraftModloaded){
-            return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx || container instanceof ContainerFluidPatternTerminal || container instanceof ContainerFluidPatternTerminalEx;
-        }else{
+
+    public static boolean isPatternContainer(Container container) {
+        if (isFluidCraftModloaded) {
+            return container instanceof ContainerPatternTerm
+                    || container instanceof ContainerPatternTermEx
+                    || container instanceof ContainerFluidPatternTerminal
+                    || container instanceof ContainerFluidPatternTerminalEx;
+        } else {
             return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx;
         }
     }
+
     public static boolean isGuiCraftingTerm(GuiScreen guiScreen) {
         return guiScreen instanceof GuiCraftingTerm || isGuiWirelessCrafting(guiScreen);
     }
-    public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen){
-        return isFluidCraftModloaded && (guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx);
+
+    public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen) {
+        return isFluidCraftModloaded
+                && (guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx);
     }
+
     public static boolean isPatternTerm(GuiScreen guiScreen) {
         if (isFluidCraftModloaded) {
-            return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx || guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx;
-        }else{
+            return guiScreen instanceof GuiPatternTerm
+                    || guiScreen instanceof GuiPatternTermEx
+                    || guiScreen instanceof GuiFluidPatternTerminal
+                    || guiScreen instanceof GuiFluidPatternTerminalEx;
+        } else {
             return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx;
         }
     }
