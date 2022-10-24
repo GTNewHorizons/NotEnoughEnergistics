@@ -2,6 +2,8 @@ package com.github.vfyjxf.nee.processor;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
+import com.github.vfyjxf.nee.utils.GuiUtils;
+import com.glodblock.github.client.gui.GuiBaseFluidPatternTerminalEx;
 import gregtech.api.enums.ItemList;
 import gregtech.api.util.GT_Recipe;
 import gregtech.nei.GT_NEI_DefaultHandler.FixedPositionedStack;
@@ -10,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -80,9 +83,28 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     public List<PositionedStack> getRecipeInput(IRecipeHandler recipe, int recipeIndex, String identifier) {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (gtDefaultClz.isInstance(recipe) || gtAssLineClz.isInstance(recipe)) {
-            recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            recipeInputs.removeIf(positionedStack ->
-                    getFluidFromDisplayStack(positionedStack.items[0]) != null || positionedStack.item.stackSize == 0);
+            if (GuiUtils.isFluidCraftPatternTermEx(Minecraft.getMinecraft().currentScreen)) {
+                boolean priority =
+                        ((GuiBaseFluidPatternTerminalEx) Minecraft.getMinecraft().currentScreen).container.prioritize;
+                if (priority) {
+                    for (PositionedStack ps : recipe.getIngredientStacks(recipeIndex)) {
+                        if (ps != null && getFluidFromDisplayStack(ps.item) != null) {
+                            recipeInputs.add(ps);
+                        }
+                    }
+                    for (PositionedStack ps : recipe.getIngredientStacks(recipeIndex)) {
+                        if (ps != null && getFluidFromDisplayStack(ps.item) == null) {
+                            recipeInputs.add(ps);
+                        }
+                    }
+                } else {
+                    recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
+                }
+            } else {
+                recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
+                recipeInputs.removeIf(positionedStack -> getFluidFromDisplayStack(positionedStack.items[0]) != null
+                        || positionedStack.item.stackSize == 0);
+            }
             if (!recipeInputs.isEmpty()) {
                 ItemStack specialItem = recipeInputs.get(recipeInputs.size() - 1).items[0];
                 if ((specialItem.isItemEqual(ItemList.Tool_DataStick.get(1))

@@ -85,6 +85,10 @@ public class GuiUtils {
         return guiScreen instanceof GuiCraftingTerm || isGuiWirelessCrafting(guiScreen);
     }
 
+    public static boolean isFluidCraftPatternTermEx(GuiScreen guiScreen) {
+        return isFluidCraftModloaded && guiScreen instanceof GuiFluidPatternTerminalEx;
+    }
+
     public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen) {
         return isFluidCraftModloaded
                 && (guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx);
