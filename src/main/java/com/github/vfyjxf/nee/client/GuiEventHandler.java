@@ -42,6 +42,7 @@ public class GuiEventHandler implements INEIGuiHandler {
 
     private GuiImgButtonEnableCombination buttonCombination;
     private boolean hasDoubleBtn = true;
+    private boolean hasBeSubstituteBtn = true;
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent event) {
@@ -97,17 +98,25 @@ public class GuiEventHandler implements INEIGuiHandler {
             } catch (NoSuchFieldException e) {
                 hasDoubleBtn = false;
             }
-            if (hasDoubleBtn) {
-                buttonCombination = new GuiImgButtonEnableCombination(
-                        gui.guiLeft + 84,
-                        gui.guiTop + gui.ySize - 153,
-                        ItemCombination.valueOf(NEEConfig.itemCombinationMode));
-            } else {
-                buttonCombination = new GuiImgButtonEnableCombination(
-                        gui.guiLeft + 74,
-                        gui.guiTop + gui.ySize - 153,
-                        ItemCombination.valueOf(NEEConfig.itemCombinationMode));
+            try {
+                GuiPatternTerm.class.getDeclaredField("beSubstitutionsEnabledBtn");
+            } catch (NoSuchFieldException e) {
+                hasBeSubstituteBtn = false;
             }
+
+            int x, y;
+            if (hasDoubleBtn && hasBeSubstituteBtn) {
+                x = gui.guiLeft + 84;
+                y = gui.guiTop + gui.ySize - 143;
+            } else if (hasDoubleBtn) {
+                x = gui.guiLeft + 84;
+                y = gui.guiTop + gui.ySize - 153;
+            } else {
+                x = gui.guiLeft + 74;
+                y = gui.guiTop + gui.ySize - 153;
+            }
+            buttonCombination =
+                    new GuiImgButtonEnableCombination(x, y, ItemCombination.valueOf(NEEConfig.itemCombinationMode));
             event.buttonList.add(buttonCombination);
         }
     }
