@@ -19,6 +19,7 @@ import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.nei.FluidPatternTerminalRecipeTransferHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import java.util.*;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -75,7 +76,7 @@ public class NEECraftingHandler implements IOverlayHandler {
     public void overlayRecipe(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex, boolean shift) {
         if (isPatternTerm(firstGui)) {
             NEENetworkHandler.getInstance().sendToServer(packRecipe(recipe, recipeIndex));
-            fluidCraftOverlayRecipe(firstGui, recipe, recipeIndex, shift);
+            if (Loader.isModLoaded(ModIDs.FC)) fluidCraftOverlayRecipe(firstGui, recipe, recipeIndex, shift);
         } else {
             knowledgeInscriberHandler(firstGui, recipe, recipeIndex);
             extremeAutoCrafterHandler(firstGui, recipe, recipeIndex);

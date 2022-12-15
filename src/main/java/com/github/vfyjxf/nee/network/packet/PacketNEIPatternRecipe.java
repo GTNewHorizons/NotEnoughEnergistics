@@ -13,6 +13,7 @@ import appeng.helpers.IContainerCraftingPacket;
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -72,7 +73,7 @@ public class PacketNEIPatternRecipe implements IMessage {
                 ((ContainerPatternTermEx) container).getPatternTerminal().setInverted(false);
                 message.processRecipeHandler((ContainerPatternTermEx) container, message);
             }
-            addFluidCraftSupport(message, ctx);
+            if (Loader.isModLoaded(ModIDs.FC)) addFluidCraftSupport(message, ctx);
             return null;
         }
 
