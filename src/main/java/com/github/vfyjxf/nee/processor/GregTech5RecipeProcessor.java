@@ -3,7 +3,7 @@ package com.github.vfyjxf.nee.processor;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import com.github.vfyjxf.nee.utils.GuiUtils;
-import com.glodblock.github.client.gui.GuiBaseFluidPatternTerminalEx;
+import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import gregtech.api.enums.ItemList;
 import gregtech.api.util.GT_Recipe;
 import gregtech.nei.GT_NEI_DefaultHandler.FixedPositionedStack;
@@ -85,7 +85,7 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         if (gtDefaultClz.isInstance(recipe) || gtAssLineClz.isInstance(recipe)) {
             if (GuiUtils.isFluidCraftPatternTermEx(Minecraft.getMinecraft().currentScreen)) {
                 boolean priority =
-                        ((GuiBaseFluidPatternTerminalEx) Minecraft.getMinecraft().currentScreen).container.prioritize;
+                        ((GuiFluidPatternTerminalEx) Minecraft.getMinecraft().currentScreen).container.prioritize;
                 if (priority) {
                     for (PositionedStack ps : recipe.getIngredientStacks(recipeIndex)) {
                         if (ps != null && getFluidFromDisplayStack(ps.item) != null) {

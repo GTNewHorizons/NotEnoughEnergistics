@@ -14,7 +14,7 @@ import codechicken.nei.recipe.IRecipeHandler;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
-import com.glodblock.github.client.gui.GuiFCBaseMonitor;
+import com.glodblock.github.client.gui.base.FCGuiMonitor;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class IngredientTracker {
     private ItemRepo getRepo() throws IllegalAccessException {
         if (isFluidCraftPatternTerm(termGui)) {
             return (ItemRepo)
-                    ReflectionHelper.findField(GuiFCBaseMonitor.class, "repo").get(termGui);
+                    ReflectionHelper.findField(FCGuiMonitor.class, "repo").get(termGui);
         } else {
             return (ItemRepo)
                     ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
