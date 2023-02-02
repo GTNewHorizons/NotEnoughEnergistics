@@ -2,6 +2,13 @@ package com.github.vfyjxf.nee.container;
 
 import static appeng.container.slot.SlotRestrictedInput.PlacableItemType.ENCODED_PATTERN;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+
 import appeng.api.implementations.ICraftingPatternItem;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
 import appeng.api.storage.data.IAEItemStack;
@@ -15,13 +22,8 @@ import appeng.tile.inventory.AppEngInternalInventory;
 import appeng.tile.inventory.IAEAppEngInventory;
 import appeng.tile.inventory.InvOperation;
 import appeng.util.Platform;
+
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 
 public class ContainerPatternInterface extends AEBaseContainer implements IAEAppEngInventory {
 
@@ -42,18 +44,24 @@ public class ContainerPatternInterface extends AEBaseContainer implements IAEApp
 
         for (int i = 0; i < patterns.getSizeInventory(); i++) {
             addSlotToContainer(
-                    patternSlots[i] =
-                            new SlotRestrictedInput(ENCODED_PATTERN, patterns, i, 8 + 18 * i, 90 + 5, playerInventory) {
-                                @Override
-                                public boolean isItemValid(ItemStack i) {
-                                    return false;
-                                }
+                    patternSlots[i] = new SlotRestrictedInput(
+                            ENCODED_PATTERN,
+                            patterns,
+                            i,
+                            8 + 18 * i,
+                            90 + 5,
+                            playerInventory) {
 
-                                @Override
-                                public boolean canTakeStack(EntityPlayer par1EntityPlayer) {
-                                    return false;
-                                }
-                            });
+                        @Override
+                        public boolean isItemValid(ItemStack i) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean canTakeStack(EntityPlayer par1EntityPlayer) {
+                            return false;
+                        }
+                    });
         }
 
         for (int y = 0; y < 3; y++) {
@@ -120,8 +128,7 @@ public class ContainerPatternInterface extends AEBaseContainer implements IAEApp
                             }
                             Slot outSlot = getSlotFromInventory(this.getRecipeInventory(), 9);
                             if (outSlot != null) {
-                                outSlot.putStack(
-                                        details.getOutput(ic, getTileEntity().getWorldObj()));
+                                outSlot.putStack(details.getOutput(ic, getTileEntity().getWorldObj()));
                             }
                         }
                     }
@@ -151,6 +158,6 @@ public class ContainerPatternInterface extends AEBaseContainer implements IAEApp
     public void saveChanges() {}
 
     @Override
-    public void onChangeInventory(
-            IInventory inv, int slot, InvOperation mc, ItemStack removedStack, ItemStack newStack) {}
+    public void onChangeInventory(IInventory inv, int slot, InvOperation mc, ItemStack removedStack,
+            ItemStack newStack) {}
 }

@@ -1,7 +1,8 @@
 package com.github.vfyjxf.nee.utils;
 
-import codechicken.nei.PositionedStack;
 import net.minecraft.item.ItemStack;
+
+import codechicken.nei.PositionedStack;
 
 public class Ingredient {
 

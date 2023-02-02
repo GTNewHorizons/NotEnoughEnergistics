@@ -4,21 +4,24 @@ import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
 import static com.github.vfyjxf.nee.network.NEEGuiHandler.CRAFTING_AMOUNT_ID;
 import static com.github.vfyjxf.nee.network.NEEGuiHandler.CRAFTING_AMOUNT_WIRELESS_ID;
 
-import appeng.container.ContainerOpenContext;
-import appeng.container.implementations.ContainerCraftingTerm;
-import com.github.vfyjxf.nee.container.ContainerCraftingAmount;
-import com.github.vfyjxf.nee.network.NEEGuiHandler;
-import com.github.vfyjxf.nee.utils.GuiUtils;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+
+import appeng.container.ContainerOpenContext;
+import appeng.container.implementations.ContainerCraftingTerm;
+
+import com.github.vfyjxf.nee.container.ContainerCraftingAmount;
+import com.github.vfyjxf.nee.network.NEEGuiHandler;
+import com.github.vfyjxf.nee.utils.GuiUtils;
+
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import io.netty.buffer.ByteBuf;
 
 public class PacketOpenCraftAmount implements IMessage {
 
@@ -41,6 +44,7 @@ public class PacketOpenCraftAmount implements IMessage {
     }
 
     public static final class Handler implements IMessageHandler<PacketOpenCraftAmount, IMessage> {
+
         @Override
         public IMessage onMessage(PacketOpenCraftAmount message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;

@@ -5,6 +5,29 @@ import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isGuiCraftingTerm;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.oredict.OreDictionary;
+
+import org.lwjgl.input.Keyboard;
+
 import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.container.slot.SlotCraftingMatrix;
 import appeng.container.slot.SlotFakeCraftingMatrix;
@@ -19,6 +42,7 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
 import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.IRecipeHandler;
+
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
@@ -28,32 +52,14 @@ import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
+
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import io.netty.buffer.ByteBuf;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.oredict.OreDictionary;
-import org.lwjgl.input.Keyboard;
 
 public class NEECraftingHelper implements IOverlayHandler {
+
     public static final NEECraftingHelper INSTANCE = new NEECraftingHelper();
     public static IngredientTracker tracker = null;
     public static boolean noPreview = false;
@@ -137,8 +143,9 @@ public class NEECraftingHelper implements IOverlayHandler {
                 // don't use gtnh ae2's method;
                 int packetSize = getPacketSize(packet);
                 if (packetSize >= 32 * 1024) {
-                    AELog.warn("Recipe for " + recipe.getRecipeName()
-                            + " has too many variants, reduced version will be used");
+                    AELog.warn(
+                            "Recipe for " + recipe.getRecipeName()
+                                    + " has too many variants, reduced version will be used");
                     packet = new PacketNEIRecipe(packIngredients(firstGui, ingredients, true));
                 }
                 if (packetSize >= 0) {
@@ -149,8 +156,7 @@ public class NEECraftingHelper implements IOverlayHandler {
             } else if (GuiUtils.isGuiWirelessCrafting(firstGui)) {
                 moveItemsForWirelessCrafting(firstGui, ingredients);
             }
-        } catch (final Exception | Error ignored) {
-        }
+        } catch (final Exception | Error ignored) {}
     }
 
     /**
@@ -223,8 +229,7 @@ public class NEECraftingHelper implements IOverlayHandler {
 
     private int getPacketSize(AppEngPacket packet) {
         try {
-            ByteBuf p = (ByteBuf)
-                    ReflectionHelper.findField(AppEngPacket.class, "p").get(packet);
+            ByteBuf p = (ByteBuf) ReflectionHelper.findField(AppEngPacket.class, "p").get(packet);
             return p.array().length;
         } catch (IllegalAccessException e) {
             return -1;
@@ -274,8 +279,8 @@ public class NEECraftingHelper implements IOverlayHandler {
                         IRecipeHandler handler = (IRecipeHandler) guiRecipe.currenthandlers.get(guiRecipe.recipetype);
                         if (isGtnhNei) {
                             try {
-                                recipesPerPage = (int) ReflectionHelper.findMethod(
-                                                GuiRecipe.class, guiRecipe, new String[] {"getRecipesPerPage"})
+                                recipesPerPage = (int) ReflectionHelper
+                                        .findMethod(GuiRecipe.class, guiRecipe, new String[] { "getRecipesPerPage" })
                                         .invoke(guiRecipe);
                             } catch (IllegalAccessException | InvocationTargetException e) {
                                 e.printStackTrace();
@@ -283,8 +288,8 @@ public class NEECraftingHelper implements IOverlayHandler {
                         }
                         if (recipesPerPage >= 0 && handler != null) {
                             int recipe = guiRecipe.page * recipesPerPage + event.button.id - OVERLAY_BUTTON_ID_START;
-                            final IOverlayHandler overlayHandler =
-                                    handler.getOverlayHandler(guiRecipe.firstGui, recipe);
+                            final IOverlayHandler overlayHandler = handler
+                                    .getOverlayHandler(guiRecipe.firstGui, recipe);
                             Minecraft.getMinecraft().displayGuiScreen(guiRecipe.firstGui);
                             overlayHandler.overlayRecipe(
                                     guiRecipe.firstGui,

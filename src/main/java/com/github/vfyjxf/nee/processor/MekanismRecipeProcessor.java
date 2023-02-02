@@ -1,34 +1,38 @@
 package com.github.vfyjxf.nee.processor;
 
+import java.util.*;
+
+import javax.annotation.Nonnull;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
-import java.util.*;
-import javax.annotation.Nonnull;
 
 /**
  * @author vfyjxf
  */
 public class MekanismRecipeProcessor implements IRecipeProcessor {
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
-        return new HashSet<>(Arrays.asList(
-                "chemicalinfuser",
-                "chemicalinjectionchamber",
-                "chemicaloxidizer",
-                "chemicalwasher",
-                "combiner",
-                "crusher",
-                "electrolyticseparator",
-                "chamber",
-                "infuser",
-                "compressor",
-                "prc",
-                "precisionsawmill",
-                "purificationchamber",
-                "rotarycondensentrator",
-                "solarneutron",
-                "thermalevaporation"));
+        return new HashSet<>(
+                Arrays.asList(
+                        "chemicalinfuser",
+                        "chemicalinjectionchamber",
+                        "chemicaloxidizer",
+                        "chemicalwasher",
+                        "combiner",
+                        "crusher",
+                        "electrolyticseparator",
+                        "chamber",
+                        "infuser",
+                        "compressor",
+                        "prc",
+                        "precisionsawmill",
+                        "purificationchamber",
+                        "rotarycondensentrator",
+                        "solarneutron",
+                        "thermalevaporation"));
     }
 
     @Nonnull

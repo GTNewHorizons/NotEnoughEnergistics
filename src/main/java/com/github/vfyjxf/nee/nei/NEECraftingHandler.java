@@ -3,11 +3,19 @@ package com.github.vfyjxf.nee.nei;
 import static com.github.vfyjxf.nee.processor.RecipeProcessor.NULL_IDENTIFIER;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
+import java.util.*;
+
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.oredict.OreDictionary;
+
 import appeng.util.Platform;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
 import codechicken.nei.recipe.IRecipeHandler;
 import codechicken.nei.recipe.TemplateRecipeHandler;
+
 import com.github.vfyjxf.nee.config.ItemCombination;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
@@ -19,13 +27,9 @@ import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.nei.FluidPatternTerminalRecipeTransferHandler;
+
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
-import java.util.*;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.oredict.OreDictionary;
 
 /**
  * @author vfyjxf
@@ -44,17 +48,14 @@ public class NEECraftingHandler implements IOverlayHandler {
     static {
         try {
             knowledgeInscriberClz = Class.forName("thaumicenergistics.client.gui.GuiKnowledgeInscriber");
-        } catch (ClassNotFoundException ignored) {
-        }
+        } catch (ClassNotFoundException ignored) {}
         try {
             itemAspectClz = Class.forName("com.djgiannuzz.thaumcraftneiplugin.items.ItemAspect");
-        } catch (ClassNotFoundException ignored) {
-        }
+        } catch (ClassNotFoundException ignored) {}
         try {
-            guiExtremeAutoCrafterClz =
-                    Class.forName("wanion.avaritiaddons.block.extremeautocrafter.GuiExtremeAutoCrafter");
-        } catch (ClassNotFoundException ignored) {
-        }
+            guiExtremeAutoCrafterClz = Class
+                    .forName("wanion.avaritiaddons.block.extremeautocrafter.GuiExtremeAutoCrafter");
+        } catch (ClassNotFoundException ignored) {}
     }
 
     public static boolean isCraftingTableRecipe(IRecipeHandler recipe) {
@@ -117,16 +118,14 @@ public class NEECraftingHandler implements IOverlayHandler {
                         if (currentValue != ItemCombination.DISABLED
                                 && processor.mergeStacks(recipe, recipeIndex, identifier)) {
                             boolean isWhitelist = currentValue == ItemCombination.WHITELIST
-                                    && Arrays.asList(NEEConfig.itemCombinationWhitelist)
-                                            .contains(identifier);
+                                    && Arrays.asList(NEEConfig.itemCombinationWhitelist).contains(identifier);
                             if (currentValue == ItemCombination.ENABLED || isWhitelist) {
                                 for (PositionedStack storedStack : mergedInputs) {
                                     ItemStack firstStack = storedStack.items[0];
                                     boolean areItemStackEqual = firstStack.isItemEqual(currentStack)
                                             && ItemStack.areItemStackTagsEqual(firstStack, currentStack);
-                                    if (areItemStackEqual
-                                            && (firstStack.stackSize + currentStack.stackSize)
-                                                    <= firstStack.getMaxStackSize()) {
+                                    if (areItemStackEqual && (firstStack.stackSize + currentStack.stackSize)
+                                            <= firstStack.getMaxStackSize()) {
                                         find = true;
                                         storedStack.items[0].stackSize = firstStack.stackSize + currentStack.stackSize;
                                     }

@@ -3,6 +3,15 @@ package com.github.vfyjxf.nee.utils;
 import static com.github.vfyjxf.nee.nei.NEECraftingHelper.noPreview;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isFluidCraftPatternTerm;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
+
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IItemList;
 import appeng.client.gui.implementations.GuiMEMonitorable;
@@ -11,18 +20,12 @@ import appeng.util.item.AEItemStack;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.IRecipeHandler;
+
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
-import com.glodblock.github.client.gui.GuiFCBaseMonitor;
+import com.glodblock.github.client.gui.base.FCGuiMonitor;
 import cpw.mods.fml.relauncher.ReflectionHelper;
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
 
 public class IngredientTracker {
 
@@ -79,11 +82,9 @@ public class IngredientTracker {
 
     private ItemRepo getRepo() throws IllegalAccessException {
         if (isFluidCraftPatternTerm(termGui)) {
-            return (ItemRepo)
-                    ReflectionHelper.findField(GuiFCBaseMonitor.class, "repo").get(termGui);
+            return (ItemRepo) ReflectionHelper.findField(FCGuiMonitor.class, "repo").get(termGui);
         } else {
-            return (ItemRepo)
-                    ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
+            return (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
         }
     }
 
@@ -95,14 +96,12 @@ public class IngredientTracker {
             try {
                 if (!GuiUtils.isGuiWirelessCrafting(termGui)) {
                     ItemRepo repo = getRepo();
-                    list = (IItemList<IAEItemStack>)
-                            ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
+                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
                 } else {
                     // wireless crafting terminal support
                     ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")
                             .get(termGui);
-                    list = (IItemList<IAEItemStack>)
-                            ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
+                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -124,18 +123,17 @@ public class IngredientTracker {
         if (termGui != null) {
             try {
                 if (!GuiUtils.isGuiWirelessCrafting(termGui)) {
-                    ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo")
-                            .get(termGui);
-                    for (IAEItemStack stack : (IItemList<IAEItemStack>)
-                            ReflectionHelper.findField(ItemRepo.class, "list").get(repo)) {
+                    ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
+                    for (IAEItemStack stack : (IItemList<IAEItemStack>) ReflectionHelper
+                            .findField(ItemRepo.class, "list").get(repo)) {
                         list.add(stack.copy());
                     }
                 } else {
                     // wireless crafting terminal support
                     ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")
                             .get(termGui);
-                    for (IAEItemStack stack : (IItemList<IAEItemStack>)
-                            ReflectionHelper.findField(ItemRepo.class, "list").get(repo)) {
+                    for (IAEItemStack stack : (IItemList<IAEItemStack>) ReflectionHelper
+                            .findField(ItemRepo.class, "list").get(repo)) {
                         list.add(stack.copy());
                     }
                 }
@@ -214,8 +212,7 @@ public class IngredientTracker {
                     }
                 } else {
                     ItemStack craftableStack = ingredient.getCraftableIngredient();
-                    if (craftableStack != null
-                            && craftableStack.isItemEqual(stack)
+                    if (craftableStack != null && craftableStack.isItemEqual(stack)
                             && ItemStack.areItemStackTagsEqual(craftableStack, stack)
                             && stack.stackSize > 0) {
                         int missingCount = (int) ingredient.getMissingCount();
@@ -254,8 +251,7 @@ public class IngredientTracker {
         List<ItemStack> inventoryStacks = new ArrayList<>();
 
         for (Slot slot : (List<Slot>) termGui.inventorySlots.inventorySlots) {
-            boolean canGetStack = slot != null
-                    && slot.getHasStack()
+            boolean canGetStack = slot != null && slot.getHasStack()
                     && slot.getStack().stackSize > 0
                     && slot.isItemValid(slot.getStack())
                     && slot.canTakeStack(Minecraft.getMinecraft().thePlayer);

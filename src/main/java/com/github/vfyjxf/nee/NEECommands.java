@@ -2,16 +2,10 @@ package com.github.vfyjxf.nee;
 
 import static com.github.vfyjxf.nee.NotEnoughEnergistics.logger;
 
-import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.processor.IRecipeProcessor;
-import com.github.vfyjxf.nee.processor.RecipeProcessor;
-import com.github.vfyjxf.nee.utils.ItemUtils;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
@@ -19,7 +13,16 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatComponentText;
 
+import com.github.vfyjxf.nee.config.NEEConfig;
+import com.github.vfyjxf.nee.processor.IRecipeProcessor;
+import com.github.vfyjxf.nee.processor.RecipeProcessor;
+import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public class NEECommands extends CommandBase {
+
     @Override
     public String getCommandName() {
         return "nee";
@@ -50,8 +53,7 @@ public class NEECommands extends CommandBase {
                     ItemStack currentStack = Minecraft.getMinecraft().thePlayer.getCurrentEquippedItem();
                     if (currentStack != null) {
                         String currentItemJsonString = ItemUtils.toItemJsonString(currentStack);
-                        JsonObject itemJsonObject =
-                                new JsonParser().parse(currentItemJsonString).getAsJsonObject();
+                        JsonObject itemJsonObject = new JsonParser().parse(currentItemJsonString).getAsJsonObject();
                         if (args.length >= 3) {
                             boolean hasRecipeProcessor = ItemUtils.hasRecipeProcessor(args[2]);
                             boolean hasOverlayIdentifier = ItemUtils.hasOverlayIdentifier(args[2]);
@@ -73,8 +75,7 @@ public class NEECommands extends CommandBase {
                             }
                         }
                         String newJsonString = new Gson().toJson(itemJsonObject);
-                        String[] oldList = "blacklist".equalsIgnoreCase(args[1])
-                                ? NEEConfig.transformBlacklist
+                        String[] oldList = "blacklist".equalsIgnoreCase(args[1]) ? NEEConfig.transformBlacklist
                                 : NEEConfig.transformPriorityList;
                         List<String> newList = new ArrayList<>(Arrays.asList(oldList));
                         for (String currentJsonString : oldList) {
@@ -120,10 +121,12 @@ public class NEECommands extends CommandBase {
     public List addTabCompletionOptions(ICommandSender sender, String[] args) {
         return args.length <= 1
                 ? CommandBase.getListOfStringsMatchingLastWord(args, "help", "reload", "add", "processor")
-                : args.length == 2
-                        ? CommandBase.getListOfStringsMatchingLastWord(
-                                args, "blacklist", "priorityItem", "priorityMod", "itemCombination")
-                        : null;
+                : args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(
+                        args,
+                        "blacklist",
+                        "priorityItem",
+                        "priorityMod",
+                        "itemCombination") : null;
     }
 
     @Override

@@ -1,17 +1,20 @@
 package com.github.vfyjxf.nee.block;
 
-import appeng.block.AEBaseItemBlock;
-import appeng.block.AEBaseTileBlock;
-import appeng.core.features.AEFeature;
-import com.github.vfyjxf.nee.NotEnoughEnergistics;
-import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
-import com.github.vfyjxf.nee.network.NEEGuiHandler;
 import java.util.EnumSet;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import appeng.block.AEBaseItemBlock;
+import appeng.block.AEBaseTileBlock;
+import appeng.core.features.AEFeature;
+
+import com.github.vfyjxf.nee.NotEnoughEnergistics;
+import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
+import com.github.vfyjxf.nee.network.NEEGuiHandler;
 
 /**
  * @author vfyjxf
@@ -30,8 +33,8 @@ public class BlockPatternInterface extends AEBaseTileBlock {
     }
 
     @Override
-    public boolean onActivated(
-            World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+    public boolean onActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY,
+            float hitZ) {
         if (player.isSneaking()) {
             return false;
         }

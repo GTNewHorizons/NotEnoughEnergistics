@@ -1,29 +1,34 @@
 package com.github.vfyjxf.nee.client;
 
-import codechicken.lib.gui.GuiDraw;
-import codechicken.nei.NEIClientConfig;
-import codechicken.nei.recipe.GuiRecipe;
-import codechicken.nei.recipe.IRecipeHandler;
-import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.nei.NEECraftingHandler;
-import com.github.vfyjxf.nee.nei.NEECraftingHelper;
-import com.github.vfyjxf.nee.utils.GuiUtils;
-import com.github.vfyjxf.nee.utils.Ingredient;
-import com.github.vfyjxf.nee.utils.IngredientTracker;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.ReflectionHelper;
 import java.awt.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
+
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.GuiScreenEvent;
+
 import org.lwjgl.input.Keyboard;
+
+import codechicken.lib.gui.GuiDraw;
+import codechicken.nei.NEIClientConfig;
+import codechicken.nei.recipe.GuiRecipe;
+import codechicken.nei.recipe.IRecipeHandler;
+
+import com.github.vfyjxf.nee.config.NEEConfig;
+import com.github.vfyjxf.nee.nei.NEECraftingHandler;
+import com.github.vfyjxf.nee.nei.NEECraftingHelper;
+import com.github.vfyjxf.nee.utils.GuiUtils;
+import com.github.vfyjxf.nee.utils.Ingredient;
+import com.github.vfyjxf.nee.utils.IngredientTracker;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 
 /**
  * Please note the difference between the GTNH NEI and the official NEI
@@ -110,10 +115,9 @@ public class NEEContainerDrawHandler {
                                 if (tracker != null) {
                                     Point offset = gui.getRecipePosition(tracker.getRecipeIndex());
                                     for (int i = 0; i < tracker.getIngredients().size(); i++) {
-                                        Ingredient ingredient =
-                                                tracker.getIngredients().get(i);
-                                        Slot slot = gui.slotcontainer.getSlotWithStack(
-                                                ingredient.getIngredient(), offset.x, offset.y);
+                                        Ingredient ingredient = tracker.getIngredients().get(i);
+                                        Slot slot = gui.slotcontainer
+                                                .getSlotWithStack(ingredient.getIngredient(), offset.x, offset.y);
                                         if (slot != null) {
                                             if (this.isCraftingTerm) {
 
@@ -169,8 +173,9 @@ public class NEEContainerDrawHandler {
 
         if (isGtnhNei) {
             try {
-                overlayButtonList = new ArrayList<>(Arrays.asList(
-                        (GuiButton[]) NEEContainerDrawHandler.instance.overlayButtonsField.get(guiRecipe)));
+                overlayButtonList = new ArrayList<>(
+                        Arrays.asList(
+                                (GuiButton[]) NEEContainerDrawHandler.instance.overlayButtonsField.get(guiRecipe)));
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -194,8 +199,7 @@ public class NEEContainerDrawHandler {
                 if (isGtnhNei) {
                     try {
                         int OVERLAY_BUTTON_ID_START = 4;
-                        recipeIndex = gui.page * (int) recipesPerPageMethod.invoke(gui)
-                                + overlayButton.id
+                        recipeIndex = gui.page * (int) recipesPerPageMethod.invoke(gui) + overlayButton.id
                                 - OVERLAY_BUTTON_ID_START;
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
@@ -219,17 +223,23 @@ public class NEEContainerDrawHandler {
         if (this.isCraftingTerm) {
             if (this.drawRequestTooltip) {
                 if (NEECraftingHelper.isIsPatternInterfaceExists()) {
-                    tooltips.add(String.format(
-                            "%s" + EnumChatFormatting.GRAY + " + " + EnumChatFormatting.BLUE
-                                    + I18n.format("neenergistics.gui.tooltip.helper.crafting.text2"),
-                            EnumChatFormatting.YELLOW
-                                    + Keyboard.getKeyName(NEIClientConfig.getKeyBinding("nee.preview"))));
+                    tooltips.add(
+                            String.format(
+                                    "%s" + EnumChatFormatting.GRAY
+                                            + " + "
+                                            + EnumChatFormatting.BLUE
+                                            + I18n.format("neenergistics.gui.tooltip.helper.crafting.text2"),
+                                    EnumChatFormatting.YELLOW
+                                            + Keyboard.getKeyName(NEIClientConfig.getKeyBinding("nee.preview"))));
                 } else {
-                    tooltips.add(String.format(
-                            "%s" + EnumChatFormatting.GRAY + " + " + EnumChatFormatting.BLUE
-                                    + I18n.format("neenergistics.gui.tooltip.helper.crafting.text1"),
-                            EnumChatFormatting.YELLOW
-                                    + Keyboard.getKeyName(NEIClientConfig.getKeyBinding("nee.preview"))));
+                    tooltips.add(
+                            String.format(
+                                    "%s" + EnumChatFormatting.GRAY
+                                            + " + "
+                                            + EnumChatFormatting.BLUE
+                                            + I18n.format("neenergistics.gui.tooltip.helper.crafting.text1"),
+                                    EnumChatFormatting.YELLOW
+                                            + Keyboard.getKeyName(NEIClientConfig.getKeyBinding("nee.preview"))));
                 }
             }
             if (this.drawMissingTooltip) {
@@ -247,8 +257,7 @@ public class NEEContainerDrawHandler {
     }
 
     private boolean isMouseOverButton(GuiButton button, int mouseX, int mouseY) {
-        return mouseX >= button.xPosition
-                && mouseY >= button.yPosition
+        return mouseX >= button.xPosition && mouseY >= button.yPosition
                 && mouseX < button.xPosition + button.width
                 && mouseY < button.yPosition + button.height;
     }

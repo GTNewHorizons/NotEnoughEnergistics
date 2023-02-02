@@ -2,21 +2,25 @@ package com.github.vfyjxf.nee.utils;
 
 import static com.github.vfyjxf.nee.config.NEEConfig.*;
 
-import codechicken.nei.PositionedStack;
-import com.github.vfyjxf.nee.NotEnoughEnergistics;
-import com.github.vfyjxf.nee.processor.IRecipeProcessor;
-import com.github.vfyjxf.nee.processor.RecipeProcessor;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.registry.GameRegistry;
 import java.util.ArrayList;
 import java.util.List;
+
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+
+import codechicken.nei.PositionedStack;
+
+import com.github.vfyjxf.nee.NotEnoughEnergistics;
+import com.github.vfyjxf.nee.processor.IRecipeProcessor;
+import com.github.vfyjxf.nee.processor.RecipeProcessor;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.registry.GameRegistry;
 
 public final class ItemUtils {
 
@@ -29,8 +33,7 @@ public final class ItemUtils {
     static {
         try {
             GT_MetaGenerated_ToolClass = Class.forName("gregtech.api.items.GT_MetaGenerated_Tool");
-        } catch (ClassNotFoundException ignored) {
-        }
+        } catch (ClassNotFoundException ignored) {}
     }
 
     public static void reloadConfig() {
@@ -65,8 +68,12 @@ public final class ItemUtils {
                             currentStack.setTagCompound(nbt);
                         }
                     }
-                    transformItemBlacklist.add(new StackProcessor(
-                            currentStack, currentItem, processor.recipeProcessor, processor.identifier));
+                    transformItemBlacklist.add(
+                            new StackProcessor(
+                                    currentStack,
+                                    currentItem,
+                                    processor.recipeProcessor,
+                                    processor.identifier));
                 }
             }
         }
@@ -101,8 +108,12 @@ public final class ItemUtils {
                             currentStack.setTagCompound(nbt);
                         }
                     }
-                    transformItemPriorityList.add(new StackProcessor(
-                            currentStack, currentItem, processor.recipeProcessor, processor.identifier));
+                    transformItemPriorityList.add(
+                            new StackProcessor(
+                                    currentStack,
+                                    currentItem,
+                                    processor.recipeProcessor,
+                                    processor.identifier));
                 }
             }
         }
@@ -186,11 +197,18 @@ public final class ItemUtils {
 
     public static String toItemJsonString(ItemStack stack) {
         GameRegistry.UniqueIdentifier identifier = GameRegistry.findUniqueIdentifierFor(stack.getItem());
-        String nbtString =
-                stack.hasTagCompound() ? ",\"nbt\":" + stack.getTagCompound().toString() : "";
+        String nbtString = stack.hasTagCompound() ? ",\"nbt\":" + stack.getTagCompound().toString() : "";
         int meta = stack.getItemDamage();
-        return "{" + "\"modid\":" + identifier.modId + "," + "\"name\":" + identifier.name + "," + "\"meta\":" + meta
-                + nbtString + "}";
+        return "{" + "\"modid\":"
+                + identifier.modId
+                + ","
+                + "\"name\":"
+                + identifier.name
+                + ","
+                + "\"meta\":"
+                + meta
+                + nbtString
+                + "}";
     }
 
     public static boolean hasRecipeProcessor(String processorId) {

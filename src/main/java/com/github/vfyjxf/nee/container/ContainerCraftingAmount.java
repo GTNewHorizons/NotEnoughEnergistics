@@ -1,5 +1,11 @@
 package com.github.vfyjxf.nee.container;
 
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
+
 import appeng.api.config.SecurityPermissions;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.security.BaseActionSource;
@@ -8,11 +14,6 @@ import appeng.api.networking.security.PlayerSource;
 import appeng.container.AEBaseContainer;
 import appeng.container.slot.SlotInaccessible;
 import appeng.tile.inventory.AppEngInternalInventory;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
 
 public class ContainerCraftingAmount extends AEBaseContainer {
 

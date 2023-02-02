@@ -1,22 +1,27 @@
 package com.github.vfyjxf.nee.processor;
 
-import codechicken.nei.PositionedStack;
-import codechicken.nei.recipe.IRecipeHandler;
-import com.github.vfyjxf.nee.utils.GuiUtils;
-import com.glodblock.github.client.gui.GuiBaseFluidPatternTerminalEx;
-import gregtech.api.enums.ItemList;
-import gregtech.api.util.GT_Recipe;
-import gregtech.nei.GT_NEI_DefaultHandler.FixedPositionedStack;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.annotation.Nonnull;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+
+import codechicken.nei.PositionedStack;
+import codechicken.nei.recipe.IRecipeHandler;
+
+import com.github.vfyjxf.nee.utils.GuiUtils;
+import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
+
+import gregtech.api.enums.ItemList;
+import gregtech.api.util.GT_Recipe;
+import gregtech.nei.GT_NEI_DefaultHandler.FixedPositionedStack;
 
 /**
  * @author vfyjxf
@@ -39,12 +44,10 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     }
 
     /**
-     * For resolving NoSuchMethodError
-     * Copied from GTNewHorizons/GT5-Unofficial.
+     * For resolving NoSuchMethodError Copied from GTNewHorizons/GT5-Unofficial.
      */
     public static FluidStack getFluidFromDisplayStack(ItemStack aDisplayStack) {
-        if (!isStackValid(aDisplayStack)
-                || aDisplayStack.getItem() != ItemList.Display_Fluid.getItem()
+        if (!isStackValid(aDisplayStack) || aDisplayStack.getItem() != ItemList.Display_Fluid.getItem()
                 || !aDisplayStack.hasTagCompound()) {
             return null;
         }
@@ -53,8 +56,7 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     }
 
     public static boolean isStackValid(Object aStack) {
-        return (aStack instanceof ItemStack)
-                && ((ItemStack) aStack).getItem() != null
+        return (aStack instanceof ItemStack) && ((ItemStack) aStack).getItem() != null
                 && ((ItemStack) aStack).stackSize >= 0;
     }
 
@@ -84,8 +86,8 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (gtDefaultClz.isInstance(recipe) || gtAssLineClz.isInstance(recipe)) {
             if (GuiUtils.isFluidCraftPatternTermEx(Minecraft.getMinecraft().currentScreen)) {
-                boolean priority =
-                        ((GuiBaseFluidPatternTerminalEx) Minecraft.getMinecraft().currentScreen).container.prioritize;
+                boolean priority = ((GuiFluidPatternTerminalEx) Minecraft
+                        .getMinecraft().currentScreen).container.prioritize;
                 if (priority) {
                     for (PositionedStack ps : recipe.getIngredientStacks(recipeIndex)) {
                         if (ps != null && getFluidFromDisplayStack(ps.item) != null) {
@@ -102,8 +104,9 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
                 }
             } else {
                 recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-                recipeInputs.removeIf(positionedStack -> getFluidFromDisplayStack(positionedStack.items[0]) != null
-                        || positionedStack.item.stackSize == 0);
+                recipeInputs.removeIf(
+                        positionedStack -> getFluidFromDisplayStack(positionedStack.items[0]) != null
+                                || positionedStack.item.stackSize == 0);
             }
             if (!recipeInputs.isEmpty()) {
                 ItemStack specialItem = recipeInputs.get(recipeInputs.size() - 1).items[0];
@@ -126,8 +129,8 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
             recipeOutputs.removeIf(positionedStack -> getFluidFromDisplayStack(positionedStack.items[0]) != null);
             // remove output if it's chance != 10000
-            recipeOutputs.removeIf(stack -> stack instanceof FixedPositionedStack
-                    && !(((FixedPositionedStack) stack).mChance == 10000
+            recipeOutputs.removeIf(
+                    stack -> stack instanceof FixedPositionedStack && !(((FixedPositionedStack) stack).mChance == 10000
                             || ((FixedPositionedStack) stack).mChance <= 0));
             return recipeOutputs;
         }

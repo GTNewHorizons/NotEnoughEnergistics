@@ -1,11 +1,13 @@
 package com.github.vfyjxf.nee.processor;
 
-import codechicken.nei.PositionedStack;
-import codechicken.nei.recipe.IRecipeHandler;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import javax.annotation.Nonnull;
+
+import codechicken.nei.PositionedStack;
+import codechicken.nei.recipe.IRecipeHandler;
 
 /**
  * @author vfyjxf

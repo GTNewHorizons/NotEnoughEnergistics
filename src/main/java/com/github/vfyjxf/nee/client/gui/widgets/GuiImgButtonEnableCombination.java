@@ -1,12 +1,15 @@
 package com.github.vfyjxf.nee.client.gui.widgets;
 
-import appeng.client.gui.widgets.ITooltip;
-import com.github.vfyjxf.nee.config.ItemCombination;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+
 import org.lwjgl.opengl.GL11;
+
+import appeng.client.gui.widgets.ITooltip;
+
+import com.github.vfyjxf.nee.config.ItemCombination;
 
 public class GuiImgButtonEnableCombination extends GuiButton implements ITooltip {
 
@@ -33,8 +36,7 @@ public class GuiImgButtonEnableCombination extends GuiButton implements ITooltip
                 GL11.glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
             }
             minecraft.renderEngine.bindTexture(new ResourceLocation("neenergistics", "textures/gui/states.png"));
-            this.field_146123_n = mouseX >= this.xPosition
-                    && mouseY >= this.yPosition
+            this.field_146123_n = mouseX >= this.xPosition && mouseY >= this.yPosition
                     && mouseX < this.xPosition + this.width
                     && mouseY < this.yPosition + this.height;
             this.drawTexturedModalRect(0, 0, 0, 0, 16, 16);

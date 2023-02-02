@@ -2,6 +2,9 @@ package com.github.vfyjxf.nee.proxy;
 
 import static com.github.vfyjxf.nee.block.BlockPatternInterface.BLOCK_INSTANCE;
 
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.ShapedOreRecipe;
+
 import appeng.api.AEApi;
 import appeng.api.definitions.IBlocks;
 import appeng.api.definitions.IDefinitions;
@@ -11,20 +14,21 @@ import appeng.api.util.AEColor;
 import appeng.core.features.ActivityState;
 import appeng.core.features.BlockStackSrc;
 import appeng.tile.AEBaseTile;
+
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
 import com.github.vfyjxf.nee.block.BlockPatternInterface;
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
+
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.oredict.ShapedOreRecipe;
 
 public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         AEBaseTile.registerTileItem(
-                TilePatternInterface.class, new BlockStackSrc(BLOCK_INSTANCE, 0, ActivityState.Enabled));
+                TilePatternInterface.class,
+                new BlockStackSrc(BLOCK_INSTANCE, 0, ActivityState.Enabled));
         registerRecipe();
     }
 
@@ -44,7 +48,8 @@ public class CommonProxy {
 
     public void registerTileEntities() {
         GameRegistry.registerTileEntity(
-                TilePatternInterface.class, NotEnoughEnergistics.MODID + "." + "tile.pattern_interface");
+                TilePatternInterface.class,
+                NotEnoughEnergistics.MODID + "." + "tile.pattern_interface");
     }
 
     public void registerRecipe() {
@@ -71,20 +76,21 @@ public class CommonProxy {
             monitor = blocks.craftingMonitor().maybeStack(1).get();
         }
 
-        GameRegistry.addRecipe(new ShapedOreRecipe(
-                BLOCK_INSTANCE,
-                "aba",
-                "cdc",
-                "eee",
-                'a',
-                blankPattern,
-                'b',
-                patternTerm,
-                'c',
-                meInterface,
-                'd',
-                monitor,
-                'e',
-                cableSmart));
+        GameRegistry.addRecipe(
+                new ShapedOreRecipe(
+                        BLOCK_INSTANCE,
+                        "aba",
+                        "cdc",
+                        "eee",
+                        'a',
+                        blankPattern,
+                        'b',
+                        patternTerm,
+                        'c',
+                        meInterface,
+                        'd',
+                        monitor,
+                        'e',
+                        cableSmart));
     }
 }

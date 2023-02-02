@@ -1,30 +1,34 @@
 package com.github.vfyjxf.nee.processor;
 
+import java.util.*;
+
+import javax.annotation.Nonnull;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
-import java.util.*;
-import javax.annotation.Nonnull;
 
 /**
  * @author vfyjxf
  */
 public class ImmersiveEngineeringRecipeProcessor implements IRecipeProcessor {
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
-        return new HashSet<>(Arrays.asList(
-                "ieArcFurnace",
-                "ieBlastFurnace",
-                "ieBlueprintCrafting",
-                "ieBottlingMachine",
-                "ieCokeOven",
-                "ieCrusher",
-                "ieFermenter",
-                "ieHammerCrushing",
-                "ieMetalPress",
-                "ieRefinery",
-                "ieShaderBag",
-                "ieSqueezer"));
+        return new HashSet<>(
+                Arrays.asList(
+                        "ieArcFurnace",
+                        "ieBlastFurnace",
+                        "ieBlueprintCrafting",
+                        "ieBottlingMachine",
+                        "ieCokeOven",
+                        "ieCrusher",
+                        "ieFermenter",
+                        "ieHammerCrushing",
+                        "ieMetalPress",
+                        "ieRefinery",
+                        "ieShaderBag",
+                        "ieSqueezer"));
     }
 
     @Nonnull
@@ -39,8 +43,7 @@ public class ImmersiveEngineeringRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            if (!("ieArcFurnace".equals(identifier)
-                    || "ieCrusher".equals(identifier)
+            if (!("ieArcFurnace".equals(identifier) || "ieCrusher".equals(identifier)
                     || "ieBlastFurnace".equals(identifier))) {
                 recipeInputs.addAll(recipe.getOtherStacks(recipeIndex));
             }

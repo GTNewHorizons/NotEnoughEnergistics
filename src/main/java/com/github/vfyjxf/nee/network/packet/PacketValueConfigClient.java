@@ -1,8 +1,13 @@
 package com.github.vfyjxf.nee.network.packet;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+
 import codechicken.nei.recipe.GuiRecipe;
+
 import com.github.vfyjxf.nee.nei.NEECraftingHelper;
 import com.github.vfyjxf.nee.utils.GuiUtils;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -11,8 +16,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 
 /**
  * @author vfyjxf
@@ -47,6 +50,7 @@ public class PacketValueConfigClient implements IMessage {
     }
 
     public static final class Handler implements IMessageHandler<PacketValueConfigClient, IMessage> {
+
         @Override
         public IMessage onMessage(PacketValueConfigClient message, MessageContext ctx) {
             if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {

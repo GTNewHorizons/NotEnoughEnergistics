@@ -1,5 +1,15 @@
 package com.github.vfyjxf.nee.processor;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+
+import net.minecraft.item.ItemStack;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -7,18 +17,12 @@ import gregapi.NEI_RecipeMap;
 import gregapi.NEI_RecipeMap.FixedPositionedStack;
 import gregapi.data.FL;
 import gregapi.recipes.Recipe;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.Nonnull;
-import net.minecraft.item.ItemStack;
 
 /**
  * @author vfyjxf
  */
 public class GregTech6RecipeProcessor implements IRecipeProcessor {
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
@@ -44,8 +48,9 @@ public class GregTech6RecipeProcessor implements IRecipeProcessor {
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
             // remove fluid
-            recipeInputs.removeIf(positionedStack ->
-                    FL.getFluid(positionedStack.item, true) != null || positionedStack.item.stackSize == 0);
+            recipeInputs.removeIf(
+                    positionedStack -> FL.getFluid(positionedStack.item, true) != null
+                            || positionedStack.item.stackSize == 0);
             // try to remove machine
             if (recipe instanceof NEI_RecipeMap) {
                 Field mRecipeMapField = ReflectionHelper.findField(NEI_RecipeMap.class, "mRecipeMap");
@@ -76,13 +81,15 @@ public class GregTech6RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutput = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutput.addAll(recipe.getOtherStacks(recipeIndex));
-            recipeOutput.removeIf(positionedStack ->
-                    FL.getFluid(positionedStack.item, true) != null || positionedStack.item.stackSize == 0);
+            recipeOutput.removeIf(
+                    positionedStack -> FL.getFluid(positionedStack.item, true) != null
+                            || positionedStack.item.stackSize == 0);
             // try to remove item output if it's chance != 100%
-            recipeOutput.removeIf(positionedStack -> positionedStack instanceof FixedPositionedStack
-                    && ((FixedPositionedStack) positionedStack).mChance > 0
-                    && ((FixedPositionedStack) positionedStack).mChance
-                            != ((FixedPositionedStack) positionedStack).mMaxChance);
+            recipeOutput.removeIf(
+                    positionedStack -> positionedStack instanceof FixedPositionedStack
+                            && ((FixedPositionedStack) positionedStack).mChance > 0
+                            && ((FixedPositionedStack) positionedStack).mChance
+                                    != ((FixedPositionedStack) positionedStack).mMaxChance);
             return recipeOutput;
         }
         return recipeOutput;

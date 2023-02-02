@@ -1,9 +1,10 @@
 package com.github.vfyjxf.nee.processor;
 
-import com.github.vfyjxf.nee.NotEnoughEnergistics;
-import cpw.mods.fml.common.Loader;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.github.vfyjxf.nee.NotEnoughEnergistics;
+import cpw.mods.fml.common.Loader;
 
 public class RecipeProcessor {
 

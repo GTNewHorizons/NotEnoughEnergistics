@@ -1,5 +1,14 @@
 package com.github.vfyjxf.nee;
 
+import java.util.*;
+
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
+
+import org.lwjgl.input.Keyboard;
+
+import thaumicenergistics.client.gui.GuiKnowledgeInscriber;
+import wanion.avaritiaddons.block.extremeautocrafter.GuiExtremeAutoCrafter;
 import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.client.gui.implementations.GuiInterface;
 import appeng.client.gui.implementations.GuiPatternTerm;
@@ -9,6 +18,7 @@ import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
 import codechicken.nei.guihook.GuiContainerManager;
 import codechicken.nei.guihook.IContainerInputHandler;
+
 import com.github.vfyjxf.nee.client.GuiEventHandler;
 import com.github.vfyjxf.nee.nei.NEECraftingHandler;
 import com.github.vfyjxf.nee.nei.NEECraftingHelper;
@@ -18,17 +28,11 @@ import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import cpw.mods.fml.common.Loader;
-import java.util.*;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
-import org.lwjgl.input.Keyboard;
-import thaumicenergistics.client.gui.GuiKnowledgeInscriber;
-import wanion.avaritiaddons.block.extremeautocrafter.GuiExtremeAutoCrafter;
 
 public class NEINeeConfig implements IConfigureNEI {
 
-    private static final List<Class<?>> transferBlacklist =
-            new ArrayList<>(Arrays.asList(GuiInterface.class, GuiPatternTerm.class));
+    private static final List<Class<?>> transferBlacklist = new ArrayList<>(
+            Arrays.asList(GuiInterface.class, GuiPatternTerm.class));
 
     @Override
     public void loadConfig() {
@@ -39,12 +43,11 @@ public class NEINeeConfig implements IConfigureNEI {
 
         registerGuiHandler();
 
-        Set<String> defaultIdentifiers =
-                new HashSet<>(Arrays.asList("crafting", "crafting2x2", "brewing", "smelting", "fuel", null));
+        Set<String> defaultIdentifiers = new HashSet<>(
+                Arrays.asList("crafting", "crafting2x2", "brewing", "smelting", "fuel", null));
         Set<String> identifiers = new HashSet<>(defaultIdentifiers);
 
-        RecipeProcessor.recipeProcessors.stream()
-                .map(IRecipeProcessor::getAllOverlayIdentifier)
+        RecipeProcessor.recipeProcessors.stream().map(IRecipeProcessor::getAllOverlayIdentifier)
                 .forEach(identifiers::addAll);
 
         for (String ident : identifiers) {
@@ -121,6 +124,7 @@ public class NEINeeConfig implements IConfigureNEI {
         if (controllerIndex > 0) {
             GuiContainerManager.inputHandlers.remove(controllerIndex);
             GuiContainerManager.inputHandlers.add(controllerIndex, new NEIController() {
+
                 @Override
                 public boolean mouseScrolled(GuiContainer gui, int mouseX, int mouseY, int scrolled) {
                     if (transferBlacklist.contains(gui.getClass())) {
@@ -159,7 +163,9 @@ public class NEINeeConfig implements IConfigureNEI {
             API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapelessrecipes");
             API.registerGuiOverlayHandler(GuiKnowledgeInscriber.class, new NEECraftingHandler(), "arcaneshapedrecipes");
             API.registerGuiOverlayHandler(
-                    GuiKnowledgeInscriber.class, new NEECraftingHandler(), "arcaneshapelessrecipes");
+                    GuiKnowledgeInscriber.class,
+                    new NEECraftingHandler(),
+                    "arcaneshapelessrecipes");
         }
     }
 

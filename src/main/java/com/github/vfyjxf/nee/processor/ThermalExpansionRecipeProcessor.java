@@ -1,12 +1,14 @@
 package com.github.vfyjxf.nee.processor;
 
+import java.lang.reflect.Field;
+import java.util.*;
+
+import javax.annotation.Nonnull;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import cofh.thermalexpansion.plugins.nei.handlers.RecipeHandlerBase;
 import cpw.mods.fml.relauncher.ReflectionHelper;
-import java.lang.reflect.Field;
-import java.util.*;
-import javax.annotation.Nonnull;
 
 public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
 
@@ -14,8 +16,8 @@ public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
 
     static {
         try {
-            thermalNeiRecipeBaseClass =
-                    Class.forName("cofh.thermalexpansion.plugins.nei.handlers.RecipeHandlerBase$NEIRecipeBase");
+            thermalNeiRecipeBaseClass = Class
+                    .forName("cofh.thermalexpansion.plugins.nei.handlers.RecipeHandlerBase$NEIRecipeBase");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -24,15 +26,16 @@ public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
-        return new HashSet<>(Arrays.asList(
-                "thermalexpansion.charger",
-                "thermalexpansion.crucible",
-                "thermalexpansion.furnace",
-                "thermalexpansion.insolator",
-                "thermalexpansion.pulverizer",
-                "thermalexpansion.sawmill",
-                "thermalexpansion.smelter",
-                "thermalexpansion.transposer"));
+        return new HashSet<>(
+                Arrays.asList(
+                        "thermalexpansion.charger",
+                        "thermalexpansion.crucible",
+                        "thermalexpansion.furnace",
+                        "thermalexpansion.insolator",
+                        "thermalexpansion.pulverizer",
+                        "thermalexpansion.sawmill",
+                        "thermalexpansion.smelter",
+                        "thermalexpansion.transposer"));
     }
 
     @Nonnull
@@ -52,8 +55,8 @@ public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
                     Field secondaryInputField = ReflectionHelper.findField(thermalNeiRecipeBaseClass, "secondaryInput");
                     PositionedStack secondaryInput = null;
                     try {
-                        secondaryInput = (PositionedStack)
-                                secondaryInputField.get(((RecipeHandlerBase) recipe).arecipes.get(recipeIndex));
+                        secondaryInput = (PositionedStack) secondaryInputField
+                                .get(((RecipeHandlerBase) recipe).arecipes.get(recipeIndex));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }
@@ -76,17 +79,17 @@ public class ThermalExpansionRecipeProcessor implements IRecipeProcessor {
             recipeOutputs.add(recipe.getResultStack(recipeIndex));
             if (recipe instanceof RecipeHandlerBase) {
                 if (thermalNeiRecipeBaseClass != null) {
-                    Field secondaryOutputField =
-                            ReflectionHelper.findField(thermalNeiRecipeBaseClass, "secondaryOutput");
-                    Field secondaryOutputChanceField =
-                            ReflectionHelper.findField(thermalNeiRecipeBaseClass, "secondaryOutputChance");
+                    Field secondaryOutputField = ReflectionHelper
+                            .findField(thermalNeiRecipeBaseClass, "secondaryOutput");
+                    Field secondaryOutputChanceField = ReflectionHelper
+                            .findField(thermalNeiRecipeBaseClass, "secondaryOutputChance");
                     PositionedStack secondaryOutput = null;
                     int secondaryOutputChance = 0;
                     try {
-                        secondaryOutput = (PositionedStack)
-                                secondaryOutputField.get(((RecipeHandlerBase) recipe).arecipes.get(recipeIndex));
-                        secondaryOutputChance = (int)
-                                secondaryOutputChanceField.get(((RecipeHandlerBase) recipe).arecipes.get(recipeIndex));
+                        secondaryOutput = (PositionedStack) secondaryOutputField
+                                .get(((RecipeHandlerBase) recipe).arecipes.get(recipeIndex));
+                        secondaryOutputChance = (int) secondaryOutputChanceField
+                                .get(((RecipeHandlerBase) recipe).arecipes.get(recipeIndex));
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }

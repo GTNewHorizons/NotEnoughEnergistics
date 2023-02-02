@@ -1,16 +1,18 @@
 package com.github.vfyjxf.nee.client.gui;
 
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.util.ResourceLocation;
+
 import appeng.client.gui.AEBaseGui;
 import appeng.container.slot.SlotRestrictedInput;
+
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
 import com.github.vfyjxf.nee.client.gui.widgets.GuiImgButtonRemove;
 import com.github.vfyjxf.nee.container.ContainerPatternInterface;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.util.ResourceLocation;
 
 public class GuiPatternInterface extends AEBaseGui {
 
@@ -56,9 +58,8 @@ public class GuiPatternInterface extends AEBaseGui {
     protected void mouseClicked(int mouseX, int mouseY, int btn) {
         if (btn == 0 && this.theSlot instanceof SlotRestrictedInput) {
             SlotRestrictedInput slot = (SlotRestrictedInput) this.theSlot;
-            NEENetworkHandler.getInstance()
-                    .sendToServer(
-                            new PacketValueConfigServer("Container.selectedSlot", Integer.toString(slot.slotNumber)));
+            NEENetworkHandler.getInstance().sendToServer(
+                    new PacketValueConfigServer("Container.selectedSlot", Integer.toString(slot.slotNumber)));
             container.setSelectedSlotIndex(slot.slotNumber);
         }
         super.mouseClicked(mouseX, mouseY, btn);

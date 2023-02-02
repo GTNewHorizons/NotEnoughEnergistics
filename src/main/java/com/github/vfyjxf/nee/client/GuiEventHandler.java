@@ -4,27 +4,9 @@ import static com.github.vfyjxf.nee.config.NEEConfig.draggedStackDefaultSize;
 import static com.github.vfyjxf.nee.config.NEEConfig.useStackSizeFromNEI;
 import static com.github.vfyjxf.nee.nei.NEECraftingHelper.tracker;
 
-import appeng.client.gui.AEBaseGui;
-import appeng.client.gui.implementations.GuiCraftConfirm;
-import appeng.client.gui.implementations.GuiPatternTerm;
-import appeng.container.implementations.ContainerCraftConfirm;
-import appeng.container.implementations.ContainerPatternTerm;
-import appeng.container.slot.SlotFake;
-import codechicken.nei.VisiblityData;
-import codechicken.nei.api.INEIGuiHandler;
-import codechicken.nei.api.TaggedInventoryArea;
-import com.github.vfyjxf.nee.client.gui.widgets.GuiImgButtonEnableCombination;
-import com.github.vfyjxf.nee.config.ItemCombination;
-import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.container.ContainerCraftingConfirm;
-import com.github.vfyjxf.nee.network.NEENetworkHandler;
-import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
-import com.github.vfyjxf.nee.utils.GuiUtils;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import java.util.Collections;
 import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -34,7 +16,30 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
+
 import org.lwjgl.input.Mouse;
+
+import appeng.client.gui.AEBaseGui;
+import appeng.client.gui.implementations.GuiCraftConfirm;
+import appeng.client.gui.implementations.GuiPatternTerm;
+import appeng.container.implementations.ContainerCraftConfirm;
+import appeng.container.implementations.ContainerPatternTerm;
+import appeng.container.slot.SlotFake;
+import codechicken.nei.VisiblityData;
+import codechicken.nei.api.INEIGuiHandler;
+import codechicken.nei.api.TaggedInventoryArea;
+
+import com.github.vfyjxf.nee.client.gui.widgets.GuiImgButtonEnableCombination;
+import com.github.vfyjxf.nee.config.ItemCombination;
+import com.github.vfyjxf.nee.config.NEEConfig;
+import com.github.vfyjxf.nee.container.ContainerCraftingConfirm;
+import com.github.vfyjxf.nee.network.NEENetworkHandler;
+import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
+import com.github.vfyjxf.nee.utils.GuiUtils;
+
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class GuiEventHandler implements INEIGuiHandler {
 
@@ -115,8 +120,10 @@ public class GuiEventHandler implements INEIGuiHandler {
                 x = gui.guiLeft + 74;
                 y = gui.guiTop + gui.ySize - 153;
             }
-            buttonCombination =
-                    new GuiImgButtonEnableCombination(x, y, ItemCombination.valueOf(NEEConfig.itemCombinationMode));
+            buttonCombination = new GuiImgButtonEnableCombination(
+                    x,
+                    y,
+                    ItemCombination.valueOf(NEEConfig.itemCombinationMode));
             event.buttonList.add(buttonCombination);
         }
     }
@@ -125,8 +132,7 @@ public class GuiEventHandler implements INEIGuiHandler {
     public void onActionPerformed(GuiScreenEvent.ActionPerformedEvent.Pre event) {
         if (event.button == this.buttonCombination) {
             GuiImgButtonEnableCombination button = (GuiImgButtonEnableCombination) event.button;
-            int ordinal = Mouse.getEventButton() != 2
-                    ? button.getCurrentValue().ordinal() + 1
+            int ordinal = Mouse.getEventButton() != 2 ? button.getCurrentValue().ordinal() + 1
                     : button.getCurrentValue().ordinal() - 1;
 
             if (ordinal >= ItemCombination.values().length) {
@@ -186,16 +192,13 @@ public class GuiEventHandler implements INEIGuiHandler {
                         boolean sendPacket = false;
                         int copySize = useStackSizeFromNEI ? copyStack.stackSize : draggedStackDefaultSize;
                         if (button == 0) {
-                            boolean areStackEqual = slotStack != null
-                                    && slotStack.isItemEqual(copyStack)
+                            boolean areStackEqual = slotStack != null && slotStack.isItemEqual(copyStack)
                                     && ItemStack.areItemStackTagsEqual(slotStack, copyStack);
-                            copyStack.stackSize = areStackEqual
-                                    ? Math.min(slotStack.stackSize + copySize, 127)
+                            copyStack.stackSize = areStackEqual ? Math.min(slotStack.stackSize + copySize, 127)
                                     : Math.min(copySize, 127);
                             sendPacket = true;
                         } else if (button == 1) {
-                            boolean areStackEqual = slotStack != null
-                                    && slotStack.isItemEqual(copyStack)
+                            boolean areStackEqual = slotStack != null && slotStack.isItemEqual(copyStack)
                                     && ItemStack.areItemStackTagsEqual(slotStack, copyStack);
                             if (areStackEqual) {
                                 copyStack.stackSize = Math.min(slotStack.stackSize + 1, 127);
@@ -206,9 +209,10 @@ public class GuiEventHandler implements INEIGuiHandler {
                         }
 
                         if (sendPacket) {
-                            NEENetworkHandler.getInstance()
-                                    .sendToServer(new PacketSlotStackChange(
-                                            copyStack, Collections.singletonList(currentSlot.slotNumber)));
+                            NEENetworkHandler.getInstance().sendToServer(
+                                    new PacketSlotStackChange(
+                                            copyStack,
+                                            Collections.singletonList(currentSlot.slotNumber)));
                             if (!NEEConfig.keepGhostitems) {
                                 draggedStack.stackSize = 0;
                             }

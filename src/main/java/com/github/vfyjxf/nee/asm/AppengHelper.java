@@ -3,10 +3,22 @@ package com.github.vfyjxf.nee.asm;
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
 import appeng.client.gui.implementations.GuiInterface;
 import appeng.container.slot.SlotFake;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.PositionedStack;
+
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.nei.NEECraftingHandler;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
@@ -14,21 +26,12 @@ import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 
 public class AppengHelper {
 
     /**
-     * Prevent the scroll bar from being triggered when modifying the number of items
-     * This method is not intended to be called by NEE.
-     * Do not use this method for any reason.
+     * Prevent the scroll bar from being triggered when modifying the number of items This method is not intended to be
+     * called by NEE. Do not use this method for any reason.
      */
     public static boolean handleMouseWheelInput(int dWheel) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -79,16 +82,15 @@ public class AppengHelper {
                     if (NEEConfig.allowSynchronousSwitchIngredient) {
                         for (Slot slot : getCraftingSlots(gui)) {
 
-                            PositionedStack slotIngredients =
-                                    NEECraftingHandler.ingredients.get(INPUT_KEY + slot.getSlotIndex());
+                            PositionedStack slotIngredients = NEECraftingHandler.ingredients
+                                    .get(INPUT_KEY + slot.getSlotIndex());
 
-                            boolean areItemStackEqual = currentSlot.getHasStack()
-                                    && slot.getHasStack()
+                            boolean areItemStackEqual = currentSlot.getHasStack() && slot.getHasStack()
                                     && currentSlot.getStack().isItemEqual(slot.getStack())
                                     && ItemStack.areItemStackTagsEqual(currentSlot.getStack(), slot.getStack());
 
-                            boolean areIngredientEqual =
-                                    slotIngredients != null && currentIngredients.contains(slotIngredients.items[0]);
+                            boolean areIngredientEqual = slotIngredients != null
+                                    && currentIngredients.contains(slotIngredients.items[0]);
 
                             if (areItemStackEqual && areIngredientEqual) {
                                 craftingSlots.add(slot.slotNumber);

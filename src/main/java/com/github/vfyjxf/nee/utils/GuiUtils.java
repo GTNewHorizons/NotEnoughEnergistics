@@ -1,5 +1,11 @@
 package com.github.vfyjxf.nee.utils;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+
 import appeng.client.gui.implementations.GuiCraftConfirm;
 import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.client.gui.implementations.GuiPatternTerm;
@@ -7,17 +13,13 @@ import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.implementations.ContainerPatternTermEx;
 import appeng.helpers.IContainerCraftingPacket;
+
 import com.github.vfyjxf.nee.container.WCTContainerCraftingConfirm;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
 import cpw.mods.fml.common.Loader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 
 /**
  * @author vfyjxf
@@ -34,8 +36,7 @@ public class GuiUtils {
 
     public static boolean isWirelessCraftingTermContainer(Container container) {
         if (!isWirelessCraftingTerminalModLoaded) return false;
-        return container
-                instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
+        return container instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
     }
 
     public static boolean isContainerWirelessCraftingConfirm(Container container) {
@@ -72,8 +73,7 @@ public class GuiUtils {
 
     public static boolean isPatternContainer(Container container) {
         if (isFluidCraftModloaded) {
-            return container instanceof ContainerPatternTerm
-                    || container instanceof ContainerPatternTermEx
+            return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx
                     || container instanceof ContainerFluidPatternTerminal
                     || container instanceof ContainerFluidPatternTerminalEx;
         } else {
@@ -96,8 +96,7 @@ public class GuiUtils {
 
     public static boolean isPatternTerm(GuiScreen guiScreen) {
         if (isFluidCraftModloaded) {
-            return guiScreen instanceof GuiPatternTerm
-                    || guiScreen instanceof GuiPatternTermEx
+            return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx
                     || guiScreen instanceof GuiFluidPatternTerminal
                     || guiScreen instanceof GuiFluidPatternTerminalEx;
         } else {

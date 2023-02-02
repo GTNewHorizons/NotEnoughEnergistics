@@ -1,15 +1,18 @@
 package com.github.vfyjxf.nee.processor;
 
+import java.util.*;
+
+import javax.annotation.Nonnull;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import gregtech.api.util.GTPP_Recipe;
-import java.util.*;
-import javax.annotation.Nonnull;
 
 /**
  * @author vfyjxf
  */
 public class GTPPRecipeProcessor implements IRecipeProcessor {
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
@@ -36,9 +39,9 @@ public class GTPPRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            recipeInputs.removeIf(positionedStack ->
-                    GregTech5RecipeProcessor.getFluidFromDisplayStack(positionedStack.items[0]) != null
-                            || positionedStack.item.stackSize == 0);
+            recipeInputs.removeIf(
+                    positionedStack -> GregTech5RecipeProcessor.getFluidFromDisplayStack(positionedStack.items[0])
+                            != null || positionedStack.item.stackSize == 0);
             return recipeInputs;
         }
         return recipeInputs;
@@ -50,8 +53,9 @@ public class GTPPRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
-            recipeOutputs.removeIf(positionedStack ->
-                    GregTech5RecipeProcessor.getFluidFromDisplayStack(positionedStack.items[0]) != null);
+            recipeOutputs.removeIf(
+                    positionedStack -> GregTech5RecipeProcessor.getFluidFromDisplayStack(positionedStack.items[0])
+                            != null);
             return recipeOutputs;
         }
         return recipeOutputs;

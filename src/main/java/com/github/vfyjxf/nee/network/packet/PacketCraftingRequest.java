@@ -4,6 +4,26 @@ import static com.github.vfyjxf.nee.nei.NEECraftingHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEECraftingHelper.RECIPE_LENGTH;
 
+import java.io.IOException;
+import java.util.concurrent.Future;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.p455w0rd.wirelesscraftingterminal.common.WCTGuiHandler;
+import net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
+import net.p455w0rd.wirelesscraftingterminal.helpers.WirelessTerminalGuiObject;
+import net.p455w0rd.wirelesscraftingterminal.reference.Reference;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import appeng.api.AEApi;
 import appeng.api.config.SecurityPermissions;
 import appeng.api.networking.IGrid;
@@ -25,6 +45,7 @@ import appeng.core.AELog;
 import appeng.core.sync.GuiBridge;
 import appeng.util.Platform;
 import appeng.util.item.AEItemStack;
+
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
 import com.github.vfyjxf.nee.container.ContainerCraftingAmount;
 import com.github.vfyjxf.nee.container.ContainerCraftingConfirm;
@@ -33,28 +54,12 @@ import com.github.vfyjxf.nee.network.NEEGuiHandler;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.google.common.base.Optional;
+
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import java.io.IOException;
-import java.util.concurrent.Future;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.p455w0rd.wirelesscraftingterminal.common.WCTGuiHandler;
-import net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
-import net.p455w0rd.wirelesscraftingterminal.helpers.WirelessTerminalGuiObject;
-import net.p455w0rd.wirelesscraftingterminal.reference.Reference;
-import org.apache.commons.lang3.tuple.Pair;
 
 public class PacketCraftingRequest implements IMessage {
 
@@ -116,6 +121,7 @@ public class PacketCraftingRequest implements IMessage {
     }
 
     public static final class Handler implements IMessageHandler<PacketCraftingRequest, IMessage> {
+
         @Override
         public IMessage onMessage(PacketCraftingRequest message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
@@ -136,12 +142,18 @@ public class PacketCraftingRequest implements IMessage {
                             if (security != null && security.hasPermission(player, SecurityPermissions.CRAFT)) {
                                 if (container instanceof ContainerCraftingTerm) {
                                     message.handlerCraftingTermRequest(
-                                            (ContainerCraftingTerm) container, message, grid, player);
+                                            (ContainerCraftingTerm) container,
+                                            message,
+                                            grid,
+                                            player);
                                 }
 
                                 if (container instanceof ContainerCraftingAmount) {
                                     message.handlerCraftingAmountRequest(
-                                            (ContainerCraftingAmount) container, message, grid, player);
+                                            (ContainerCraftingAmount) container,
+                                            message,
+                                            grid,
+                                            player);
                                 }
                             }
                         }
@@ -153,14 +165,18 @@ public class PacketCraftingRequest implements IMessage {
         }
     }
 
-    private void handlerCraftingTermRequest(
-            ContainerCraftingTerm container, PacketCraftingRequest message, IGrid grid, EntityPlayerMP player) {
+    private void handlerCraftingTermRequest(ContainerCraftingTerm container, PacketCraftingRequest message, IGrid grid,
+            EntityPlayerMP player) {
         if (message.getRequireToCraftStack() != null) {
             Future<ICraftingJob> futureJob = null;
             try {
                 final ICraftingGrid cg = grid.getCache(ICraftingGrid.class);
                 futureJob = cg.beginCraftingJob(
-                        player.worldObj, grid, container.getActionSource(), message.getRequireToCraftStack(), null);
+                        player.worldObj,
+                        grid,
+                        container.getActionSource(),
+                        message.getRequireToCraftStack(),
+                        null);
 
                 final ContainerOpenContext context = container.getOpenContext();
                 if (context != null) {
@@ -181,8 +197,8 @@ public class PacketCraftingRequest implements IMessage {
         }
     }
 
-    private void handlerCraftingAmountRequest(
-            ContainerCraftingAmount container, PacketCraftingRequest message, IGrid grid, EntityPlayerMP player) {
+    private void handlerCraftingAmountRequest(ContainerCraftingAmount container, PacketCraftingRequest message,
+            IGrid grid, EntityPlayerMP player) {
         if (container.getResultStack() != null) {
 
             Pair<TilePatternInterface, Integer> pair = setRecipe(grid, container.getRecipe(), player);
@@ -193,8 +209,8 @@ public class PacketCraftingRequest implements IMessage {
                 ItemStack resultStack = container.getResultStack().copy();
                 IAEItemStack result = null;
                 /*
-                 *For some reason,the output from jei is different from the actual one,
-                 *so apply ItemStack.isItemEqual to match.
+                 * For some reason,the output from jei is different from the actual one, so apply ItemStack.isItemEqual
+                 * to match.
                  */
                 for (IAEItemStack aeStack : all) {
                     if (resultStack.isItemEqual(aeStack.getItemStack()) && aeStack.isCraftable()) {
@@ -208,8 +224,8 @@ public class PacketCraftingRequest implements IMessage {
                     Future<ICraftingJob> futureJob = null;
                     try {
                         final ICraftingGrid cg = grid.getCache(ICraftingGrid.class);
-                        futureJob =
-                                cg.beginCraftingJob(player.worldObj, grid, container.getActionSource(), result, null);
+                        futureJob = cg
+                                .beginCraftingJob(player.worldObj, grid, container.getActionSource(), result, null);
 
                         final ContainerOpenContext context = container.getOpenContext();
                         if (context != null) {
@@ -228,8 +244,7 @@ public class PacketCraftingRequest implements IMessage {
                             NEEGuiHandler.openGui(player, NEEGuiHandler.CRAFTING_CONFIRM_WIRELESS_ID, player.worldObj);
 
                             if (player.openContainer instanceof WCTContainerCraftingConfirm) {
-                                final WCTContainerCraftingConfirm ccc =
-                                        (WCTContainerCraftingConfirm) player.openContainer;
+                                final WCTContainerCraftingConfirm ccc = (WCTContainerCraftingConfirm) player.openContainer;
                                 ccc.setJob(futureJob);
                                 ccc.setAutoStart(message.isAutoStart());
                                 ccc.setTile(pair.getLeft());
@@ -248,15 +263,14 @@ public class PacketCraftingRequest implements IMessage {
         }
     }
 
-    private void handlerWirelessCraftingRequest(
-            ContainerWirelessCraftingTerminal container, PacketCraftingRequest message, EntityPlayerMP player) {
+    private void handlerWirelessCraftingRequest(ContainerWirelessCraftingTerminal container,
+            PacketCraftingRequest message, EntityPlayerMP player) {
         Object target = container.getTarget();
         if (target instanceof WirelessTerminalGuiObject) {
             IGrid grid = ((WirelessTerminalGuiObject) target).getTargetGrid();
             if (grid != null) {
                 final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
-                if (security != null
-                        && security.hasPermission(player, SecurityPermissions.CRAFT)
+                if (security != null && security.hasPermission(player, SecurityPermissions.CRAFT)
                         && message.getRequireToCraftStack() != null) {
                     Future<ICraftingJob> futureJob = null;
                     try {
@@ -274,12 +288,8 @@ public class PacketCraftingRequest implements IMessage {
 
                         WCTGuiHandler.launchGui(Reference.GUI_CRAFT_CONFIRM, player, player.worldObj, x, y, z);
 
-                        if (player.openContainer
-                                instanceof
-                                net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) {
-                            final net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm ccc =
-                                    (net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm)
-                                            player.openContainer;
+                        if (player.openContainer instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) {
+                            final net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm ccc = (net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) player.openContainer;
                             ccc.setJob(futureJob);
                             ccc.setAutoStart(message.isAutoStart());
                         }
@@ -336,8 +346,7 @@ public class PacketCraftingRequest implements IMessage {
         ItemStack result = CraftingManager.getInstance().findMatchingRecipe(ic, player.worldObj);
         if (result != null) {
             ItemStack patternStack = null;
-            Optional<ItemStack> maybePattern =
-                    AEApi.instance().definitions().items().encodedPattern().maybeStack(1);
+            Optional<ItemStack> maybePattern = AEApi.instance().definitions().items().encodedPattern().maybeStack(1);
             if (maybePattern.isPresent()) {
                 patternStack = maybePattern.get();
             }

@@ -1,15 +1,16 @@
 package com.github.vfyjxf.nee.network.packet;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 
 /**
  * @author vfyjxf
@@ -47,6 +48,7 @@ public class PacketStackCountChange implements IMessage {
     }
 
     public static final class Handler implements IMessageHandler<PacketStackCountChange, IMessage> {
+
         @Override
         public IMessage onMessage(PacketStackCountChange message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
@@ -65,8 +67,7 @@ public class PacketStackCountChange implements IMessage {
 
             Slot currentSlot = container.getSlot(message.getSlotIndex());
             for (int i = 0; i < Math.abs(message.getChangeCount()); i++) {
-                int currentStackSize = message.getChangeCount() > 0
-                        ? currentSlot.getStack().stackSize + 1
+                int currentStackSize = message.getChangeCount() > 0 ? currentSlot.getStack().stackSize + 1
                         : currentSlot.getStack().stackSize - 1;
                 if (currentStackSize <= currentSlot.getStack().getMaxStackSize() && currentStackSize > 0) {
                     ItemStack nextStack = currentSlot.getStack().copy();

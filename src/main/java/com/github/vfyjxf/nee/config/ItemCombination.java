@@ -1,9 +1,11 @@
 package com.github.vfyjxf.nee.config;
 
 import java.util.Locale;
+
 import net.minecraft.client.resources.I18n;
 
 public enum ItemCombination {
+
     DISABLED,
     ENABLED,
     WHITELIST;

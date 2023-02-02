@@ -2,6 +2,14 @@ package com.github.vfyjxf.nee.network.packet;
 
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
 
+import javax.annotation.Nonnull;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.ISecurityGrid;
@@ -10,9 +18,11 @@ import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.implementations.ContainerPatternTermEx;
 import appeng.helpers.IContainerCraftingPacket;
+
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
+
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.ByteBufUtils;
@@ -20,12 +30,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import javax.annotation.Nonnull;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class PacketNEIPatternRecipe implements IMessage {
 
@@ -59,6 +63,7 @@ public class PacketNEIPatternRecipe implements IMessage {
     }
 
     public static final class Handler implements IMessageHandler<PacketNEIPatternRecipe, IMessage> {
+
         @Override
         public IMessage onMessage(PacketNEIPatternRecipe message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;

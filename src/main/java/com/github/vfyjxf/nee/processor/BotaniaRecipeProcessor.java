@@ -1,15 +1,18 @@
 package com.github.vfyjxf.nee.processor;
 
-import codechicken.nei.PositionedStack;
-import codechicken.nei.recipe.IRecipeHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import javax.annotation.Nonnull;
+
 import vazkii.botania.client.integration.nei.recipe.RecipeHandlerLexicaBotania;
+import codechicken.nei.PositionedStack;
+import codechicken.nei.recipe.IRecipeHandler;
 
 public class BotaniaRecipeProcessor implements IRecipeProcessor {
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {

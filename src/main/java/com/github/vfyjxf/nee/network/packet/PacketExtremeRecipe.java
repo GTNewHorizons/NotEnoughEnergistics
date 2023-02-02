@@ -1,21 +1,24 @@
 package com.github.vfyjxf.nee.network.packet;
 
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import io.netty.buffer.ByteBuf;
 import java.lang.reflect.Field;
+
 import javax.annotation.Nonnull;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
 import wanion.avaritiaddons.block.extremeautocrafter.ContainerExtremeAutoCrafter;
 import wanion.avaritiaddons.block.extremeautocrafter.TileEntityExtremeAutoCrafter;
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.ReflectionHelper;
+import io.netty.buffer.ByteBuf;
 
 /**
  * @author vfyjxf
@@ -45,6 +48,7 @@ public class PacketExtremeRecipe implements IMessage {
     }
 
     public static final class Handler implements IMessageHandler<PacketExtremeRecipe, IMessage> {
+
         @Override
         public IMessage onMessage(PacketExtremeRecipe message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
@@ -72,19 +76,19 @@ public class PacketExtremeRecipe implements IMessage {
         }
 
         private InventoryCrafting getCraftingMatrix(ContainerExtremeAutoCrafter container) {
-            Field tileEntityExtremeAutoCrafterField =
-                    ReflectionHelper.findField(ContainerExtremeAutoCrafter.class, "tileEntityExtremeAutoCrafter");
+            Field tileEntityExtremeAutoCrafterField = ReflectionHelper
+                    .findField(ContainerExtremeAutoCrafter.class, "tileEntityExtremeAutoCrafter");
             TileEntityExtremeAutoCrafter tileEntityExtremeAutoCrafter = null;
 
             try {
-                tileEntityExtremeAutoCrafter =
-                        (TileEntityExtremeAutoCrafter) tileEntityExtremeAutoCrafterField.get(container);
+                tileEntityExtremeAutoCrafter = (TileEntityExtremeAutoCrafter) tileEntityExtremeAutoCrafterField
+                        .get(container);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
             if (tileEntityExtremeAutoCrafter != null) {
-                Field craftingMatrixField =
-                        ReflectionHelper.findField(TileEntityExtremeAutoCrafter.class, "craftingMatrix");
+                Field craftingMatrixField = ReflectionHelper
+                        .findField(TileEntityExtremeAutoCrafter.class, "craftingMatrix");
                 InventoryCrafting craftingMatrix = null;
                 try {
                     craftingMatrix = (InventoryCrafting) craftingMatrixField.get(tileEntityExtremeAutoCrafter);

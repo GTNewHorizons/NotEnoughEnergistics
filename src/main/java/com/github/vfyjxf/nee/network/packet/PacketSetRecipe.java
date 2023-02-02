@@ -4,19 +4,6 @@ import static com.github.vfyjxf.nee.nei.NEECraftingHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEECraftingHandler.OUTPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEECraftingHelper.RECIPE_LENGTH;
 
-import appeng.api.AEApi;
-import appeng.api.networking.IGrid;
-import appeng.api.networking.IGridNode;
-import appeng.api.networking.security.IActionHost;
-import appeng.container.AEBaseContainer;
-import appeng.container.ContainerNull;
-import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
-import com.google.common.base.Optional;
-import cpw.mods.fml.common.network.ByteBufUtils;
-import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
-import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -25,6 +12,22 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+
+import appeng.api.AEApi;
+import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridNode;
+import appeng.api.networking.security.IActionHost;
+import appeng.container.AEBaseContainer;
+import appeng.container.ContainerNull;
+
+import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
+import com.google.common.base.Optional;
+
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import io.netty.buffer.ByteBuf;
 
 public class PacketSetRecipe implements IMessage {
 
@@ -71,9 +74,9 @@ public class PacketSetRecipe implements IMessage {
 
                                 if (patternStack != null) {
 
-                                    //                                if (tpi.putPattern(patternStack)) {
-                                    //                                    return null;
-                                    //                                }
+                                    // if (tpi.putPattern(patternStack)) {
+                                    // return null;
+                                    // }
                                 }
                             }
                         }
@@ -109,8 +112,7 @@ public class PacketSetRecipe implements IMessage {
         ItemStack result = CraftingManager.getInstance().findMatchingRecipe(ic, player.worldObj);
         if (result != null) {
             ItemStack patternStack = null;
-            Optional<ItemStack> maybePattern =
-                    AEApi.instance().definitions().items().encodedPattern().maybeStack(1);
+            Optional<ItemStack> maybePattern = AEApi.instance().definitions().items().encodedPattern().maybeStack(1);
             if (maybePattern.isPresent()) {
                 patternStack = maybePattern.get();
             }

@@ -1,5 +1,11 @@
 package com.github.vfyjxf.nee.client.gui;
 
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.ItemStack;
+import net.p455w0rd.wirelesscraftingterminal.items.ItemEnum;
+import net.p455w0rd.wirelesscraftingterminal.reference.Reference;
+
 import appeng.api.AEApi;
 import appeng.api.definitions.IDefinitions;
 import appeng.api.definitions.IParts;
@@ -15,20 +21,18 @@ import appeng.core.sync.network.NetworkHandler;
 import appeng.core.sync.packets.PacketSwitchGuis;
 import appeng.helpers.Reflected;
 import appeng.parts.reporting.PartCraftingTerminal;
+
 import com.github.vfyjxf.nee.container.ContainerCraftingAmount;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
+
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.item.ItemStack;
-import net.p455w0rd.wirelesscraftingterminal.items.ItemEnum;
-import net.p455w0rd.wirelesscraftingterminal.reference.Reference;
 
 public class GuiCraftingAmount extends AEBaseGui {
+
     private GuiNumberBox amountToCraft;
     private GuiTabButton originalGuiBtn;
 
@@ -94,12 +98,20 @@ public class GuiCraftingAmount extends AEBaseGui {
         if (this.originalGui != null && myIcon != null) {
             this.buttonList.add(
                     this.originalGuiBtn = new GuiTabButton(
-                            this.guiLeft + 154, this.guiTop, myIcon, myIcon.getDisplayName(), itemRender));
+                            this.guiLeft + 154,
+                            this.guiTop,
+                            myIcon,
+                            myIcon.getDisplayName(),
+                            itemRender));
         }
         if (this.isWirelessCrafting && myIcon != null) {
             this.buttonList.add(
                     this.originalGuiBtn = new GuiTabButton(
-                            this.guiLeft + 154, this.guiTop, myIcon, myIcon.getDisplayName(), itemRender));
+                            this.guiLeft + 154,
+                            this.guiTop,
+                            myIcon,
+                            myIcon.getDisplayName(),
+                            itemRender));
         }
 
         this.amountToCraft = new GuiNumberBox(
@@ -150,13 +162,11 @@ public class GuiCraftingAmount extends AEBaseGui {
             if (key == 28) {
                 this.actionPerformed(this.next);
             }
-            if ((key == 211
-                            || key == 205
-                            || key == 203
-                            || key == 14
-                            || character == '-'
-                            || Character.isDigit(character))
-                    && this.amountToCraft.textboxKeyTyped(character, key)) {
+            if ((key == 211 || key == 205
+                    || key == 203
+                    || key == 14
+                    || character == '-'
+                    || Character.isDigit(character)) && this.amountToCraft.textboxKeyTyped(character, key)) {
                 try {
                     String out = this.amountToCraft.getText();
 
@@ -202,9 +212,8 @@ public class GuiCraftingAmount extends AEBaseGui {
             }
 
             if (btn == this.next) {
-                NEENetworkHandler.getInstance()
-                        .sendToServer(new PacketCraftingRequest(
-                                Integer.parseInt(this.amountToCraft.getText()), isShiftKeyDown()));
+                NEENetworkHandler.getInstance().sendToServer(
+                        new PacketCraftingRequest(Integer.parseInt(this.amountToCraft.getText()), isShiftKeyDown()));
             }
         } catch (final NumberFormatException e) {
             // nope..
@@ -212,8 +221,9 @@ public class GuiCraftingAmount extends AEBaseGui {
         }
 
         final boolean isPlus = btn == this.plus1 || btn == this.plus10 || btn == this.plus100 || btn == this.plus1000;
-        final boolean isMinus =
-                btn == this.minus1 || btn == this.minus10 || btn == this.minus100 || btn == this.minus1000;
+        final boolean isMinus = btn == this.minus1 || btn == this.minus10
+                || btn == this.minus100
+                || btn == this.minus1000;
 
         if (isPlus || isMinus) {
             this.addQty(this.getQty(btn));

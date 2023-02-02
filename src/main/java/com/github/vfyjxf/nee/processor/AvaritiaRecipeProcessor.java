@@ -1,11 +1,14 @@
 package com.github.vfyjxf.nee.processor;
 
-import codechicken.nei.PositionedStack;
-import codechicken.nei.recipe.IRecipeHandler;
 import java.util.*;
+
 import javax.annotation.Nonnull;
 
+import codechicken.nei.PositionedStack;
+import codechicken.nei.recipe.IRecipeHandler;
+
 public class AvaritiaRecipeProcessor implements IRecipeProcessor {
+
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
