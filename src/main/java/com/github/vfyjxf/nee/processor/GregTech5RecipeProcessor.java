@@ -84,7 +84,7 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     @Override
     public List<PositionedStack> getRecipeInput(IRecipeHandler recipe, int recipeIndex, String identifier) {
         List<PositionedStack> recipeInputs = new ArrayList<>();
-        if (gtDefaultClz.isInstance(recipe) || gtAssLineClz.isInstance(recipe)) {
+        if (canProcessRecipe(recipe)) {
             if (GuiUtils.isFluidCraftPatternTermEx(Minecraft.getMinecraft().currentScreen)) {
                 boolean priority = ((GuiFluidPatternTerminalEx) Minecraft
                         .getMinecraft().currentScreen).container.prioritize;
@@ -125,7 +125,7 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     @Override
     public List<PositionedStack> getRecipeOutput(IRecipeHandler recipe, int recipeIndex, String identifier) {
         List<PositionedStack> recipeOutputs = new ArrayList<>();
-        if (gtDefaultClz.isInstance(recipe) || gtAssLineClz.isInstance(recipe)) {
+        if (canProcessRecipe(recipe)) {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
             recipeOutputs.removeIf(positionedStack -> getFluidFromDisplayStack(positionedStack.items[0]) != null);
             // remove output if it's chance != 10000
@@ -140,5 +140,10 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     @Override
     public boolean mergeStacks(IRecipeHandler recipe, int recipeIndex, String identifier) {
         return !"gt.recipe.fakeAssemblylineProcess".equals(identifier);
+    }
+
+    private boolean canProcessRecipe(IRecipeHandler recipe) {
+        return (gtDefaultClz != null && gtDefaultClz.isInstance(recipe))
+                || (gtAssLineClz != null && gtAssLineClz.isInstance(recipe));
     }
 }
