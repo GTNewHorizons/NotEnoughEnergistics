@@ -25,8 +25,10 @@ import com.github.vfyjxf.nee.nei.NEECraftingHelper;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.GuiFluidPatternExWireless;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
+import com.glodblock.github.client.gui.GuiFluidPatternWireless;
 import cpw.mods.fml.common.Loader;
 
 public class NEINeeConfig implements IConfigureNEI {
@@ -76,7 +78,9 @@ public class NEINeeConfig implements IConfigureNEI {
             identifiers.remove("crafting2x2");
             for (String ident : identifiers) {
                 API.registerGuiOverlay(GuiFluidPatternTerminalEx.class, ident);
-                API.registerGuiOverlayHandler(GuiFluidPatternTerminalEx.class, new NEECraftingHandler(), ident);
+                API.registerGuiOverlay(GuiFluidPatternExWireless.class, ident);
+                API.registerGuiOverlayHandler(GuiFluidPatternTerminalEx.class, NEECraftingHandler.INSTANCE, ident);
+                API.registerGuiOverlayHandler(GuiFluidPatternExWireless.class, NEECraftingHandler.INSTANCE, ident);
             }
         }
     }
@@ -85,7 +89,9 @@ public class NEINeeConfig implements IConfigureNEI {
         if (Loader.isModLoaded(ModIDs.FC)) {
             for (String ident : identifiers) {
                 API.registerGuiOverlay(GuiFluidPatternTerminal.class, ident);
+                API.registerGuiOverlay(GuiFluidPatternWireless.class, ident);
                 API.registerGuiOverlayHandler(GuiFluidPatternTerminal.class, NEECraftingHandler.INSTANCE, ident);
+                API.registerGuiOverlayHandler(GuiFluidPatternWireless.class, NEECraftingHandler.INSTANCE, ident);
             }
         }
     }
