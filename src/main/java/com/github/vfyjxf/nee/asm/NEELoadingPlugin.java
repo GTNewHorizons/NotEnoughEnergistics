@@ -6,7 +6,6 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 @IFMLLoadingPlugin.Name("NEELoadingPlugin")
 @IFMLLoadingPlugin.MCVersion("1.7.10")
-@IFMLLoadingPlugin.TransformerExclusions("com.github.vfyjxf.nee.asm")
 public class NEELoadingPlugin implements IFMLLoadingPlugin {
 
     @Override
