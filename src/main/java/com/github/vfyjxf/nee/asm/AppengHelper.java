@@ -26,8 +26,17 @@ import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import cpw.mods.fml.common.Loader;
 
 public class AppengHelper {
+
+    private static boolean hasLwjgl3 = Loader.isModLoaded("lwjgl3ify");
+
+    // LWJGL2 reports different scroll values for every platform, 120 for one tick on Windows.
+    // LWJGL3 reports the delta in exact scroll ticks.
+    private static int dwheelToScrollSteps(int dWheel) {
+        return hasLwjgl3 ? dWheel : dWheel / 120;
+    }
 
     /**
      * Prevent the scroll bar from being triggered when modifying the number of items This method is not intended to be
@@ -49,7 +58,7 @@ public class AppengHelper {
                         handleRecipeIngredientChange((GuiContainer) mc.currentScreen, currentSlot, dWheel);
                         return true;
                     } else if (Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("nee.count"))) {
-                        int changeCount = dWheel / 120;
+                        int changeCount = dwheelToScrollSteps(dWheel);
                         NEENetworkHandler.getInstance()
                                 .sendToServer(new PacketStackCountChange(currentSlot.slotNumber, changeCount));
                         return true;
@@ -67,7 +76,7 @@ public class AppengHelper {
         if (currentIngredients != null && currentIngredients.items.length > 1) {
             int currentStackIndex = ItemUtils.getIngredientIndex(currentSlot.getStack(), currentIngredients);
             if (currentStackIndex >= 0) {
-                int nextStackIndex = dWheel / 120;
+                int nextStackIndex = dwheelToScrollSteps(dWheel);
                 for (int j = 0; j < Math.abs(nextStackIndex); j++) {
                     currentStackIndex = nextStackIndex > 0 ? currentStackIndex + 1 : currentStackIndex - 1;
                     if (currentStackIndex >= currentIngredients.items.length) {
