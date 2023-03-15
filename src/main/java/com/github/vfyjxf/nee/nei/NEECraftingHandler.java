@@ -160,6 +160,9 @@ public class NEECraftingHandler implements IOverlayHandler {
                         if (currentStack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                             currentStack.setItemDamage(0);
                         }
+                        if (currentStack.stackSize < 1) {
+                            currentStack.stackSize = 1;
+                        }
 
                         recipeInputs.setTag("#" + inputIndex, currentStack.writeToNBT(new NBTTagCompound()));
                         NEECraftingHandler.ingredients.put(INPUT_KEY + inputIndex, positionedStack);
@@ -174,6 +177,9 @@ public class NEECraftingHandler implements IOverlayHandler {
                         ItemStack outputStack = positionedStack.item.copy();
                         if (outputStack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                             outputStack.setItemDamage(0);
+                        }
+                        if (outputStack.stackSize < 1) {
+                            outputStack.stackSize = 1;
                         }
 
                         recipeOutputs.setTag(OUTPUT_KEY + outputIndex, outputStack.writeToNBT(new NBTTagCompound()));
