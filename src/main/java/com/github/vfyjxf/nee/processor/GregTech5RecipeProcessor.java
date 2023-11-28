@@ -1,9 +1,11 @@
 package com.github.vfyjxf.nee.processor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -19,7 +21,7 @@ import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import gregtech.api.enums.ItemList;
-import gregtech.api.util.GT_Recipe;
+import gregtech.api.recipe.RecipeCategory;
 import gregtech.nei.GT_NEI_DefaultHandler.FixedPositionedStack;
 
 /**
@@ -29,17 +31,21 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
 
     private static final Class<?> gtDefaultClz, gtAssLineClz;
 
+    private final boolean isNH;
+
     static {
         Class<?> gtDH = null;
         Class<?> gtAL = null;
         try {
             gtDH = Class.forName("gregtech.nei.GT_NEI_DefaultHandler");
             gtAL = Class.forName("gregtech.nei.GT_NEI_AssLineHandler");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        } catch (ClassNotFoundException ignored) {}
         gtDefaultClz = gtDH;
         gtAssLineClz = gtAL;
+    }
+
+    public GregTech5RecipeProcessor(boolean isNH) {
+        this.isNH = isNH;
     }
 
     /**
@@ -62,15 +68,28 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
-
-        Set<String> identifiers = new HashSet<>();
-        for (GT_Recipe.GT_Recipe_Map tMap : GT_Recipe.GT_Recipe_Map.sMappings) {
-            if (tMap.mNEIAllowed) {
-                identifiers.add(tMap.mNEIName);
-            }
+        if (isNH) {
+            return RecipeCategory.ALL_RECIPE_CATEGORIES.values().stream()
+                    .filter(category -> category.recipeMap.getFrontend().getNEIProperties().registerNEI)
+                    .map(category -> category.unlocalizedName).collect(Collectors.toSet());
         }
-        identifiers.add("gt.recipe.fakeAssemblylineProcess");
-        return identifiers;
+
+        try {
+            Set<String> identifiers = new HashSet<>();
+            Class<?> recipeMapClazz = Class.forName("gregtech.api.util.GT_Recipe$GT_Recipe_Map");
+            Collection<?> sMappings = (Collection<?>) recipeMapClazz.getDeclaredField("sMappings").get(null);
+            for (Object tMap : sMappings) {
+                boolean mNEIAllowed = recipeMapClazz.getDeclaredField("mNEIAllowed").getBoolean(tMap);
+                if (mNEIAllowed) {
+                    String mNEIName = (String) recipeMapClazz.getDeclaredField("mNEIName").get(tMap);
+                    identifiers.add(mNEIName);
+                }
+            }
+            identifiers.add("gt.recipe.fakeAssemblylineProcess");
+            return identifiers;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Nonnull

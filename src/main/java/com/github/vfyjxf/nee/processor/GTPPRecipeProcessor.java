@@ -6,24 +6,40 @@ import javax.annotation.Nonnull;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
-import gregtech.api.util.GTPP_Recipe;
 
 /**
  * @author vfyjxf
  */
 public class GTPPRecipeProcessor implements IRecipeProcessor {
 
+    private final boolean isNH;
+
+    public GTPPRecipeProcessor(boolean isNH) {
+        this.isNH = isNH;
+    }
+
     @Nonnull
     @Override
-    @SuppressWarnings("deprecation")
     public Set<String> getAllOverlayIdentifier() {
-        HashSet<String> identifiers = new HashSet<>(Collections.singletonList("GTPP_Decayables"));
+        HashSet<String> identifiers = new HashSet<>();
+        identifiers.add("GTPP_Decayables");
+        if (isNH) {
+            return identifiers;
+        }
 
-        // GTNH version of GT++ deprecated this, but other versions still use it
-        for (GTPP_Recipe.GTPP_Recipe_Map_Internal gtppMap : GTPP_Recipe.GTPP_Recipe_Map_Internal.sMappingsEx) {
-            if (gtppMap.mNEIAllowed) {
-                identifiers.add(gtppMap.mNEIName);
+        try {
+            Class<?> gtRecipeMapClazz = Class.forName("gregtech.api.util.GT_Recipe$GT_Recipe_Map");
+            Class<?> gtppRecipeMapClazz = Class.forName("gregtech.api.util.GTPP_Recipe$GTPP_Recipe_Map_Internal");
+            Collection<?> sMappingsEx = (Collection<?>) gtppRecipeMapClazz.getDeclaredField("sMappingsEx").get(null);
+            for (Object gtppMap : sMappingsEx) {
+                boolean mNEIAllowed = gtRecipeMapClazz.getDeclaredField("mNEIAllowed").getBoolean(gtppMap);
+                if (mNEIAllowed) {
+                    String mNEIName = (String) gtRecipeMapClazz.getDeclaredField("mNEIName").get(gtppMap);
+                    identifiers.add(mNEIName);
+                }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return identifiers;

@@ -27,9 +27,16 @@ public class RecipeProcessor {
             recipeProcessors.add(new BotaniaRecipeProcessor());
         }
 
+        boolean isNH = false;
         if (Loader.isModLoaded("gregtech") && !Loader.isModLoaded("gregapi")) {
-            NotEnoughEnergistics.logger.info("Found GregTech5,install GregTech5 support");
-            recipeProcessors.add(new GregTech5RecipeProcessor());
+            try {
+                Class.forName("gregtech.api.recipe.RecipeMap");
+                isNH = true;
+                NotEnoughEnergistics.logger.info("Found NH version of GregTech5, install GregTech5 support");
+            } catch (ClassNotFoundException ignored) {
+                NotEnoughEnergistics.logger.info("Found GregTech5, install GregTech5 support");
+            }
+            recipeProcessors.add(new GregTech5RecipeProcessor(isNH));
         }
         if (Loader.isModLoaded("gregapi") && Loader.isModLoaded("gregapi_post")) {
             NotEnoughEnergistics.logger.info("Found GregTech6,install GregTech6 support");
@@ -77,9 +84,9 @@ public class RecipeProcessor {
         }
         if (Loader.isModLoaded("miscutils")) {
             NotEnoughEnergistics.logger.info("Found GT++, install GT++ support");
-            recipeProcessors.add(new GTPPRecipeProcessor());
+            recipeProcessors.add(new GTPPRecipeProcessor(isNH));
         }
-        if (Loader.isModLoaded("GoodGenerator")) {
+        if (!isNH && Loader.isModLoaded("GoodGenerator")) {
             NotEnoughEnergistics.logger.info("Found Good Generator, install Good Generator support");
             recipeProcessors.add(new GoodGeneratorRecipeProcessor());
         }
