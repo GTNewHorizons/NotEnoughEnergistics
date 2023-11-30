@@ -1,6 +1,8 @@
 package com.github.vfyjxf.nee.utils;
 
-import static com.github.vfyjxf.nee.config.NEEConfig.*;
+import static com.github.vfyjxf.nee.config.NEEConfig.transformBlacklist;
+import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityList;
+import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityModList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,6 +210,19 @@ public final class ItemUtils {
                 + meta
                 + nbtString
                 + "}";
+    }
+
+    public static NBTTagCompound writeItemStackToNBT(ItemStack itemStack, NBTTagCompound tag) {
+        itemStack.writeToNBT(tag);
+        tag.setInteger("Count", itemStack.stackSize);
+        return tag;
+    }
+
+    public static ItemStack loadItemStackFromNBT(NBTTagCompound tag) {
+        ItemStack itemStack = ItemStack.loadItemStackFromNBT(tag);
+        if (itemStack == null) return null;
+        itemStack.stackSize = tag.getInteger("Count");
+        return itemStack;
     }
 
     public static boolean hasRecipeProcessor(String processorId) {
