@@ -3,7 +3,11 @@ package com.github.vfyjxf.nee.nei;
 import static com.github.vfyjxf.nee.processor.RecipeProcessor.NULL_IDENTIFIER;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;

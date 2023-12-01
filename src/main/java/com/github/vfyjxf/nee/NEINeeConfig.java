@@ -1,6 +1,10 @@
 package com.github.vfyjxf.nee;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;

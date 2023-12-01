@@ -1,6 +1,8 @@
 package com.github.vfyjxf.nee.utils;
 
-import static com.github.vfyjxf.nee.config.NEEConfig.*;
+import static com.github.vfyjxf.nee.config.NEEConfig.transformBlacklist;
+import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityList;
+import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityModList;
 
 import java.util.ArrayList;
 import java.util.List;
