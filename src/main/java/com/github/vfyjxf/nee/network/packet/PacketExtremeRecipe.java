@@ -11,6 +11,8 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import com.github.vfyjxf.nee.utils.ItemUtils;
+
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -58,7 +60,7 @@ public class PacketExtremeRecipe implements IMessage {
                 NBTTagCompound currentStack;
                 for (int i = 0; i < recipeInputs.length; i++) {
                     currentStack = (NBTTagCompound) message.input.getTag("#" + i);
-                    recipeInputs[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+                    recipeInputs[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
                 }
                 int inputIndex = 0;
                 for (int i = 81; i < 162; i++) {

@@ -7,6 +7,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import com.github.vfyjxf.nee.utils.ItemUtils;
+
 import appeng.container.slot.SlotFakeCraftingMatrix;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -50,7 +52,7 @@ public class PacketArcaneRecipe implements IMessage {
                 NBTTagCompound currentStack;
                 for (int i = 0; i < recipeInput.length; i++) {
                     currentStack = (NBTTagCompound) message.input.getTag("#" + i);
-                    recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+                    recipeInput[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
                 }
 
                 Field craftingSlots = ReflectionHelper.findField(ContainerKnowledgeInscriber.class, "craftingSlots");

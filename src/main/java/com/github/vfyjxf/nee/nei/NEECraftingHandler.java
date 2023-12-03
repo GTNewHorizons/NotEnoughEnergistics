@@ -167,7 +167,9 @@ public class NEECraftingHandler implements IOverlayHandler {
                             currentStack.stackSize = 1;
                         }
 
-                        recipeInputs.setTag("#" + inputIndex, currentStack.writeToNBT(new NBTTagCompound()));
+                        recipeInputs.setTag(
+                                "#" + inputIndex,
+                                ItemUtils.writeItemStackToNBT(currentStack, new NBTTagCompound()));
                         NEECraftingHandler.ingredients.put(INPUT_KEY + inputIndex, positionedStack);
                         inputIndex++;
                     }
@@ -185,7 +187,9 @@ public class NEECraftingHandler implements IOverlayHandler {
                             outputStack.stackSize = 1;
                         }
 
-                        recipeOutputs.setTag(OUTPUT_KEY + outputIndex, outputStack.writeToNBT(new NBTTagCompound()));
+                        recipeOutputs.setTag(
+                                OUTPUT_KEY + outputIndex,
+                                ItemUtils.writeItemStackToNBT(outputStack, new NBTTagCompound()));
                         outputIndex++;
                     }
                     break;
@@ -224,7 +228,7 @@ public class NEECraftingHandler implements IOverlayHandler {
                     stack.setItemDamage(0);
                 }
 
-                recipeInputs.setTag("#" + slotIndex, stack.writeToNBT(new NBTTagCompound()));
+                recipeInputs.setTag("#" + slotIndex, ItemUtils.writeItemStackToNBT(stack, new NBTTagCompound()));
                 NEECraftingHandler.ingredients.put(INPUT_KEY + slotIndex, positionedStack);
             }
         }
@@ -253,7 +257,7 @@ public class NEECraftingHandler implements IOverlayHandler {
                         stack = currentStack.copy();
                     }
                 }
-                recipeInputs.setTag("#" + slotIndex, stack.writeToNBT(new NBTTagCompound()));
+                recipeInputs.setTag("#" + slotIndex, ItemUtils.writeItemStackToNBT(stack, new NBTTagCompound()));
             }
         }
         return new PacketArcaneRecipe(recipeInputs);
@@ -286,7 +290,7 @@ public class NEECraftingHandler implements IOverlayHandler {
                     currentStack = stack.copy();
                 }
             }
-            recipeInputs.setTag("#" + slotIndex, currentStack.writeToNBT(new NBTTagCompound()));
+            recipeInputs.setTag("#" + slotIndex, ItemUtils.writeItemStackToNBT(currentStack, new NBTTagCompound()));
         }
         return new PacketExtremeRecipe(recipeInputs);
     }

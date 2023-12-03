@@ -212,6 +212,19 @@ public final class ItemUtils {
                 + "}";
     }
 
+    public static NBTTagCompound writeItemStackToNBT(ItemStack itemStack, NBTTagCompound tag) {
+        itemStack.writeToNBT(tag);
+        tag.setInteger("Count", itemStack.stackSize);
+        return tag;
+    }
+
+    public static ItemStack loadItemStackFromNBT(NBTTagCompound tag) {
+        ItemStack itemStack = ItemStack.loadItemStackFromNBT(tag);
+        if (itemStack == null) return null;
+        itemStack.stackSize = tag.getInteger("Count");
+        return itemStack;
+    }
+
     public static boolean hasRecipeProcessor(String processorId) {
         for (IRecipeProcessor processor : RecipeProcessor.recipeProcessors) {
             if (processor.getRecipeProcessorId().equals(processorId)) {

@@ -10,6 +10,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
@@ -103,7 +104,7 @@ public class PacketNEIPatternRecipe implements IMessage {
 
         for (int i = 0; i < recipeInput.length; i++) {
             currentStack = (NBTTagCompound) message.input.getTag("#" + i);
-            recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+            recipeInput[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
         }
 
         final IContainerCraftingPacket cct = (IContainerCraftingPacket) container;
@@ -150,12 +151,12 @@ public class PacketNEIPatternRecipe implements IMessage {
 
             for (int i = 0; i < recipeInput.length; i++) {
                 NBTTagCompound currentStack = (NBTTagCompound) message.input.getTag("#" + i);
-                recipeInput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+                recipeInput[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
             }
 
             for (int i = 0; i < recipeOutput.length; i++) {
                 NBTTagCompound currentStack = (NBTTagCompound) message.output.getTag(OUTPUT_KEY + i);
-                recipeOutput[i] = currentStack == null ? null : ItemStack.loadItemStackFromNBT(currentStack);
+                recipeOutput[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
             }
             if (inv != null && message.input != null && security != null) {
                 for (int i = 0; i < craftMatrix.getSizeInventory(); i++) {
