@@ -1,7 +1,17 @@
 package com.github.vfyjxf.nee.network;
 
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
-import com.github.vfyjxf.nee.network.packet.*;
+import com.github.vfyjxf.nee.network.packet.PacketArcaneRecipe;
+import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
+import com.github.vfyjxf.nee.network.packet.PacketExtremeRecipe;
+import com.github.vfyjxf.nee.network.packet.PacketNEIPatternRecipe;
+import com.github.vfyjxf.nee.network.packet.PacketOpenCraftAmount;
+import com.github.vfyjxf.nee.network.packet.PacketOpenGui;
+import com.github.vfyjxf.nee.network.packet.PacketSetRecipe;
+import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
+import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
+import com.github.vfyjxf.nee.network.packet.PacketValueConfigClient;
+import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
 
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
