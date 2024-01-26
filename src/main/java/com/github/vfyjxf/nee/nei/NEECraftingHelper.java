@@ -29,6 +29,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.input.Keyboard;
 
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
+import com.github.vfyjxf.nee.client.NEEContainerDrawHandler;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketOpenCraftAmount;
@@ -274,26 +275,33 @@ public class NEECraftingHelper implements IOverlayHandler {
                     boolean isPatternTerm = isPatternTerm(guiRecipe.firstGui);
                     boolean isCraftingTerm = isGuiCraftingTerm(guiRecipe.firstGui);
                     if (isCraftingTerm || isPatternTerm) {
-                        int recipesPerPage = 2;
                         IRecipeHandler handler = (IRecipeHandler) guiRecipe.currenthandlers.get(guiRecipe.recipetype);
+                        int recipeIndex = -1;
                         if (isGtnhNei) {
                             try {
-                                recipesPerPage = (int) ReflectionHelper
-                                        .findMethod(GuiRecipe.class, guiRecipe, new String[] { "getRecipesPerPage" })
+                                final List<Integer> indices = (List) NEEContainerDrawHandler.instance.getRecipeIndicesMethod
                                         .invoke(guiRecipe);
+                                final int refIndex = event.button.id - OVERLAY_BUTTON_ID_START;
+
+                                if (refIndex >= 0 && refIndex < indices.size()) {
+                                    recipeIndex = indices.get(refIndex);
+                                }
                             } catch (IllegalAccessException | InvocationTargetException e) {
                                 e.printStackTrace();
                             }
+                        } else {
+                            int recipesPerPage = 2;
+                            recipeIndex = guiRecipe.page * recipesPerPage + event.button.id - OVERLAY_BUTTON_ID_START;
                         }
-                        if (recipesPerPage >= 0 && handler != null) {
-                            int recipe = guiRecipe.page * recipesPerPage + event.button.id - OVERLAY_BUTTON_ID_START;
+
+                        if (handler != null && recipeIndex >= 0 && recipeIndex < handler.numRecipes()) {
                             final IOverlayHandler overlayHandler = handler
-                                    .getOverlayHandler(guiRecipe.firstGui, recipe);
+                                    .getOverlayHandler(guiRecipe.firstGui, recipeIndex);
                             Minecraft.getMinecraft().displayGuiScreen(guiRecipe.firstGui);
                             overlayHandler.overlayRecipe(
                                     guiRecipe.firstGui,
                                     (IRecipeHandler) guiRecipe.currenthandlers.get(guiRecipe.recipetype),
-                                    recipe,
+                                    recipeIndex,
                                     NEIClientUtils.shiftKey());
                             event.setCanceled(true);
                         }

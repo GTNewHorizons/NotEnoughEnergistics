@@ -52,7 +52,7 @@ public class NEEContainerDrawHandler {
     private int oldType;
 
     public Field overlayButtonsField;
-    public Method recipesPerPageMethod;
+    public Method getRecipeIndicesMethod;
     private boolean drawRequestTooltip;
     private boolean drawMissingTooltip;
     private boolean drawCraftableTooltip;
@@ -62,9 +62,9 @@ public class NEEContainerDrawHandler {
         isGtnhNei = true;
         try {
             this.overlayButtonsField = GuiRecipe.class.getDeclaredField("overlayButtons");
-            this.recipesPerPageMethod = GuiRecipe.class.getDeclaredMethod("getRecipesPerPage");
+            this.getRecipeIndicesMethod = GuiRecipe.class.getDeclaredMethod("getRecipeIndices");
             this.overlayButtonsField.setAccessible(true);
-            this.recipesPerPageMethod.setAccessible(true);
+            this.getRecipeIndicesMethod.setAccessible(true);
         } catch (NoSuchMethodException | NoSuchFieldException e) {
             isGtnhNei = false;
         }
@@ -201,9 +201,13 @@ public class NEEContainerDrawHandler {
                 int recipeIndex = -1;
                 if (isGtnhNei) {
                     try {
-                        int OVERLAY_BUTTON_ID_START = 4;
-                        recipeIndex = gui.page * (int) recipesPerPageMethod.invoke(gui) + overlayButton.id
-                                - OVERLAY_BUTTON_ID_START;
+                        final int OVERLAY_BUTTON_ID_START = 4;
+                        final List<Integer> indices = (List) getRecipeIndicesMethod.invoke(gui);
+                        final int refIndex = overlayButton.id - OVERLAY_BUTTON_ID_START;
+
+                        if (refIndex >= 0 && refIndex < indices.size()) {
+                            recipeIndex = indices.get(refIndex);
+                        }
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
