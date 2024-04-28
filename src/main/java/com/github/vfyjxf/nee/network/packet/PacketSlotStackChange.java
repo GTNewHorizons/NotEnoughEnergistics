@@ -6,6 +6,9 @@ import java.util.List;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+
+import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -38,7 +41,7 @@ public class PacketSlotStackChange implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.stack = ByteBufUtils.readItemStack(buf);
+        this.stack = ItemUtils.loadItemStackFromNBT(ByteBufUtils.readTag(buf));
         int craftingSlotsSize = buf.readInt();
         this.craftingSlots = new ArrayList<>(craftingSlotsSize);
         for (int i = 0; i < craftingSlotsSize; i++) {
@@ -49,7 +52,7 @@ public class PacketSlotStackChange implements IMessage {
 
     @Override
     public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeItemStack(buf, this.stack);
+        ByteBufUtils.writeTag(buf, ItemUtils.writeItemStackToNBT(this.stack, new NBTTagCompound()));
         buf.writeInt(this.craftingSlots.size());
         for (Integer craftingSlot : this.craftingSlots) {
             buf.writeInt(craftingSlot);

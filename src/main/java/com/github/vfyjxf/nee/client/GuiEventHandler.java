@@ -204,14 +204,13 @@ public class GuiEventHandler implements INEIGuiHandler {
                         if (button == 0) {
                             boolean areStackEqual = slotStack != null && slotStack.isItemEqual(copyStack)
                                     && ItemStack.areItemStackTagsEqual(slotStack, copyStack);
-                            copyStack.stackSize = areStackEqual ? Math.min(slotStack.stackSize + copySize, 127)
-                                    : Math.min(copySize, 127);
+                            copyStack.stackSize = areStackEqual ? slotStack.stackSize + copySize : copySize;
                             sendPacket = true;
                         } else if (button == 1) {
                             boolean areStackEqual = slotStack != null && slotStack.isItemEqual(copyStack)
                                     && ItemStack.areItemStackTagsEqual(slotStack, copyStack);
                             if (areStackEqual) {
-                                copyStack.stackSize = Math.min(slotStack.stackSize + 1, 127);
+                                copyStack.stackSize = slotStack.stackSize;
                             } else {
                                 copyStack.stackSize = slotStack == null ? 1 : copySize;
                             }
