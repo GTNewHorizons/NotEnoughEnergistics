@@ -1,5 +1,5 @@
 dependencies {
-    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-412-GTNH:dev")
+    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-414-GTNH-pre:dev")
     api("com.github.GTNewHorizons:NotEnoughItems:2.6.14-GTNH:dev")
     implementation("com.github.GTNewHorizons:Baubles:1.0.4:dev")
     implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.11.2:dev")
