@@ -183,6 +183,7 @@ public class PacketCraftingRequest implements IMessage {
                     Platform.openGUI(player, te, container.getOpenContext().getSide(), GuiBridge.GUI_CRAFTING_CONFIRM);
                     if (player.openContainer instanceof ContainerCraftConfirm) {
                         final ContainerCraftConfirm ccc = (ContainerCraftConfirm) player.openContainer;
+                        ccc.setItemToCraft(message.getRequireToCraftStack());
                         ccc.setJob(futureJob);
                         ccc.setAutoStart(message.isAutoStart());
                     }
@@ -232,6 +233,7 @@ public class PacketCraftingRequest implements IMessage {
                             NEEGuiHandler.openGui(player, NEEGuiHandler.CRAFTING_CONFIRM_ID, te, context.getSide());
                             if (player.openContainer instanceof ContainerCraftingConfirm) {
                                 final ContainerCraftingConfirm ccc = (ContainerCraftingConfirm) player.openContainer;
+                                ccc.setItemToCraft(result);
                                 ccc.setAutoStart(message.isAutoStart());
                                 ccc.setJob(futureJob);
                                 ccc.setTile(pair.getLeft());
@@ -244,6 +246,7 @@ public class PacketCraftingRequest implements IMessage {
 
                             if (player.openContainer instanceof WCTContainerCraftingConfirm) {
                                 final WCTContainerCraftingConfirm ccc = (WCTContainerCraftingConfirm) player.openContainer;
+                                ccc.setItemToCraft(result);
                                 ccc.setJob(futureJob);
                                 ccc.setAutoStart(message.isAutoStart());
                                 ccc.setTile(pair.getLeft());
@@ -289,6 +292,7 @@ public class PacketCraftingRequest implements IMessage {
 
                         if (player.openContainer instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) {
                             final net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm ccc = (net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) player.openContainer;
+                            ccc.setItemToCraft(message.getRequireToCraftStack());
                             ccc.setJob(futureJob);
                             ccc.setAutoStart(message.isAutoStart());
                         }
