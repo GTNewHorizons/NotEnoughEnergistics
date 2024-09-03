@@ -22,7 +22,7 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import gregtech.api.enums.ItemList;
 import gregtech.api.recipe.RecipeCategory;
-import gregtech.nei.GT_NEI_DefaultHandler.FixedPositionedStack;
+import gregtech.nei.GTNEIDefaultHandler.FixedPositionedStack;
 
 /**
  * @author vfyjxf
@@ -37,7 +37,7 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         Class<?> gtDH = null;
         Class<?> gtAL = null;
         try {
-            gtDH = Class.forName("gregtech.nei.GT_NEI_DefaultHandler");
+            gtDH = Class.forName("gregtech.nei.GTNEIDefaultHandler");
             gtAL = Class.forName("gregtech.nei.GT_NEI_AssLineHandler");
         } catch (ClassNotFoundException ignored) {}
         gtDefaultClz = gtDH;

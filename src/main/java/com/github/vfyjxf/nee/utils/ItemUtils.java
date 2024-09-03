@@ -33,7 +33,7 @@ public final class ItemUtils {
 
     static {
         try {
-            GT_MetaGenerated_ToolClass = Class.forName("gregtech.api.items.GT_MetaGenerated_Tool");
+            GT_MetaGenerated_ToolClass = Class.forName("gregtech.api.items.MetaGeneratedTool");
         } catch (ClassNotFoundException ignored) {}
     }
 

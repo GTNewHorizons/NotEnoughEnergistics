@@ -32,8 +32,8 @@ public class GTPPRecipeProcessor implements IRecipeProcessor {
         }
 
         try {
-            Class<?> gtRecipeMapClazz = Class.forName("gregtech.api.util.GT_Recipe$GT_Recipe_Map");
-            Class<?> gtppRecipeMapClazz = Class.forName("gregtech.api.util.GTPP_Recipe$GTPP_Recipe_Map_Internal");
+            Class<?> gtRecipeMapClazz = Class.forName("gregtech.api.util.GTRecipe$GT_Recipe_Map");
+            Class<?> gtppRecipeMapClazz = Class.forName("gregtech.api.util.GTPPRecipe$GTPP_Recipe_Map_Internal");
             Collection<?> sMappingsEx = (Collection<?>) gtppRecipeMapClazz.getDeclaredField("sMappingsEx").get(null);
             for (Object gtppMap : sMappingsEx) {
                 boolean mNEIAllowed = gtRecipeMapClazz.getDeclaredField("mNEIAllowed").getBoolean(gtppMap);
