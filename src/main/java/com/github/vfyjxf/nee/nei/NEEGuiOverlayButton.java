@@ -1,7 +1,5 @@
 package com.github.vfyjxf.nee.nei;
 
-import static codechicken.lib.gui.GuiDraw.drawRect;
-
 import java.util.Map;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -13,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.utils.Ingredient;
 
+import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.Image;
 import codechicken.nei.LayoutManager;
 import codechicken.nei.NEIClientConfig;
@@ -73,7 +72,7 @@ public class NEEGuiOverlayButton extends GuiOverlayButton {
                     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
                     GL11.glDisable(GL11.GL_LIGHTING);
                     GL11.glDisable(GL11.GL_DEPTH_TEST);
-                    drawRect(this.slot.relx, this.slot.rely, 16, 16, 0x660000AA);
+                    GuiDraw.drawRect(this.slot.relx, this.slot.rely, 16, 16, 0x660000AA);
                     GL11.glPopAttrib();
                 } else {
                     LayoutManager.drawIcon(this.slot.relx + 16 - icon.width, this.slot.rely + 16 - icon.height, icon);
