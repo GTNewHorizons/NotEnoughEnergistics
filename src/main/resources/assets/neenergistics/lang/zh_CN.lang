@@ -1,8 +1,3 @@
-neenergistics.gui.tooltip.helper.crafting.text1=点击以请求缺失物品
-neenergistics.gui.tooltip.helper.crafting.text2=点击以请求配方成品
-neenergistics.gui.tooltip.missing=缺失物品
-neenergistics.gui.tooltip.helper.pattern=自动合成已启用
-
 nei.options.keys.nee=NotEnoughEnergistics
 nei.options.keys.nee.count=修改物品数量
 nei.options.keys.nee.ingredient=选择材料
@@ -16,6 +11,3 @@ gui.neenergistics.button.name.disabled=关闭
 gui.neenergistics.button.name.whitelist=白名单
 gui.neenergistics.button.title.remove=删除
 gui.neenergistics.button.tooltip.remove=删除并取消当前配方
-
-tile.neenergistics.pattern_interface.name=样板接口
-

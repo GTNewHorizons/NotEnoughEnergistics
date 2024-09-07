@@ -1,7 +1,5 @@
-neenergistics.gui.tooltip.helper.crafting.text1=click to request missing items
-neenergistics.gui.tooltip.helper.crafting.text2=click to request the recipe result.
-neenergistics.gui.tooltip.missing=Missing Items
-neenergistics.gui.tooltip.helper.pattern=Autocrafting available
+neenergistics.gui.tooltip.crafting.preview=Request missing items
+neenergistics.gui.tooltip.crafting.nopreview=Request missing items (No Preview)
 
 nei.options.keys.nee=NotEnoughEnergistics
 nei.options.keys.nee.count=Change Item Count
@@ -17,4 +15,3 @@ gui.neenergistics.button.name.whitelist=Whitelist
 gui.neenergistics.button.title.remove=Remove
 gui.neenergistics.button.tooltip.remove=Remove and cancel the current recipe
 
-tile.neenergistics.pattern_interface.name=Pattern Interface

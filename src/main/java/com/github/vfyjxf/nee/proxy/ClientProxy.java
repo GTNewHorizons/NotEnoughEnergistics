@@ -5,9 +5,10 @@ import net.minecraftforge.common.MinecraftForge;
 
 import com.github.vfyjxf.nee.NEECommands;
 import com.github.vfyjxf.nee.client.GuiEventHandler;
-import com.github.vfyjxf.nee.client.NEEContainerDrawHandler;
-import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.nei.NEECraftingHelper;
+import com.github.vfyjxf.nee.nei.NEECraftingTerminalHandler;
+import com.github.vfyjxf.nee.nei.NEEExtremeAutoCrafterHandler;
+import com.github.vfyjxf.nee.nei.NEEKnowledgeInscriberHandler;
+import com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -20,11 +21,9 @@ public class ClientProxy extends CommonProxy {
         ClientCommandHandler.instance.registerCommand(new NEECommands());
         FMLCommonHandler.instance().bus().register(GuiEventHandler.instance);
         MinecraftForge.EVENT_BUS.register(GuiEventHandler.instance);
-        if (NEEConfig.noShift) {
-            MinecraftForge.EVENT_BUS.register(NEECraftingHelper.INSTANCE);
-        }
-        if (NEEConfig.drawHighlight) {
-            MinecraftForge.EVENT_BUS.register(NEEContainerDrawHandler.instance);
-        }
+        MinecraftForge.EVENT_BUS.register(NEECraftingTerminalHandler.instance);
+        MinecraftForge.EVENT_BUS.register(NEEPatternTerminalHandler.instance);
+        MinecraftForge.EVENT_BUS.register(NEEExtremeAutoCrafterHandler.instance);
+        MinecraftForge.EVENT_BUS.register(NEEKnowledgeInscriberHandler.instance);
     }
 }
