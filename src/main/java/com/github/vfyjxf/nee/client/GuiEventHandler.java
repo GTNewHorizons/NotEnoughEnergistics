@@ -33,8 +33,8 @@ import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
-import com.glodblock.github.client.gui.container.base.FCContainerEncodeTerminal;
 import com.glodblock.github.client.gui.base.FCGuiEncodeTerminal;
+import com.glodblock.github.client.gui.container.base.FCContainerEncodeTerminal;
 
 import appeng.api.events.GuiScrollEvent;
 import appeng.client.gui.AEBaseGui;
