@@ -2,22 +2,22 @@ package com.github.vfyjxf.nee.client;
 
 import static com.github.vfyjxf.nee.config.NEEConfig.draggedStackDefaultSize;
 import static com.github.vfyjxf.nee.config.NEEConfig.useStackSizeFromNEI;
-import static com.github.vfyjxf.nee.nei.NEECraftingHandler.INPUT_KEY;
-import static com.github.vfyjxf.nee.nei.NEECraftingHelper.tracker;
+import static com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 
 import org.lwjgl.input.Keyboard;
@@ -26,20 +26,20 @@ import org.lwjgl.input.Mouse;
 import com.github.vfyjxf.nee.client.gui.widgets.GuiImgButtonEnableCombination;
 import com.github.vfyjxf.nee.config.ItemCombination;
 import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.container.ContainerCraftingConfirm;
-import com.github.vfyjxf.nee.nei.NEECraftingHandler;
+import com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.container.base.FCContainerEncodeTerminal;
+import com.glodblock.github.client.gui.base.FCGuiEncodeTerminal;
 
 import appeng.api.events.GuiScrollEvent;
 import appeng.client.gui.AEBaseGui;
-import appeng.client.gui.implementations.GuiCraftConfirm;
 import appeng.client.gui.implementations.GuiInterface;
-import appeng.client.gui.implementations.GuiPatternTerm;
-import appeng.container.implementations.ContainerCraftConfirm;
+import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.slot.SlotFake;
 import codechicken.nei.NEIClientConfig;
@@ -47,103 +47,111 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.VisiblityData;
 import codechicken.nei.api.INEIGuiHandler;
 import codechicken.nei.api.TaggedInventoryArea;
+import codechicken.nei.recipe.RecipeInfo;
 import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class GuiEventHandler implements INEIGuiHandler {
 
-    public static GuiEventHandler instance = new GuiEventHandler();
+    public static final GuiEventHandler instance = new GuiEventHandler();
+    private final GuiImgButtonEnableCombination buttonCombination = new GuiImgButtonEnableCombination(
+            0,
+            0,
+            ItemCombination.ENABLED);
 
-    private GuiImgButtonEnableCombination buttonCombination;
-    private boolean hasDoubleBtn = true;
-    private boolean hasBeSubstituteBtn = true;
-
-    @SubscribeEvent
-    public void onGuiOpen(GuiOpenEvent event) {
-        GuiScreen old = Minecraft.getMinecraft().currentScreen;
-        GuiScreen next = event.gui;
-        if (old != null) {
-            if (GuiUtils.isGuiCraftConfirm(old) && isContainerCraftConfirm(((GuiContainer) old).inventorySlots)) {
-                if (tracker != null) {
-                    if (GuiUtils.isGuiCraftingTerm(next)) {
-                        if (tracker.hasNext()) {
-                            tracker.requestNextIngredient();
-                        } else {
-                            tracker = null;
-                        }
-                    } else {
-                        if (tracker != null) {
-                            tracker = null;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public void onCraftConfirmActionPerformed(GuiScreenEvent.ActionPerformedEvent.Post event) {
-        if (tracker != null) {
-            if (event.gui instanceof GuiCraftConfirm) {
-                if (getCancelButton((GuiCraftConfirm) event.gui) == event.button) {
-                    tracker = null;
-                }
-            }
-        }
-    }
-
-    private GuiButton getCancelButton(GuiCraftConfirm gui) {
-        return ObfuscationReflectionHelper.getPrivateValue(GuiCraftConfirm.class, gui, "cancel");
-    }
-
-    private boolean isContainerCraftConfirm(Container container) {
-        return (container instanceof ContainerCraftConfirm || GuiUtils.isContainerWirelessCraftingConfirm(container))
-                && !((container instanceof ContainerCraftingConfirm)
-                        || (GuiUtils.isWCTContainerCraftingConfirm(container)));
-    }
+    private List<GuiButton> buttonList;
 
     @SuppressWarnings("unchecked")
     @SubscribeEvent
     public void onInitGui(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (event.gui instanceof GuiPatternTerm) {
-            GuiPatternTerm gui = (GuiPatternTerm) event.gui;
-            try {
-                GuiPatternTerm.class.getDeclaredField("doubleBtn");
-            } catch (NoSuchFieldException e) {
-                hasDoubleBtn = false;
-            }
-            try {
-                GuiPatternTerm.class.getDeclaredField("beSubstitutionsEnabledBtn");
-            } catch (NoSuchFieldException e) {
-                hasBeSubstituteBtn = false;
+
+        if (isGuiPatternTerm(event.gui)) {
+            event.buttonList.add(buttonCombination);
+            this.buttonList = getButtonList((GuiContainer) event.gui, event.buttonList);
+            updateCombinationButtonPosition((GuiContainer) event.gui);
+        } else {
+            this.buttonList = null;
+        }
+    }
+
+    @SubscribeEvent
+    public void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
+
+        if (this.buttonList != null && isGuiPatternTerm(event.gui)) {
+            updateCombinationButtonPosition((GuiContainer) event.gui);
+        }
+    }
+
+    private boolean isGuiPatternTerm(GuiScreen guiScreen) {
+        if (guiScreen instanceof GuiContainer) {
+            final GuiContainer guiContainer = (GuiContainer) guiScreen;
+
+            if (Loader.isModLoaded(ModIDs.FC) && guiContainer instanceof FCGuiEncodeTerminal) {
+                return false;
             }
 
-            int x, y;
-            if (hasDoubleBtn && hasBeSubstituteBtn) {
-                x = gui.guiLeft + 84;
-                y = gui.guiTop + gui.ySize - 143;
-            } else if (hasDoubleBtn) {
-                x = gui.guiLeft + 84;
-                y = gui.guiTop + gui.ySize - 153;
-            } else {
-                x = gui.guiLeft + 74;
-                y = gui.guiTop + gui.ySize - 153;
-            }
-            buttonCombination = new GuiImgButtonEnableCombination(
-                    x,
-                    y,
-                    ItemCombination.valueOf(NEEConfig.itemCombinationMode));
-            event.buttonList.add(buttonCombination);
+            return RecipeInfo.getOverlayHandler(guiContainer, "crafting") instanceof NEEPatternTerminalHandler
+                    || RecipeInfo.getOverlayHandler(guiContainer, "smelting") instanceof NEEPatternTerminalHandler;
         }
+
+        return false;
+    }
+
+    private List<GuiButton> getButtonList(GuiContainer guiContainer, List<Object> items) {
+        final Rectangle buttonsArea = new Rectangle(
+                guiContainer.guiLeft + 70,
+                guiContainer.guiTop + guiContainer.ySize - 165,
+                38,
+                68);
+        return items.stream().filter(btn -> btn instanceof GuiButton && btn != buttonCombination)
+                .map(GuiButton.class::cast).filter(btn -> buttonsArea.contains(btn.xPosition, btn.yPosition))
+                .collect(Collectors.toList());
+    }
+
+    private void updateCombinationButtonPosition(GuiContainer guiContainer) {
+        final Point leftPoint = new Point(Integer.MAX_VALUE, 0);
+        final Point rightPoint = new Point(0, 0);
+
+        for (GuiButton button : buttonList) {
+            if (button.visible) {
+                leftPoint.x = Math.min(leftPoint.x, button.xPosition);
+                rightPoint.x = Math.max(rightPoint.x, button.xPosition);
+            }
+        }
+
+        for (GuiButton button : buttonList) {
+            if (button.visible) {
+                if (leftPoint.x == button.xPosition) {
+                    leftPoint.y = Math.max(leftPoint.y, button.yPosition + button.height);
+                }
+
+                if (rightPoint.x == button.xPosition) {
+                    rightPoint.y = Math.max(rightPoint.y, button.yPosition + button.height);
+                }
+            }
+        }
+
+        if (rightPoint.y < leftPoint.y) {
+            buttonCombination.xPosition = rightPoint.x;
+            buttonCombination.yPosition = leftPoint.y - buttonCombination.height;
+        } else if (rightPoint.y == leftPoint.y) {
+            buttonCombination.xPosition = leftPoint.x;
+            buttonCombination.yPosition = leftPoint.y + 2;
+        } else {
+            buttonCombination.xPosition = leftPoint.x;
+            buttonCombination.yPosition = rightPoint.y - buttonCombination.height;
+        }
+
+        buttonCombination.setValue(ItemCombination.valueOf(NEEConfig.itemCombinationMode));
+        buttonCombination.enabled = buttonCombination.visible = guiContainer.inventorySlots instanceof AEBaseContainer
+                && !isCraftingMode((AEBaseContainer) guiContainer.inventorySlots);
     }
 
     @SubscribeEvent
     public void onActionPerformed(GuiScreenEvent.ActionPerformedEvent.Pre event) {
         if (event.button == this.buttonCombination) {
-            GuiImgButtonEnableCombination button = (GuiImgButtonEnableCombination) event.button;
-            int ordinal = Mouse.getEventButton() != 2 ? button.getCurrentValue().ordinal() + 1
-                    : button.getCurrentValue().ordinal() - 1;
+            int ordinal = Mouse.getEventButton() != 2 ? this.buttonCombination.getCurrentValue().ordinal() + 1
+                    : this.buttonCombination.getCurrentValue().ordinal() - 1;
 
             if (ordinal >= ItemCombination.values().length) {
                 ordinal = 0;
@@ -151,23 +159,21 @@ public class GuiEventHandler implements INEIGuiHandler {
             if (ordinal < 0) {
                 ordinal = ItemCombination.values().length - 1;
             }
-            button.setValue(ItemCombination.values()[ordinal]);
+
+            this.buttonCombination.setValue(ItemCombination.values()[ordinal]);
             NEEConfig.setItemCombinationMode(ItemCombination.values()[ordinal].name());
         }
     }
 
-    @SubscribeEvent
-    public void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
-        if (event.gui instanceof GuiPatternTerm) {
-            ContainerPatternTerm container = (ContainerPatternTerm) ((GuiPatternTerm) event.gui).inventorySlots;
-            if (container.isCraftingMode()) {
-                buttonCombination.enabled = false;
-                buttonCombination.visible = false;
-            } else {
-                buttonCombination.enabled = true;
-                buttonCombination.visible = true;
-            }
+    private boolean isCraftingMode(AEBaseContainer container) {
+
+        if (container instanceof ContainerPatternTerm) {
+            return ((ContainerPatternTerm) container).isCraftingMode();
+        } else if (Loader.isModLoaded(ModIDs.FC) && container instanceof FCContainerEncodeTerminal) {
+            return ((FCContainerEncodeTerminal) container).isCraftingMode();
         }
+
+        return false;
     }
 
     @Override
@@ -192,49 +198,47 @@ public class GuiEventHandler implements INEIGuiHandler {
             return false;
         }
 
-        if (NEEConfig.enableNEIDragDrop) {
-            if (gui instanceof AEBaseGui) {
-                if (draggedStack != null) {
-                    Slot currentSlot = gui.getSlotAtPosition(mouseX, mouseY);
-                    if (currentSlot instanceof SlotFake) {
-                        ItemStack slotStack = currentSlot.getStack();
-                        ItemStack copyStack = draggedStack.copy();
-                        boolean sendPacket = false;
-                        int copySize = useStackSizeFromNEI ? copyStack.stackSize : draggedStackDefaultSize;
-                        if (button == 0) {
-                            boolean areStackEqual = slotStack != null && slotStack.isItemEqual(copyStack)
-                                    && ItemStack.areItemStackTagsEqual(slotStack, copyStack);
-                            copyStack.stackSize = areStackEqual ? slotStack.stackSize + copySize : copySize;
-                            sendPacket = true;
-                        } else if (button == 1) {
-                            boolean areStackEqual = slotStack != null && slotStack.isItemEqual(copyStack)
-                                    && ItemStack.areItemStackTagsEqual(slotStack, copyStack);
-                            if (areStackEqual) {
-                                copyStack.stackSize = slotStack.stackSize;
-                            } else {
-                                copyStack.stackSize = slotStack == null ? 1 : copySize;
-                            }
-                            sendPacket = true;
-                        }
+        if (NEEConfig.enableNEIDragDrop && draggedStack != null && gui instanceof AEBaseGui) {
+            Slot currentSlot = gui.getSlotAtPosition(mouseX, mouseY);
 
-                        if (sendPacket) {
-                            NEENetworkHandler.getInstance().sendToServer(
-                                    new PacketSlotStackChange(
-                                            copyStack,
-                                            Collections.singletonList(currentSlot.slotNumber)));
-                            if (!NEEConfig.keepGhostitems) {
-                                draggedStack.stackSize = 0;
-                            }
-                            return true;
-                        }
+            if (currentSlot instanceof SlotFake) {
+                ItemStack slotStack = currentSlot.getStack();
+                ItemStack copyStack = draggedStack.copy();
+                boolean sendPacket = false;
+                int copySize = useStackSizeFromNEI ? copyStack.stackSize : draggedStackDefaultSize;
+                if (button == 0) {
+                    copyStack.stackSize = areStackEqual(slotStack, copyStack) ? slotStack.stackSize + copySize
+                            : copySize;
+                    sendPacket = true;
+                } else if (button == 1) {
+                    if (areStackEqual(slotStack, copyStack)) {
+                        copyStack.stackSize = slotStack.stackSize;
+                    } else {
+                        copyStack.stackSize = slotStack == null ? 1 : copySize;
                     }
-                    if (button == 2) {
+                    sendPacket = true;
+                }
+
+                if (sendPacket) {
+                    NEENetworkHandler.getInstance().sendToServer(
+                            new PacketSlotStackChange(copyStack, Collections.singletonList(currentSlot.slotNumber)));
+                    if (!NEEConfig.keepGhostitems) {
                         draggedStack.stackSize = 0;
                     }
+                    return true;
                 }
             }
+
+            if (button == 2) {
+                draggedStack.stackSize = 0;
+            }
         }
+
         return false;
+    }
+
+    private boolean areStackEqual(ItemStack stackA, ItemStack stackB) {
+        return stackA != null && stackA.isItemEqual(stackB) && ItemStack.areItemStackTagsEqual(stackA, stackB);
     }
 
     @Override
@@ -252,7 +256,7 @@ public class GuiEventHandler implements INEIGuiHandler {
         boolean isPatternTerm = isPatternTerm(mc.currentScreen);
         boolean isInterface = event.guiScreen instanceof GuiInterface;
         if (isPatternTerm || isInterface) {
-            Slot currentSlot = (event.guiScreen).getSlotAtPosition(event.mouseX, event.mouseY);
+            Slot currentSlot = event.guiScreen.getSlotAtPosition(event.mouseX, event.mouseY);
             if (currentSlot instanceof SlotFake && currentSlot.getHasStack()) {
                 // try to change current itemstack to next ingredient;
                 if (Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("nee.ingredient"))
@@ -272,12 +276,13 @@ public class GuiEventHandler implements INEIGuiHandler {
     private static void handleRecipeIngredientChange(GuiContainer gui, Slot currentSlot, int dWheel) {
         List<Integer> craftingSlots = new ArrayList<>();
         int currentSlotIndex = currentSlot.getSlotIndex();
-        PositionedStack currentIngredients = NEECraftingHandler.ingredients.get(INPUT_KEY + currentSlotIndex);
+        PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients.get(INPUT_KEY + currentSlotIndex);
         if (currentIngredients != null && currentIngredients.items.length > 1) {
             int currentStackIndex = ItemUtils.getIngredientIndex(currentSlot.getStack(), currentIngredients);
             if (currentStackIndex >= 0) {
                 for (int j = 0; j < Math.abs(dWheel); j++) {
                     currentStackIndex += (dWheel < 0) ? -1 : 1;
+
                     if (currentStackIndex >= currentIngredients.items.length) {
                         currentStackIndex = 0;
                     } else if (currentStackIndex < 0) {
@@ -290,7 +295,7 @@ public class GuiEventHandler implements INEIGuiHandler {
                     if (NEEConfig.allowSynchronousSwitchIngredient) {
                         for (Slot slot : getCraftingSlots(gui)) {
 
-                            PositionedStack slotIngredients = NEECraftingHandler.ingredients
+                            PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
                                     .get(INPUT_KEY + slot.getSlotIndex());
 
                             boolean areItemStackEqual = currentSlot.getHasStack() && slot.getHasStack()

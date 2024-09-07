@@ -12,11 +12,15 @@ import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTermi
 import org.lwjgl.input.Keyboard;
 
 import com.github.vfyjxf.nee.client.GuiEventHandler;
-import com.github.vfyjxf.nee.nei.NEECraftingHandler;
-import com.github.vfyjxf.nee.nei.NEECraftingHelper;
+import com.github.vfyjxf.nee.nei.NEECraftingTerminalHandler;
+import com.github.vfyjxf.nee.nei.NEEExtremeAutoCrafterHandler;
+import com.github.vfyjxf.nee.nei.NEEKnowledgeInscriberHandler;
+import com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler;
+import com.github.vfyjxf.nee.nei.NEETerminalBookmarkContainerHandler;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.GuiFluidCraftingWireless;
 import com.glodblock.github.client.gui.GuiFluidPatternExWireless;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
@@ -58,22 +62,24 @@ public class NEINeeConfig implements IConfigureNEI {
 
         for (String ident : identifiers) {
             API.registerGuiOverlay(GuiPatternTerm.class, ident);
-            API.registerGuiOverlayHandler(GuiPatternTerm.class, NEECraftingHandler.INSTANCE, ident);
+            API.registerGuiOverlayHandler(GuiPatternTerm.class, NEEPatternTerminalHandler.instance, ident);
         }
 
         installCraftingTermSupport();
 
         installWirelessCraftingTermSupport();
 
-        installFluidPatternTerminalSupport(new HashSet<String>(identifiers));
+        installFluidPatternTerminalSupport(new HashSet<>(identifiers));
 
         installThaumicEnergisticsSupport();
 
         installAvaritiaddonsSupport();
 
-        installPatternTerminalExSupport(new HashSet<String>(identifiers));
+        installPatternTerminalExSupport(new HashSet<>(identifiers));
 
-        installFluidPatternTerminalExSupport(new HashSet<String>(identifiers));
+        installFluidPatternTerminalExSupport(new HashSet<>(identifiers));
+
+        installlBookmarkContainerHandler();
     }
 
     private void installFluidPatternTerminalExSupport(Set<String> identifiers) {
@@ -83,8 +89,15 @@ public class NEINeeConfig implements IConfigureNEI {
             for (String ident : identifiers) {
                 API.registerGuiOverlay(GuiFluidPatternTerminalEx.class, ident);
                 API.registerGuiOverlay(GuiFluidPatternExWireless.class, ident);
-                API.registerGuiOverlayHandler(GuiFluidPatternTerminalEx.class, NEECraftingHandler.INSTANCE, ident);
-                API.registerGuiOverlayHandler(GuiFluidPatternExWireless.class, NEECraftingHandler.INSTANCE, ident);
+
+                API.registerGuiOverlayHandler(
+                        GuiFluidPatternTerminalEx.class,
+                        NEEPatternTerminalHandler.instance,
+                        ident);
+                API.registerGuiOverlayHandler(
+                        GuiFluidPatternExWireless.class,
+                        NEEPatternTerminalHandler.instance,
+                        ident);
             }
         }
     }
@@ -94,9 +107,41 @@ public class NEINeeConfig implements IConfigureNEI {
             for (String ident : identifiers) {
                 API.registerGuiOverlay(GuiFluidPatternTerminal.class, ident);
                 API.registerGuiOverlay(GuiFluidPatternWireless.class, ident);
-                API.registerGuiOverlayHandler(GuiFluidPatternTerminal.class, NEECraftingHandler.INSTANCE, ident);
-                API.registerGuiOverlayHandler(GuiFluidPatternWireless.class, NEECraftingHandler.INSTANCE, ident);
+
+                API.registerGuiOverlayHandler(GuiFluidPatternTerminal.class, NEEPatternTerminalHandler.instance, ident);
+                API.registerGuiOverlayHandler(GuiFluidPatternWireless.class, NEEPatternTerminalHandler.instance, ident);
             }
+        }
+    }
+
+    private void installlBookmarkContainerHandler() {
+        API.registerBookmarkContainerHandler(GuiPatternTerm.class, NEETerminalBookmarkContainerHandler.instance);
+        API.registerBookmarkContainerHandler(GuiPatternTermEx.class, NEETerminalBookmarkContainerHandler.instance);
+        API.registerBookmarkContainerHandler(GuiCraftingTerm.class, NEETerminalBookmarkContainerHandler.instance);
+
+        if (Loader.isModLoaded(ModIDs.FC)) {
+            API.registerBookmarkContainerHandler(
+                    GuiFluidPatternWireless.class,
+                    NEETerminalBookmarkContainerHandler.instance);
+            API.registerBookmarkContainerHandler(
+                    GuiFluidPatternTerminal.class,
+                    NEETerminalBookmarkContainerHandler.instance);
+            API.registerBookmarkContainerHandler(
+                    GuiFluidPatternTerminalEx.class,
+                    NEETerminalBookmarkContainerHandler.instance);
+            API.registerBookmarkContainerHandler(
+                    GuiFluidPatternExWireless.class,
+                    NEETerminalBookmarkContainerHandler.instance);
+
+            API.registerBookmarkContainerHandler(
+                    GuiFluidCraftingWireless.class,
+                    NEETerminalBookmarkContainerHandler.instance);
+        }
+
+        if (Loader.isModLoaded(ModIDs.WCT)) {
+            API.registerBookmarkContainerHandler(
+                    GuiWirelessCraftingTerminal.class,
+                    NEETerminalBookmarkContainerHandler.instance);
         }
     }
 
@@ -150,14 +195,31 @@ public class NEINeeConfig implements IConfigureNEI {
     private void installCraftingTermSupport() {
         API.registerGuiOverlay(GuiCraftingTerm.class, "crafting");
         API.registerGuiOverlay(GuiCraftingTerm.class, "crafting2x2");
-        API.registerGuiOverlayHandler(GuiCraftingTerm.class, NEECraftingHelper.INSTANCE, "crafting");
-        API.registerGuiOverlayHandler(GuiCraftingTerm.class, NEECraftingHelper.INSTANCE, "crafting2x2");
+        API.registerGuiOverlayHandler(GuiCraftingTerm.class, NEECraftingTerminalHandler.instance, "crafting");
+        API.registerGuiOverlayHandler(GuiCraftingTerm.class, NEECraftingTerminalHandler.instance, "crafting2x2");
+
+        if (Loader.isModLoaded(ModIDs.FC)) {
+            API.registerGuiOverlayHandler(
+                    GuiFluidCraftingWireless.class,
+                    NEECraftingTerminalHandler.instance,
+                    "crafting");
+            API.registerGuiOverlayHandler(
+                    GuiFluidCraftingWireless.class,
+                    NEECraftingTerminalHandler.instance,
+                    "crafting2x2");
+        }
     }
 
     private void installWirelessCraftingTermSupport() {
         if (Loader.isModLoaded(ModIDs.WCT)) {
-            API.registerGuiOverlayHandler(GuiWirelessCraftingTerminal.class, NEECraftingHelper.INSTANCE, "crafting");
-            API.registerGuiOverlayHandler(GuiWirelessCraftingTerminal.class, NEECraftingHelper.INSTANCE, "crafting2x2");
+            API.registerGuiOverlayHandler(
+                    GuiWirelessCraftingTerminal.class,
+                    NEECraftingTerminalHandler.instance,
+                    "crafting");
+            API.registerGuiOverlayHandler(
+                    GuiWirelessCraftingTerminal.class,
+                    NEECraftingTerminalHandler.instance,
+                    "crafting2x2");
         }
     }
 
@@ -167,14 +229,18 @@ public class NEINeeConfig implements IConfigureNEI {
         } catch (ClassNotFoundException e) {
             return;
         }
+
         if (Loader.isModLoaded("thaumcraftneiplugin")) {
             NotEnoughEnergistics.logger.info("Install ThaumicEnergistics support");
             API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapedrecipes");
             API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapelessrecipes");
-            API.registerGuiOverlayHandler(GuiKnowledgeInscriber.class, new NEECraftingHandler(), "arcaneshapedrecipes");
             API.registerGuiOverlayHandler(
                     GuiKnowledgeInscriber.class,
-                    new NEECraftingHandler(),
+                    NEEKnowledgeInscriberHandler.instance,
+                    "arcaneshapedrecipes");
+            API.registerGuiOverlayHandler(
+                    GuiKnowledgeInscriber.class,
+                    NEEKnowledgeInscriberHandler.instance,
                     "arcaneshapelessrecipes");
         }
     }
@@ -185,7 +251,7 @@ public class NEINeeConfig implements IConfigureNEI {
         // PatternTermEx Support
         for (String ident : identifiers) {
             API.registerGuiOverlay(GuiPatternTermEx.class, ident);
-            API.registerGuiOverlayHandler(GuiPatternTermEx.class, new NEECraftingHandler(), ident);
+            API.registerGuiOverlayHandler(GuiPatternTermEx.class, NEEPatternTerminalHandler.instance, ident);
         }
     }
 
@@ -195,10 +261,14 @@ public class NEINeeConfig implements IConfigureNEI {
         } catch (ClassNotFoundException e) {
             return;
         }
+
         if (Loader.isModLoaded("avaritiaddons")) {
             NotEnoughEnergistics.logger.info("Install Avaritiaddons support");
             API.registerGuiOverlay(GuiExtremeAutoCrafter.class, "extreme");
-            API.registerGuiOverlayHandler(GuiExtremeAutoCrafter.class, new NEECraftingHandler(), "extreme");
+            API.registerGuiOverlayHandler(
+                    GuiExtremeAutoCrafter.class,
+                    NEEExtremeAutoCrafterHandler.instance,
+                    "extreme");
         }
     }
 }

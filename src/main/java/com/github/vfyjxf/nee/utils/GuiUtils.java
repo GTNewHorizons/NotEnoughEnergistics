@@ -6,14 +6,11 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
-import com.github.vfyjxf.nee.container.WCTContainerCraftingConfirm;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
 
-import appeng.client.gui.implementations.GuiCraftConfirm;
-import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.client.gui.implementations.GuiPatternTerm;
 import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.container.implementations.ContainerPatternTerm;
@@ -32,30 +29,6 @@ public class GuiUtils {
     public static boolean isGuiWirelessCrafting(GuiScreen gui) {
         if (!isWirelessCraftingTerminalModLoaded) return false;
         return gui instanceof net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
-    }
-
-    public static boolean isWirelessCraftingTermContainer(Container container) {
-        if (!isWirelessCraftingTerminalModLoaded) return false;
-        return container instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
-    }
-
-    public static boolean isContainerWirelessCraftingConfirm(Container container) {
-        if (!isWirelessCraftingTerminalModLoaded) return false;
-        return container instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm;
-    }
-
-    public static boolean isWirelessGuiCraftConfirm(GuiScreen gui) {
-        if (!isWirelessCraftingTerminalModLoaded) return false;
-        return gui instanceof net.p455w0rd.wirelesscraftingterminal.client.gui.GuiCraftConfirm;
-    }
-
-    public static boolean isWCTContainerCraftingConfirm(Container container) {
-        return container instanceof WCTContainerCraftingConfirm;
-    }
-
-    public static boolean isWirelessTerminalGuiObject(Object guiObj) {
-        if (!isWirelessCraftingTerminalModLoaded) return false;
-        return guiObj instanceof net.p455w0rd.wirelesscraftingterminal.helpers.WirelessTerminalGuiObject;
     }
 
     public static boolean isCraftingSlot(Slot slot) {
@@ -81,17 +54,8 @@ public class GuiUtils {
         }
     }
 
-    public static boolean isGuiCraftingTerm(GuiScreen guiScreen) {
-        return guiScreen instanceof GuiCraftingTerm || isGuiWirelessCrafting(guiScreen);
-    }
-
     public static boolean isFluidCraftPatternTermEx(GuiScreen guiScreen) {
         return isFluidCraftModloaded && guiScreen instanceof GuiFluidPatternTerminalEx;
-    }
-
-    public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen) {
-        return isFluidCraftModloaded
-                && (guiScreen instanceof GuiFluidPatternTerminal || guiScreen instanceof GuiFluidPatternTerminalEx);
     }
 
     public static boolean isPatternTerm(GuiScreen guiScreen) {
@@ -104,7 +68,4 @@ public class GuiUtils {
         }
     }
 
-    public static boolean isGuiCraftConfirm(GuiScreen gui) {
-        return gui instanceof GuiCraftConfirm || isWirelessGuiCraftConfirm(gui);
-    }
 }
