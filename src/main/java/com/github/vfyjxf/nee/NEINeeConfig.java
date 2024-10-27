@@ -17,6 +17,7 @@ import com.github.vfyjxf.nee.nei.NEECraftingHelper;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.GuiFluidCraftingWireless;
 import com.glodblock.github.client.gui.GuiFluidPatternExWireless;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
 import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
@@ -158,6 +159,10 @@ public class NEINeeConfig implements IConfigureNEI {
         if (Loader.isModLoaded(ModIDs.WCT)) {
             API.registerGuiOverlayHandler(GuiWirelessCraftingTerminal.class, NEECraftingHelper.INSTANCE, "crafting");
             API.registerGuiOverlayHandler(GuiWirelessCraftingTerminal.class, NEECraftingHelper.INSTANCE, "crafting2x2");
+        }
+        if (Loader.isModLoaded(ModIDs.FC)) {
+            API.registerGuiOverlayHandler(GuiFluidCraftingWireless.class, NEECraftingHelper.INSTANCE, "crafting");
+            API.registerGuiOverlayHandler(GuiFluidCraftingWireless.class, NEECraftingHelper.INSTANCE, "crafting2x2");
         }
     }
 

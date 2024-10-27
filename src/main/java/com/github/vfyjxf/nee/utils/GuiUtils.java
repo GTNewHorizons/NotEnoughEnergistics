@@ -34,9 +34,19 @@ public class GuiUtils {
         return gui instanceof net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
     }
 
+    public static boolean isGuiFluidCraftingWireless(GuiScreen gui) {
+        if (!isFluidCraftModloaded) return false;
+        return gui instanceof com.glodblock.github.client.gui.GuiFluidCraftingWireless;
+    }
+
     public static boolean isWirelessCraftingTermContainer(Container container) {
         if (!isWirelessCraftingTerminalModLoaded) return false;
         return container instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
+    }
+
+    public static boolean isFCContainerCraftingWireless(Container container) {
+        if (!isFluidCraftModloaded) return false;
+        return container instanceof com.glodblock.github.client.gui.container.ContainerCraftingWireless;
     }
 
     public static boolean isContainerWirelessCraftingConfirm(Container container) {
@@ -82,7 +92,8 @@ public class GuiUtils {
     }
 
     public static boolean isGuiCraftingTerm(GuiScreen guiScreen) {
-        return guiScreen instanceof GuiCraftingTerm || isGuiWirelessCrafting(guiScreen);
+        return guiScreen instanceof GuiCraftingTerm || isGuiWirelessCrafting(guiScreen)
+                || isGuiFluidCraftingWireless(guiScreen);
     }
 
     public static boolean isFluidCraftPatternTermEx(GuiScreen guiScreen) {

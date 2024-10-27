@@ -94,13 +94,16 @@ public class IngredientTracker {
         if (termGui != null) {
             IItemList<IAEItemStack> list = null;
             try {
-                if (!GuiUtils.isGuiWirelessCrafting(termGui)) {
-                    ItemRepo repo = getRepo();
-                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
-                } else {
+                if (GuiUtils.isGuiWirelessCrafting(termGui)) {
                     // wireless crafting terminal support
                     ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")
                             .get(termGui);
+                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
+                } else if (GuiUtils.isGuiFluidCraftingWireless(termGui)) {
+                    ItemRepo repo = (ItemRepo) ReflectionHelper.findField(FCGuiMonitor.class, "repo").get(termGui);
+                    list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
+                } else {
+                    ItemRepo repo = getRepo();
                     list = (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list").get(repo);
                 }
             } catch (IllegalAccessException e) {
@@ -121,22 +124,25 @@ public class IngredientTracker {
     private List<IAEItemStack> getStorageStacks() {
         List<IAEItemStack> list = new ArrayList<>();
         if (termGui != null) {
+
             try {
-                if (!GuiUtils.isGuiWirelessCrafting(termGui)) {
-                    ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
-                    for (IAEItemStack stack : (IItemList<IAEItemStack>) ReflectionHelper
-                            .findField(ItemRepo.class, "list").get(repo)) {
-                        list.add(stack.copy());
-                    }
-                } else {
+                ItemRepo repo;
+                if (GuiUtils.isGuiWirelessCrafting(termGui)) {
                     // wireless crafting terminal support
-                    ItemRepo repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")
+                    repo = (ItemRepo) ReflectionHelper.findField(GuiWirelessCraftingTerminal.class, "repo")
                             .get(termGui);
-                    for (IAEItemStack stack : (IItemList<IAEItemStack>) ReflectionHelper
-                            .findField(ItemRepo.class, "list").get(repo)) {
-                        list.add(stack.copy());
-                    }
                 }
+                // wireless fluid terminal
+                else if (GuiUtils.isGuiFluidCraftingWireless(termGui)) {
+                    repo = (ItemRepo) ReflectionHelper.findField(FCGuiMonitor.class, "repo").get(termGui);
+                } else {
+                    repo = (ItemRepo) ReflectionHelper.findField(GuiMEMonitorable.class, "repo").get(termGui);
+                }
+                for (IAEItemStack stack : (IItemList<IAEItemStack>) ReflectionHelper.findField(ItemRepo.class, "list")
+                        .get(repo)) {
+                    list.add(stack.copy());
+                }
+
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
