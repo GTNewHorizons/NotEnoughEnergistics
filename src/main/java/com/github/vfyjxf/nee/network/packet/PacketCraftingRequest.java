@@ -18,7 +18,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.p455w0rd.wirelesscraftingterminal.common.WCTGuiHandler;
-import net.p455w0rd.wirelesscraftingterminal.common.container.ContainerWirelessCraftingTerminal;
 import net.p455w0rd.wirelesscraftingterminal.helpers.WirelessTerminalGuiObject;
 import net.p455w0rd.wirelesscraftingterminal.reference.Reference;
 
@@ -31,6 +30,7 @@ import com.github.vfyjxf.nee.container.WCTContainerCraftingConfirm;
 import com.github.vfyjxf.nee.network.NEEGuiHandler;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.inventory.item.WirelessCraftingTerminalInventory;
 import com.google.common.base.Optional;
 
 import appeng.api.AEApi;
@@ -126,8 +126,9 @@ public class PacketCraftingRequest implements IMessage {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             Container container = player.openContainer;
 
-            if (GuiUtils.isWirelessCraftingTermContainer(container)) {
-                message.handlerWirelessCraftingRequest((ContainerWirelessCraftingTerminal) container, message, player);
+            if (GuiUtils.isWirelessCraftingTermContainer(container)
+                    || GuiUtils.isFCContainerCraftingWireless(container)) {
+                message.handlerWirelessCraftingRequest((AEBaseContainer) container, message, player);
             } else if (container instanceof AEBaseContainer) {
                 AEBaseContainer baseContainer = (AEBaseContainer) container;
                 Object target = baseContainer.getTarget();
@@ -265,43 +266,47 @@ public class PacketCraftingRequest implements IMessage {
         }
     }
 
-    private void handlerWirelessCraftingRequest(ContainerWirelessCraftingTerminal container,
-            PacketCraftingRequest message, EntityPlayerMP player) {
+    private void handlerWirelessCraftingRequest(AEBaseContainer container, PacketCraftingRequest message,
+            EntityPlayerMP player) {
         Object target = container.getTarget();
+        IGrid grid = null;
         if (target instanceof WirelessTerminalGuiObject) {
-            IGrid grid = ((WirelessTerminalGuiObject) target).getTargetGrid();
-            if (grid != null) {
-                final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
-                if (security != null && security.hasPermission(player, SecurityPermissions.CRAFT)
-                        && message.getRequireToCraftStack() != null) {
-                    Future<ICraftingJob> futureJob = null;
-                    try {
-                        final ICraftingGrid cg = grid.getCache(ICraftingGrid.class);
-                        futureJob = cg.beginCraftingJob(
-                                player.worldObj,
-                                grid,
-                                container.getActionSource(),
-                                message.getRequireToCraftStack(),
-                                null);
+            grid = ((WirelessTerminalGuiObject) target).getTargetGrid();
+        } else if (target instanceof WirelessCraftingTerminalInventory) {
+            WirelessCraftingTerminalInventory target1 = (WirelessCraftingTerminalInventory) target;
+            grid = target1.getActionableNode().getGrid();
+        }
+        if (grid != null) {
+            final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
+            if (security != null && security.hasPermission(player, SecurityPermissions.CRAFT)
+                    && message.getRequireToCraftStack() != null) {
+                Future<ICraftingJob> futureJob = null;
+                try {
+                    final ICraftingGrid cg = grid.getCache(ICraftingGrid.class);
+                    futureJob = cg.beginCraftingJob(
+                            player.worldObj,
+                            grid,
+                            container.getActionSource(),
+                            message.getRequireToCraftStack(),
+                            null);
 
-                        int x = (int) player.posX;
-                        int y = (int) player.posY;
-                        int z = (int) player.posZ;
+                    int x = (int) player.posX;
+                    int y = (int) player.posY;
+                    int z = (int) player.posZ;
 
-                        WCTGuiHandler.launchGui(Reference.GUI_CRAFT_CONFIRM, player, player.worldObj, x, y, z);
+                    WCTGuiHandler.launchGui(Reference.GUI_CRAFT_CONFIRM, player, player.worldObj, x, y, z);
 
-                        if (player.openContainer instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) {
-                            final net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm ccc = (net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) player.openContainer;
-                            ccc.setItemToCraft(message.getRequireToCraftStack());
-                            ccc.setJob(futureJob);
-                            ccc.setAutoStart(message.isAutoStart());
-                        }
-                    } catch (final Throwable e) {
-                        if (futureJob != null) {
-                            futureJob.cancel(true);
-                        }
-                        AELog.debug(e);
+                    if (player.openContainer instanceof net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) {
+                        final net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm ccc = (net.p455w0rd.wirelesscraftingterminal.common.container.ContainerCraftConfirm) player.openContainer;
+                        ccc.setItemToCraft(message.getRequireToCraftStack());
+                        ccc.setJob(futureJob);
+                        ccc.setAutoStart(message.isAutoStart());
                     }
+                } catch (final Throwable e) {
+                    if (futureJob != null) {
+                        futureJob.cancel(true);
+                    }
+                    AELog.debug(e);
                 }
             }
         }

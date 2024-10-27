@@ -56,6 +56,7 @@ public class NEEContainerDrawHandler {
     private boolean drawRequestTooltip;
     private boolean drawMissingTooltip;
     private boolean drawCraftableTooltip;
+    private boolean isFluidCraftingTerm;
 
     public NEEContainerDrawHandler() {
         // gtnh nei support
@@ -76,8 +77,9 @@ public class NEEContainerDrawHandler {
             GuiRecipe guiRecipe = (GuiRecipe) event.gui;
             this.isCraftingTerm = GuiUtils.isGuiCraftingTerm(guiRecipe.firstGui);
             this.isPatternTerm = GuiUtils.isPatternTerm(guiRecipe.firstGui);
+            this.isFluidCraftingTerm = GuiUtils.isGuiFluidCraftingWireless(guiRecipe.firstGui);
 
-            if (this.isCraftingTerm || this.isPatternTerm) {
+            if (this.isCraftingTerm || this.isPatternTerm || this.isFluidCraftingTerm) {
                 this.oldPage = guiRecipe.page;
                 this.oldType = guiRecipe.recipetype;
                 setOverlayButton(guiRecipe);
