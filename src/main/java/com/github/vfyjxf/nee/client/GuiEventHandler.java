@@ -193,7 +193,7 @@ public class GuiEventHandler implements INEIGuiHandler {
         }
 
         if (NEEConfig.enableNEIDragDrop) {
-            if (gui instanceof AEBaseGui) {
+            if (gui instanceof AEBaseGui && !gui.getClass().getName().contains("com.glodblock.github.client.gui.GuiLevelMaintainer")) {
                 if (draggedStack != null) {
                     Slot currentSlot = gui.getSlotAtPosition(mouseX, mouseY);
                     if (currentSlot instanceof SlotFake) {
