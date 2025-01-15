@@ -33,6 +33,7 @@ import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.glodblock.github.client.gui.GuiLevelMaintainer;
 
 import appeng.api.events.GuiScrollEvent;
 import appeng.client.gui.AEBaseGui;
@@ -193,8 +194,10 @@ public class GuiEventHandler implements INEIGuiHandler {
         }
 
         if (NEEConfig.enableNEIDragDrop) {
-            if (gui instanceof AEBaseGui
-                    && !gui.getClass().getName().contains("com.glodblock.github.client.gui.GuiLevelMaintainer")) {
+            if (Loader.isModLoaded("ae2fc") && gui instanceof GuiLevelMaintainer) {
+                return false;
+            }
+            if (gui instanceof AEBaseGui) {
                 if (draggedStack != null) {
                     Slot currentSlot = gui.getSlotAtPosition(mouseX, mouseY);
                     if (currentSlot instanceof SlotFake) {
