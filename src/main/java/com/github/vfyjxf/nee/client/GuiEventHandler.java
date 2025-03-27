@@ -34,6 +34,7 @@ import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.glodblock.github.client.gui.GuiLevelMaintainer;
 import com.glodblock.github.client.gui.base.FCGuiEncodeTerminal;
 import com.glodblock.github.client.gui.container.base.FCContainerEncodeTerminal;
 
@@ -184,6 +185,10 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
     public boolean handleDragNDrop(GuiContainer gui, int mouseX, int mouseY, ItemStack draggedStack, int button) {
         // When NEIAddons exist, give them to NEIAddons to handle
         if (Loader.isModLoaded("NEIAddons") && NEEConfig.useNEIDragFromNEIAddons) {
+            return false;
+        }
+
+        if (NEEConfig.enableNEIDragDrop && Loader.isModLoaded("ae2fc") && gui instanceof GuiLevelMaintainer) {
             return false;
         }
 
