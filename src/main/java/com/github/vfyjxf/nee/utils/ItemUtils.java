@@ -19,7 +19,7 @@ import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import codechicken.nei.PositionedStack;
+import codechicken.nei.NEIServerUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 
@@ -183,14 +183,11 @@ public final class ItemUtils {
         return null;
     }
 
-    public static int getIngredientIndex(ItemStack stack, PositionedStack positionedStack) {
-        ItemStack stackInput = stack.copy();
-        stackInput.stackSize = 1;
-        for (int i = 0; i < positionedStack.items.length; i++) {
-            ItemStack currentStack = positionedStack.items[i].copy();
-            currentStack.stackSize = 1;
-            if (ItemStack.areItemStacksEqual(currentStack, stackInput)) {
-                return i;
+    public static int getPermutationIndex(ItemStack stack, List<ItemStack> items) {
+
+        for (int index = 0; index < items.size(); index++) {
+            if (NEIServerUtils.areStacksSameTypeCraftingWithNBT(items.get(index), stack)) {
+                return index;
             }
         }
         return -1;
@@ -212,9 +209,9 @@ public final class ItemUtils {
                 + "}";
     }
 
-    public static NBTTagCompound writeItemStackToNBT(ItemStack itemStack, NBTTagCompound tag) {
-        itemStack.writeToNBT(tag);
-        tag.setInteger("Count", itemStack.stackSize);
+    public static NBTTagCompound writeItemStackToNBT(ItemStack itemStack, int stackSize) {
+        NBTTagCompound tag = itemStack.writeToNBT(new NBTTagCompound());
+        tag.setInteger("Count", stackSize);
         return tag;
     }
 

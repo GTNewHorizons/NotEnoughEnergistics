@@ -16,6 +16,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import io.netty.buffer.ByteBuf;
+import thaumicenergistics.client.gui.GuiArcaneCraftingTerminal;
 import thaumicenergistics.common.container.ContainerKnowledgeInscriber;
 
 /**
@@ -68,11 +69,43 @@ public class PacketArcaneRecipe implements IMessage {
                     }
                     container.onCraftMatrixChanged(craftMatrix[0].inventory);
                 }
+            } else if (container.inventorySlots instanceof GuiArcaneCraftingTerminal) {
+                ItemStack[] recipeInput = new ItemStack[9];
+                NBTTagCompound currentStack;
+                for (int i = 0; i < recipeInput.length; i++) {
+                    currentStack = (NBTTagCompound) message.input.getTag("#" + i);
+                    recipeInput[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
+                }
+                Field craftingSlots = ReflectionHelper.findField(GuiArcaneCraftingTerminal.class, "craftingSlots");
+                SlotFakeCraftingMatrix[] craftMatrix = this
+                        .getCraftingSlots(craftingSlots, (GuiArcaneCraftingTerminal) container.inventorySlots);
+
+                if (craftMatrix != null && message.input != null) {
+                    for (int i = 0; i < recipeInput.length; i++) {
+                        ItemStack currentItem = null;
+                        if (recipeInput[i] != null) {
+                            currentItem = recipeInput[i].copy();
+                        }
+                        craftMatrix[i].putStack(currentItem);
+                    }
+                    container.onCraftMatrixChanged(craftMatrix[0].inventory);
+                }
+
             }
+
             return null;
         }
 
         private SlotFakeCraftingMatrix[] getCraftingSlots(Field field, ContainerKnowledgeInscriber container) {
+            try {
+                return (SlotFakeCraftingMatrix[]) field.get(container);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        private SlotFakeCraftingMatrix[] getCraftingSlots(Field field, GuiArcaneCraftingTerminal container) {
             try {
                 return (SlotFakeCraftingMatrix[]) field.get(container);
             } catch (IllegalAccessException e) {

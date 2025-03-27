@@ -1,14 +1,15 @@
 package com.github.vfyjxf.nee.nei;
 
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.github.vfyjxf.nee.config.NEEConfig;
+import com.github.vfyjxf.nee.nei.NEETerminalOverlayButton.NEEItemOverlayState;
 import com.github.vfyjxf.nee.utils.Ingredient;
 
 import codechicken.lib.gui.GuiDraw;
@@ -19,9 +20,12 @@ import codechicken.nei.drawable.DrawableBuilder;
 import codechicken.nei.recipe.GuiOverlayButton;
 import codechicken.nei.recipe.GuiOverlayButton.ItemOverlayFormat;
 import codechicken.nei.recipe.GuiOverlayButton.ItemOverlayState;
-import codechicken.nei.recipe.IRecipeHandler;
+import codechicken.nei.recipe.GuiRecipe;
+import codechicken.nei.recipe.GuiRecipeButton;
+import codechicken.nei.recipe.RecipeHandlerRef;
+import codechicken.nei.util.NEIMouseUtils;
 
-public class NEEGuiOverlayButton extends GuiOverlayButton {
+public class NEETerminalOverlayButton extends GuiOverlayButton {
 
     public static class NEEItemOverlayState extends ItemOverlayState {
 
@@ -61,8 +65,8 @@ public class NEEGuiOverlayButton extends GuiOverlayButton {
         }
 
         public void draw(ItemOverlayFormat format) {
-            boolean doCraftingHelp = Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("nee.nopreview"))
-                    || Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("nee.preview"));
+            boolean doCraftingHelp = NEIClientConfig.isKeyHashDown("nee.nopreview")
+                    || NEIClientConfig.isKeyHashDown("nee.preview");
 
             if (this.ingredient.isCraftable()
                     && (!this.isCraftingTerm || doCraftingHelp && this.ingredient.requiresToCraft())) {
@@ -84,50 +88,52 @@ public class NEEGuiOverlayButton extends GuiOverlayButton {
         }
     }
 
-    public NEEGuiOverlayButton(GuiContainer firstGui, IRecipeHandler handler, int recipeIndex, int xPosition,
-            int yPosition, int width, int height) {
-        super(firstGui, handler, recipeIndex, xPosition, yPosition, width, height);
+    public NEETerminalOverlayButton(GuiContainer firstGui, RecipeHandlerRef handlerRef, int xPosition, int yPosition) {
+        super(firstGui, handlerRef, xPosition, yPosition);
         if (NEEConfig.noShift) {
             setRequireShiftForOverlayRecipe(false);
         }
     }
 
-    public NEEGuiOverlayButton(GuiOverlayButton button) {
-        this(
-                button.firstGui,
-                button.handler,
-                button.recipeIndex,
-                button.xPosition,
-                button.yPosition,
-                button.width,
-                button.height);
+    public NEETerminalOverlayButton(GuiOverlayButton button) {
+        this(button.firstGui, button.handlerRef, button.xPosition, button.yPosition);
+    }
+
+    @Override
+    public void mouseReleased(int mousex, int mousey) {
+        if (this.firstGui != null && !NEECraftingPreviewHandler.instance
+                .handle(this.firstGui, this.handlerRef.handler, this.handlerRef.recipeIndex)) {
+            super.mouseReleased(mousex, mousey);
+        }
     }
 
     @Override
     public Map<String, String> handleHotkeys(GuiContainer gui, int mousex, int mousey, Map<String, String> hotkeys) {
         hotkeys = super.handleHotkeys(gui, mousex, mousey, hotkeys);
 
-        if (ingredientsOverlay().stream().anyMatch(
-                btn -> btn instanceof NEEItemOverlayState && showCraftingHotkeys((NEEItemOverlayState) btn))) {
-            final String previewKeyName = NEIClientConfig.getKeyName("nee.preview");
-
-            if (previewKeyName != null) {
-                hotkeys.put(previewKeyName + " + Click", I18n.format("neenergistics.gui.tooltip.crafting.preview"));
-            }
-
-            final String noPreviewKeyName = NEIClientConfig.getKeyName("nee.nopreview");
-
-            if (noPreviewKeyName != null) {
-                hotkeys.put(noPreviewKeyName + " + Click", I18n.format("neenergistics.gui.tooltip.crafting.nopreview"));
-            }
+        if (ingredientsOverlay().stream().allMatch(
+                state -> state instanceof NEEItemOverlayState overlayState && showCraftingHotkeys(overlayState))) {
+            hotkeys.put(
+                    NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                    I18n.format("neenergistics.gui.tooltip.crafting.preview"));
+            hotkeys.put(
+                    NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                    I18n.format("neenergistics.gui.tooltip.crafting.nopreview"));
         }
 
         return hotkeys;
     }
 
     private static boolean showCraftingHotkeys(NEEItemOverlayState button) {
-        return button.isCraftingTerm() && button.getIngredient().isCraftable()
-                && button.getIngredient().requiresToCraft();
+        return button.getIngredient().isCraftable() || !button.getIngredient().requiresToCraft();
+    }
+
+    public static void updateRecipeButtons(GuiRecipe guiRecipe, List<GuiRecipeButton> buttonList) {
+        for (int i = 0; i < buttonList.size(); i++) {
+            if (buttonList.get(i) instanceof GuiOverlayButton btn) {
+                buttonList.set(i, new NEETerminalOverlayButton(btn));
+            }
+        }
     }
 
 }

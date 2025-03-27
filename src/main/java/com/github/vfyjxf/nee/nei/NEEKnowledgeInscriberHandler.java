@@ -6,6 +6,7 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketArcaneRecipe;
 import com.github.vfyjxf.nee.utils.ItemUtils;
@@ -15,6 +16,7 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
 import codechicken.nei.recipe.GuiOverlayButton;
 import codechicken.nei.recipe.GuiRecipe;
+import codechicken.nei.recipe.GuiRecipeButton;
 import codechicken.nei.recipe.IRecipeHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
@@ -31,8 +33,8 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     private NEEKnowledgeInscriberHandler() {
 
         try {
-            knowledgeInscriberClz = Class.forName("thaumicenergistics.client.gui.GuiKnowledgeInscriber");// "Knowledge
-                                                                                                         // Inscriber"
+            // "Knowledge Inscriber"
+            knowledgeInscriberClz = Class.forName("thaumicenergistics.client.gui.GuiKnowledgeInscriber");
         } catch (ClassNotFoundException ignored) {}
 
         try {
@@ -50,7 +52,7 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
 
     private PacketArcaneRecipe packetArcaneRecipe(IRecipeHandler recipe, int recipeIndex) {
         final NBTTagCompound recipeInputs = new NBTTagCompound();
-        List<PositionedStack> ingredients = recipe.getIngredientStacks(recipeIndex);
+        final List<PositionedStack> ingredients = recipe.getIngredientStacks(recipeIndex);
 
         if (itemAspectClz != null) {
             ingredients.removeIf(positionedStack -> itemAspectClz.isInstance(positionedStack.item.getItem()));
@@ -58,7 +60,7 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
 
         for (PositionedStack positionedStack : ingredients) {
             if (positionedStack.items != null && positionedStack.items.length > 0) {
-                int slotIndex = getSlotIndex(positionedStack.relx * 100 + positionedStack.rely);
+                final int slotIndex = getSlotIndex(positionedStack.relx * 100 + positionedStack.rely);
                 final ItemStack[] currentStackList = positionedStack.items;
                 ItemStack stack = positionedStack.item;
 
@@ -68,7 +70,7 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
                     }
                 }
 
-                recipeInputs.setTag("#" + slotIndex, ItemUtils.writeItemStackToNBT(stack, new NBTTagCompound()));
+                recipeInputs.setTag("#" + slotIndex, ItemUtils.writeItemStackToNBT(stack, stack.stackSize));
             }
         }
 
@@ -100,16 +102,25 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     }
 
     @SubscribeEvent
-    public void onActionPerformedEventPre(GuiOverlayButton.UpdateOverlayButtonsEvent.Post event) {
-        if (event.gui instanceof GuiRecipe && isGuiPatternTerm((GuiRecipe<?>) event.gui)) {
+    public void onActionPerformedEventPre(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
+
+        if (NEEConfig.noShift && event.gui instanceof GuiRecipe guiRecipe
+                && (isGuiKnowledgeInscriber(guiRecipe) || isGuiArcaneCraftingTerm(guiRecipe))) {
             for (int i = 0; i < event.buttonList.size(); i++) {
-                event.buttonList.set(i, new NEEGuiOverlayButton(event.buttonList.get(i)));
+                if (event.buttonList.get(i) instanceof GuiOverlayButton btn) {
+                    btn.setRequireShiftForOverlayRecipe(false);
+                }
             }
         }
+
     }
 
-    private boolean isGuiPatternTerm(GuiRecipe<?> gui) {
+    private boolean isGuiKnowledgeInscriber(GuiRecipe<?> gui) {
         return this.getClass().isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
+    }
+
+    private boolean isGuiArcaneCraftingTerm(GuiRecipe<?> gui) {
+        return gui.firstGui instanceof thaumicenergistics.client.gui.GuiArcaneCraftingTerminal;
     }
 
 }

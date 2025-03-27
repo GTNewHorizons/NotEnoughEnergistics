@@ -4,9 +4,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
+
+import com.github.vfyjxf.nee.utils.GuiUtils;
+import com.glodblock.github.common.item.ItemFluidPacket;
 
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
+import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -66,15 +71,19 @@ public class PacketStackCountChange implements IMessage {
             }
 
             Slot currentSlot = container.getSlot(message.getSlotIndex());
-            for (int i = 0; i < Math.abs(message.getChangeCount()); i++) {
-                int currentStackSize = message.getChangeCount() > 0 ? currentSlot.getStack().stackSize + 1
-                        : currentSlot.getStack().stackSize - 1;
-                if (currentStackSize > 0) {
-                    ItemStack nextStack = currentSlot.getStack().copy();
-                    nextStack.stackSize = currentStackSize;
-                    currentSlot.putStack(nextStack);
+
+            if (currentSlot.getHasStack()) {
+                ItemStack stack = currentSlot.getStack();
+
+                if (GuiUtils.isFluidCraftPatternContainer(container)
+                        && StackInfo.itemStackToNBT(stack).hasKey("gtFluidName")) {
+                    FluidStack fluid = StackInfo.getFluid(stack);
+                    fluid.amount = Math.max(1, fluid.amount + message.getChangeCount());
+                    currentSlot.putStack(ItemFluidPacket.newStack(fluid));
                 } else {
-                    break;
+                    stack = stack.copy();
+                    stack.stackSize = Math.max(1, stack.stackSize + message.getChangeCount());
+                    currentSlot.putStack(stack);
                 }
             }
         }

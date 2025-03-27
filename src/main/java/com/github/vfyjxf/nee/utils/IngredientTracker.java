@@ -2,7 +2,6 @@ package com.github.vfyjxf.nee.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -14,13 +13,9 @@ import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
 
 import appeng.api.storage.data.IAEItemStack;
-import appeng.api.storage.data.IItemList;
-import appeng.client.me.ItemRepo;
 import appeng.util.item.AEItemStack;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 
 public class IngredientTracker {
 
@@ -39,7 +34,7 @@ public class IngredientTracker {
         }
 
         for (Ingredient ingredient : this.ingredients) {
-            for (IAEItemStack stack : getStorageStacks(IAEItemStack::isCraftable)) {
+            for (IAEItemStack stack : GuiUtils.getStorageStacks(this.termGui, IAEItemStack::isCraftable)) {
                 if (ingredient.getIngredient().contains(stack.getItemStack())) {
                     ingredient.setCraftableIngredient(stack.getItemStack());
                 }
@@ -47,48 +42,6 @@ public class IngredientTracker {
         }
 
         this.calculateIngredients();
-    }
-
-    private List<IAEItemStack> getStorageStacks(Predicate<IAEItemStack> predicate) {
-        List<IAEItemStack> storageStacks = new ArrayList<>();
-
-        if (termGui != null) {
-            ItemRepo repo = getItemRepo(termGui);
-
-            if (repo != null) {
-                try {
-                    @SuppressWarnings("unchecked")
-                    IItemList<IAEItemStack> list = (IItemList<IAEItemStack>) ReflectionHelper
-                            .findField(ItemRepo.class, "list").get(repo);
-
-                    for (IAEItemStack stack : list) {
-                        if (predicate.test(stack)) {
-                            storageStacks.add(stack.copy());
-                        }
-                    }
-
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return storageStacks;
-    }
-
-    private ItemRepo getItemRepo(GuiContainer termGui) {
-        Class<?> clazz = termGui.getClass();
-        ItemRepo repo = null;
-
-        while (repo == null && clazz != null) {
-            try {
-                repo = (ItemRepo) ReflectionHelper.findField(clazz, "repo").get(termGui);
-            } catch (UnableToFindFieldException | IllegalAccessException e) {
-                clazz = clazz.getSuperclass();
-            }
-        }
-
-        return repo;
     }
 
     public List<Ingredient> getIngredients() {
@@ -178,7 +131,8 @@ public class IngredientTracker {
 
     @SuppressWarnings("unchecked")
     public void calculateIngredients() {
-        List<IAEItemStack> stacks = getStorageStacks(stack -> NEEConfig.matchOtherItems || stack.isCraftable());
+        final List<IAEItemStack> stacks = GuiUtils
+                .getStorageStacks(this.termGui, stack -> NEEConfig.matchOtherItems || stack.isCraftable());
 
         for (Ingredient ingredient : this.ingredients) {
             for (IAEItemStack stack : stacks) {
@@ -193,10 +147,10 @@ public class IngredientTracker {
             }
         }
 
-        List<ItemStack> inventoryStacks = new ArrayList<>();
+        final List<ItemStack> inventoryStacks = new ArrayList<>();
 
         for (Slot slot : (List<Slot>) termGui.inventorySlots.inventorySlots) {
-            boolean canGetStack = slot != null && slot.getHasStack()
+            final boolean canGetStack = slot != null && slot.getHasStack()
                     && slot.getStack().stackSize > 0
                     && slot.isItemValid(slot.getStack())
                     && slot.canTakeStack(Minecraft.getMinecraft().thePlayer);

@@ -5,6 +5,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import com.github.vfyjxf.nee.NEECommands;
 import com.github.vfyjxf.nee.client.GuiEventHandler;
+import com.github.vfyjxf.nee.nei.NEECraftingPreviewHandler;
 import com.github.vfyjxf.nee.nei.NEECraftingTerminalHandler;
 import com.github.vfyjxf.nee.nei.NEEExtremeAutoCrafterHandler;
 import com.github.vfyjxf.nee.nei.NEEKnowledgeInscriberHandler;
@@ -25,5 +26,6 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(NEEPatternTerminalHandler.instance);
         MinecraftForge.EVENT_BUS.register(NEEExtremeAutoCrafterHandler.instance);
         MinecraftForge.EVENT_BUS.register(NEEKnowledgeInscriberHandler.instance);
+        MinecraftForge.EVENT_BUS.register(NEECraftingPreviewHandler.instance);
     }
 }

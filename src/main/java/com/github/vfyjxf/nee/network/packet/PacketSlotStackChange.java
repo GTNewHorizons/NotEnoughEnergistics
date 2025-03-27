@@ -6,10 +6,12 @@ import java.util.List;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 
+import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.glodblock.github.common.item.ItemFluidPacket;
 
+import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -52,7 +54,7 @@ public class PacketSlotStackChange implements IMessage {
 
     @Override
     public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, ItemUtils.writeItemStackToNBT(this.stack, new NBTTagCompound()));
+        ByteBufUtils.writeTag(buf, ItemUtils.writeItemStackToNBT(this.stack, this.stack.stackSize));
         buf.writeInt(this.craftingSlots.size());
         for (Integer craftingSlot : this.craftingSlots) {
             buf.writeInt(craftingSlot);
@@ -66,6 +68,12 @@ public class PacketSlotStackChange implements IMessage {
             Container container = ctx.getServerHandler().playerEntity.openContainer;
             ItemStack nextStack = message.getStack();
             if (nextStack != null) {
+
+                if (GuiUtils.isFluidCraftPatternContainer(container)
+                        && StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
+                    nextStack = ItemFluidPacket.newStack(StackInfo.getFluid(nextStack));
+                }
+
                 for (Integer craftingSlot : message.getCraftingSlots()) {
                     Slot currentSlot = container.getSlot(craftingSlot);
                     if (currentSlot != null) {

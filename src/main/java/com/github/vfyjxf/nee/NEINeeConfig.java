@@ -28,6 +28,8 @@ import com.glodblock.github.client.gui.GuiFluidPatternWireless;
 
 import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.client.gui.implementations.GuiInterface;
+import appeng.client.gui.implementations.GuiMEMonitorable;
+import appeng.client.gui.implementations.GuiMEPortableCell;
 import appeng.client.gui.implementations.GuiPatternTerm;
 import appeng.client.gui.implementations.GuiPatternTermEx;
 import codechicken.nei.NEIController;
@@ -35,7 +37,10 @@ import codechicken.nei.api.API;
 import codechicken.nei.api.IConfigureNEI;
 import codechicken.nei.guihook.GuiContainerManager;
 import codechicken.nei.guihook.IContainerInputHandler;
+import codechicken.nei.recipe.DefaultOverlayHandler;
 import cpw.mods.fml.common.Loader;
+import fox.spiteful.avaritia.gui.GUIExtremeCrafting;
+import thaumicenergistics.client.gui.GuiArcaneCraftingTerminal;
 import thaumicenergistics.client.gui.GuiKnowledgeInscriber;
 import wanion.avaritiaddons.block.extremeautocrafter.GuiExtremeAutoCrafter;
 
@@ -72,6 +77,8 @@ public class NEINeeConfig implements IConfigureNEI {
         installFluidPatternTerminalSupport(new HashSet<>(identifiers));
 
         installThaumicEnergisticsSupport();
+
+        installAvaritiaSupport();
 
         installAvaritiaddonsSupport();
 
@@ -118,6 +125,8 @@ public class NEINeeConfig implements IConfigureNEI {
         API.registerBookmarkContainerHandler(GuiPatternTerm.class, NEETerminalBookmarkContainerHandler.instance);
         API.registerBookmarkContainerHandler(GuiPatternTermEx.class, NEETerminalBookmarkContainerHandler.instance);
         API.registerBookmarkContainerHandler(GuiCraftingTerm.class, NEETerminalBookmarkContainerHandler.instance);
+        API.registerBookmarkContainerHandler(GuiMEMonitorable.class, NEETerminalBookmarkContainerHandler.instance);
+        API.registerBookmarkContainerHandler(GuiMEPortableCell.class, NEETerminalBookmarkContainerHandler.instance);
 
         if (Loader.isModLoaded(ModIDs.FC)) {
             API.registerBookmarkContainerHandler(
@@ -143,6 +152,13 @@ public class NEINeeConfig implements IConfigureNEI {
                     GuiWirelessCraftingTerminal.class,
                     NEETerminalBookmarkContainerHandler.instance);
         }
+
+        if (Loader.isModLoaded("thaumcraftneiplugin")) {
+            API.registerBookmarkContainerHandler(
+                    GuiArcaneCraftingTerminal.class,
+                    NEETerminalBookmarkContainerHandler.instance);
+        }
+
     }
 
     @Override
@@ -164,6 +180,7 @@ public class NEINeeConfig implements IConfigureNEI {
 
     private void registerGuiHandler() {
         API.registerNEIGuiHandler(GuiEventHandler.instance);
+        GuiContainerManager.addTooltipHandler(GuiEventHandler.instance);
         // disable MouseScrollTransfer in some gui
         replaceNEIController();
     }
@@ -224,24 +241,28 @@ public class NEINeeConfig implements IConfigureNEI {
     }
 
     private void installThaumicEnergisticsSupport() {
-        try {
-            Class.forName("thaumicenergistics.client.gui.GuiKnowledgeInscriber");
-        } catch (ClassNotFoundException e) {
-            return;
-        }
 
         if (Loader.isModLoaded("thaumcraftneiplugin")) {
             NotEnoughEnergistics.logger.info("Install ThaumicEnergistics support");
-            API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapedrecipes");
-            API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapelessrecipes");
-            API.registerGuiOverlayHandler(
-                    GuiKnowledgeInscriber.class,
-                    NEEKnowledgeInscriberHandler.instance,
-                    "arcaneshapedrecipes");
-            API.registerGuiOverlayHandler(
-                    GuiKnowledgeInscriber.class,
-                    NEEKnowledgeInscriberHandler.instance,
-                    "arcaneshapelessrecipes");
+
+            try {
+                Class.forName("thaumicenergistics.client.gui.GuiKnowledgeInscriber");
+
+                API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapedrecipes");
+                API.registerGuiOverlay(GuiKnowledgeInscriber.class, "arcaneshapelessSrecipes");
+                API.registerGuiOverlayHandler(
+                        GuiKnowledgeInscriber.class,
+                        NEEKnowledgeInscriberHandler.instance,
+                        "arcaneshapedrecipes");
+                API.registerGuiOverlayHandler(
+                        GuiKnowledgeInscriber.class,
+                        NEEKnowledgeInscriberHandler.instance,
+                        "arcaneshapelessrecipes");
+
+            } catch (ClassNotFoundException e) {
+
+            }
+
         }
     }
 
@@ -264,11 +285,24 @@ public class NEINeeConfig implements IConfigureNEI {
 
         if (Loader.isModLoaded("avaritiaddons")) {
             NotEnoughEnergistics.logger.info("Install Avaritiaddons support");
-            API.registerGuiOverlay(GuiExtremeAutoCrafter.class, "extreme");
+            API.registerGuiOverlay(GuiExtremeAutoCrafter.class, "extreme", 181, 15);
             API.registerGuiOverlayHandler(
                     GuiExtremeAutoCrafter.class,
                     NEEExtremeAutoCrafterHandler.instance,
                     "extreme");
+        }
+    }
+
+    private void installAvaritiaSupport() {
+        try {
+            Class.forName("fox.spiteful.avaritia.gui.GUIExtremeCrafting");
+        } catch (ClassNotFoundException e) {
+            return;
+        }
+
+        if (Loader.isModLoaded("Avaritia")) {
+            API.registerGuiOverlay(GUIExtremeCrafting.class, "extreme", 9, 5);
+            API.registerGuiOverlayHandler(GUIExtremeCrafting.class, new DefaultOverlayHandler(9, 5), "extreme");
         }
     }
 }

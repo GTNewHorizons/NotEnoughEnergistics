@@ -10,17 +10,18 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import com.github.vfyjxf.nee.client.gui.widgets.GuiImgButtonEnableCombination;
@@ -42,16 +43,19 @@ import appeng.client.gui.implementations.GuiInterface;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.slot.SlotFake;
+import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.NEIClientConfig;
+import codechicken.nei.NEIServerUtils;
 import codechicken.nei.PositionedStack;
-import codechicken.nei.VisiblityData;
-import codechicken.nei.api.INEIGuiHandler;
-import codechicken.nei.api.TaggedInventoryArea;
+import codechicken.nei.api.INEIGuiAdapter;
+import codechicken.nei.guihook.IContainerTooltipHandler;
+import codechicken.nei.recipe.AcceptsFollowingTooltipLineHandler;
 import codechicken.nei.recipe.RecipeInfo;
+import codechicken.nei.util.NEIMouseUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
-public class GuiEventHandler implements INEIGuiHandler {
+public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltipHandler {
 
     public static final GuiEventHandler instance = new GuiEventHandler();
     private final GuiImgButtonEnableCombination buttonCombination = new GuiImgButtonEnableCombination(
@@ -59,6 +63,7 @@ public class GuiEventHandler implements INEIGuiHandler {
             0,
             ItemCombination.ENABLED);
 
+    private AcceptsFollowingTooltipLineHandler acceptsFollowingTooltipLineHandler;
     private List<GuiButton> buttonList;
 
     @SuppressWarnings("unchecked")
@@ -150,8 +155,7 @@ public class GuiEventHandler implements INEIGuiHandler {
     @SubscribeEvent
     public void onActionPerformed(GuiScreenEvent.ActionPerformedEvent.Pre event) {
         if (event.button == this.buttonCombination) {
-            int ordinal = Mouse.getEventButton() != 2 ? this.buttonCombination.getCurrentValue().ordinal() + 1
-                    : this.buttonCombination.getCurrentValue().ordinal() - 1;
+            int ordinal = this.buttonCombination.getCurrentValue().ordinal() + (Mouse.getEventButton() == 0 ? 1 : -1);
 
             if (ordinal >= ItemCombination.values().length) {
                 ordinal = 0;
@@ -177,21 +181,6 @@ public class GuiEventHandler implements INEIGuiHandler {
     }
 
     @Override
-    public VisiblityData modifyVisiblity(GuiContainer gui, VisiblityData currentVisibility) {
-        return null;
-    }
-
-    @Override
-    public Iterable<Integer> getItemSpawnSlots(GuiContainer gui, ItemStack item) {
-        return null;
-    }
-
-    @Override
-    public List<TaggedInventoryArea> getInventoryAreas(GuiContainer gui) {
-        return null;
-    }
-
-    @Override
     public boolean handleDragNDrop(GuiContainer gui, int mouseX, int mouseY, ItemStack draggedStack, int button) {
         // When NEIAddons exist, give them to NEIAddons to handle
         if (Loader.isModLoaded("NEIAddons") && NEEConfig.useNEIDragFromNEIAddons) {
@@ -207,11 +196,12 @@ public class GuiEventHandler implements INEIGuiHandler {
                 boolean sendPacket = false;
                 int copySize = useStackSizeFromNEI ? copyStack.stackSize : draggedStackDefaultSize;
                 if (button == 0) {
-                    copyStack.stackSize = areStackEqual(slotStack, copyStack) ? slotStack.stackSize + copySize
+                    copyStack.stackSize = NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotStack, copyStack)
+                            ? slotStack.stackSize + copySize
                             : copySize;
                     sendPacket = true;
                 } else if (button == 1) {
-                    if (areStackEqual(slotStack, copyStack)) {
+                    if (NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotStack, copyStack)) {
                         copyStack.stackSize = slotStack.stackSize;
                     } else {
                         copyStack.stackSize = slotStack == null ? 1 : copySize;
@@ -237,15 +227,6 @@ public class GuiEventHandler implements INEIGuiHandler {
         return false;
     }
 
-    private boolean areStackEqual(ItemStack stackA, ItemStack stackB) {
-        return stackA != null && stackA.isItemEqual(stackB) && ItemStack.areItemStackTagsEqual(stackA, stackB);
-    }
-
-    @Override
-    public boolean hideItemPanelSlot(GuiContainer gui, int x, int y, int w, int h) {
-        return false;
-    }
-
     /**
      * Prevent the scroll bar from being triggered when modifying the number of items This method is not intended to be
      * called by NEE. Do not use this method for any reason.
@@ -253,69 +234,117 @@ public class GuiEventHandler implements INEIGuiHandler {
     @SubscribeEvent
     public boolean handleMouseWheelInput(GuiScrollEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
-        boolean isPatternTerm = isPatternTerm(mc.currentScreen);
-        boolean isInterface = event.guiScreen instanceof GuiInterface;
-        if (isPatternTerm || isInterface) {
-            Slot currentSlot = event.guiScreen.getSlotAtPosition(event.mouseX, event.mouseY);
-            if (currentSlot instanceof SlotFake && currentSlot.getHasStack()) {
-                // try to change current itemstack to next ingredient;
-                if (Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("nee.ingredient"))
-                        && GuiUtils.isCraftingSlot(currentSlot)) {
-                    handleRecipeIngredientChange(event.guiScreen, currentSlot, event.scrollAmount);
-                    return true;
-                } else if (Keyboard.isKeyDown(NEIClientConfig.getKeyBinding("nee.count"))) {
-                    NEENetworkHandler.getInstance()
-                            .sendToServer(new PacketStackCountChange(currentSlot.slotNumber, event.scrollAmount));
-                    return true;
-                }
+        Slot currentSlot = getFakeSlotAtPosition((GuiContainer) mc.currentScreen, event.mouseX, event.mouseY);
+
+        if (currentSlot != null) {
+            // try to change current itemstack to next ingredient;
+            if (NEIClientConfig.isKeyHashDown("nee.ingredient") && GuiUtils.isCraftingSlot(currentSlot)) {
+                handleRecipeIngredientChange(event.guiScreen, currentSlot, event.scrollAmount);
+                return true;
+            } else if (NEIClientConfig.isKeyHashDown("nee.count")) {
+                NEENetworkHandler.getInstance()
+                        .sendToServer(new PacketStackCountChange(currentSlot.slotNumber, event.scrollAmount));
+                return true;
             }
         }
+
         return false;
     }
 
-    private static void handleRecipeIngredientChange(GuiContainer gui, Slot currentSlot, int dWheel) {
-        List<Integer> craftingSlots = new ArrayList<>();
-        int currentSlotIndex = currentSlot.getSlotIndex();
-        PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients.get(INPUT_KEY + currentSlotIndex);
-        if (currentIngredients != null && currentIngredients.items.length > 1) {
-            int currentStackIndex = ItemUtils.getIngredientIndex(currentSlot.getStack(), currentIngredients);
-            if (currentStackIndex >= 0) {
-                for (int j = 0; j < Math.abs(dWheel); j++) {
-                    currentStackIndex += (dWheel < 0) ? -1 : 1;
+    @Override
+    public List<String> handleItemTooltip(GuiContainer gui, ItemStack itemstack, int mousex, int mousey,
+            List<String> currenttip) {
+        final Slot currentSlot = itemstack != null ? getFakeSlotAtPosition(gui, mousex, mousey) : null;
 
-                    if (currentStackIndex >= currentIngredients.items.length) {
-                        currentStackIndex = 0;
-                    } else if (currentStackIndex < 0) {
-                        currentStackIndex = currentIngredients.items.length - 1;
-                    }
+        if (currentSlot != null) {
+            PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients
+                    .get(INPUT_KEY + currentSlot.getSlotIndex());
+            if (currentIngredients != null && currentIngredients.items.length > 1
+                    && currentIngredients.containsWithNBT(currentSlot.getStack())) {
 
-                    ItemStack currentStack = currentIngredients.items[currentStackIndex].copy();
-                    currentStack.stackSize = currentSlot.getStack().stackSize;
+                if (this.acceptsFollowingTooltipLineHandler == null
+                        || this.acceptsFollowingTooltipLineHandler.tooltipGUID != currentIngredients) {
+                    this.acceptsFollowingTooltipLineHandler = AcceptsFollowingTooltipLineHandler.of(
+                            currentIngredients,
+                            currentIngredients.getFilteredPermutations(),
+                            currentIngredients.item);
+                }
 
-                    if (NEEConfig.allowSynchronousSwitchIngredient) {
-                        for (Slot slot : getCraftingSlots(gui)) {
-
-                            PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
-                                    .get(INPUT_KEY + slot.getSlotIndex());
-
-                            boolean areItemStackEqual = currentSlot.getHasStack() && slot.getHasStack()
-                                    && currentSlot.getStack().isItemEqual(slot.getStack())
-                                    && ItemStack.areItemStackTagsEqual(currentSlot.getStack(), slot.getStack());
-
-                            boolean areIngredientEqual = slotIngredients != null
-                                    && currentIngredients.contains(slotIngredients.items[0]);
-
-                            if (areItemStackEqual && areIngredientEqual) {
-                                craftingSlots.add(slot.slotNumber);
-                            }
-                        }
-                    } else {
-                        craftingSlots.add(currentSlot.slotNumber);
-                    }
-                    NEENetworkHandler.getInstance()
-                            .sendToServer(new PacketSlotStackChange(currentStack, craftingSlots));
+                if (this.acceptsFollowingTooltipLineHandler != null) {
+                    this.acceptsFollowingTooltipLineHandler.setActiveStack(currentIngredients.item);
+                    currenttip.add(
+                            GuiDraw.TOOLTIP_HANDLER + GuiDraw.getTipLineId(this.acceptsFollowingTooltipLineHandler));
                 }
             }
+        }
+
+        return currenttip;
+    }
+
+    @Override
+    public Map<String, String> handleHotkeys(GuiContainer gui, int mousex, int mousey, Map<String, String> hotkeys) {
+        final Slot currentSlot = getFakeSlotAtPosition(gui, mousex, mousey);
+
+        if (currentSlot != null) {
+
+            if (this.acceptsFollowingTooltipLineHandler != null) {
+                hotkeys.put(
+                        NEIClientConfig.getKeyName(
+                                "nee.ingredient",
+                                0,
+                                NEIMouseUtils.MOUSE_BTN_NONE + NEIMouseUtils.MOUSE_SCROLL),
+                        I18n.format("neenergistics.gui.tooltip.ingredient.permutation"));
+            }
+
+            hotkeys.put(
+                    NEIClientConfig
+                            .getKeyName("nee.count", 0, NEIMouseUtils.MOUSE_BTN_NONE + NEIMouseUtils.MOUSE_SCROLL),
+                    I18n.format("neenergistics.gui.tooltip.ingredient.count"));
+        }
+
+        return hotkeys;
+    }
+
+    private Slot getFakeSlotAtPosition(GuiContainer gui, int mousex, int mousey) {
+        if (gui instanceof GuiInterface || isPatternTerm(gui)) {
+            final Slot currentSlot = gui.getSlotAtPosition(mousex, mousey);
+            if (currentSlot instanceof SlotFake && currentSlot.getHasStack()) {
+                return currentSlot;
+            }
+        }
+
+        return null;
+    }
+
+    private void handleRecipeIngredientChange(GuiContainer gui, Slot currentSlot, int dWheel) {
+        final int currentSlotIndex = currentSlot.getSlotIndex();
+        final PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients
+                .get(INPUT_KEY + currentSlotIndex);
+
+        if (currentIngredients != null && currentIngredients.items.length > 1) {
+            final List<Integer> craftingSlots = new ArrayList<>();
+            final List<ItemStack> items = currentIngredients.getFilteredPermutations();
+            final int currentStackIndex = ItemUtils.getPermutationIndex(currentSlot.getStack(), items);
+            final ItemStack nextStack = items.get((items.size() - dWheel + currentStackIndex) % items.size());
+            final ItemStack currentStack = currentIngredients.item;
+
+            if (NEEConfig.allowSynchronousSwitchIngredient) {
+                for (Slot slot : getCraftingSlots(gui)) {
+                    final PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
+                            .get(INPUT_KEY + slot.getSlotIndex());
+
+                    if (slotIngredients != null && slotIngredients.containsWithNBT(nextStack)
+                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, currentStack)) {
+                        slotIngredients.setPermutationToRender(nextStack);
+                        craftingSlots.add(slot.slotNumber);
+                    }
+                }
+            } else {
+                currentIngredients.setPermutationToRender(nextStack);
+                craftingSlots.add(currentSlot.slotNumber);
+            }
+
+            NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(nextStack, craftingSlots));
         }
     }
 

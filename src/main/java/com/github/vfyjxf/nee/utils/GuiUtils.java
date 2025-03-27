@@ -1,7 +1,12 @@
 package com.github.vfyjxf.nee.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -11,12 +16,17 @@ import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
 
+import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IItemList;
 import appeng.client.gui.implementations.GuiPatternTerm;
 import appeng.client.gui.implementations.GuiPatternTermEx;
+import appeng.client.me.ItemRepo;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.implementations.ContainerPatternTermEx;
 import appeng.helpers.IContainerCraftingPacket;
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.relauncher.ReflectionHelper;
+import cpw.mods.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 
 /**
  * @author vfyjxf
@@ -44,14 +54,14 @@ public class GuiUtils {
         return craftMatrix.equals(slot.inventory);
     }
 
+    public static boolean isFluidCraftPatternContainer(Container container) {
+        return isFluidCraftModloaded && (container instanceof ContainerFluidPatternTerminal
+                || container instanceof ContainerFluidPatternTerminalEx);
+    }
+
     public static boolean isPatternContainer(Container container) {
-        if (isFluidCraftModloaded) {
-            return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx
-                    || container instanceof ContainerFluidPatternTerminal
-                    || container instanceof ContainerFluidPatternTerminalEx;
-        } else {
-            return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx;
-        }
+        return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx
+                || isFluidCraftPatternContainer(container);
     }
 
     public static boolean isFluidCraftPatternTermEx(GuiScreen guiScreen) {
@@ -59,13 +69,51 @@ public class GuiUtils {
     }
 
     public static boolean isPatternTerm(GuiScreen guiScreen) {
-        if (isFluidCraftModloaded) {
-            return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx
-                    || guiScreen instanceof GuiFluidPatternTerminal
-                    || guiScreen instanceof GuiFluidPatternTerminalEx;
-        } else {
-            return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx;
+        return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx
+                || isFluidCraftModloaded && (guiScreen instanceof GuiFluidPatternTerminal
+                        || guiScreen instanceof GuiFluidPatternTerminalEx);
+    }
+
+    public static ItemRepo getItemRepo(GuiContainer termGui) {
+        Class<?> clazz = termGui.getClass();
+        ItemRepo repo = null;
+
+        while (repo == null && clazz != null) {
+            try {
+                repo = (ItemRepo) ReflectionHelper.findField(clazz, "repo").get(termGui);
+            } catch (UnableToFindFieldException | IllegalAccessException e) {
+                clazz = clazz.getSuperclass();
+            }
         }
+
+        return repo;
+    }
+
+    public static List<IAEItemStack> getStorageStacks(GuiContainer termGui, Predicate<IAEItemStack> predicate) {
+        final List<IAEItemStack> storageStacks = new ArrayList<>();
+
+        if (termGui != null) {
+            final ItemRepo repo = GuiUtils.getItemRepo(termGui);
+
+            if (repo != null) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    final IItemList<IAEItemStack> list = (IItemList<IAEItemStack>) ReflectionHelper
+                            .findField(ItemRepo.class, "list").get(repo);
+
+                    for (IAEItemStack stack : list) {
+                        if (predicate.test(stack)) {
+                            storageStacks.add(stack.copy());
+                        }
+                    }
+
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return storageStacks;
     }
 
 }
