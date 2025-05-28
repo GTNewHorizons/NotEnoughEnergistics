@@ -108,7 +108,7 @@ public class GuiUtils {
                         }
                     }
 
-                } catch (IllegalAccessException e) {}
+                } catch (Exception e) {}
 
                 try {
                     final IAEItemStack[] pins = (IAEItemStack[]) ReflectionHelper.findField(ItemRepo.class, "pins")
@@ -121,7 +121,7 @@ public class GuiUtils {
                         }
                     }
 
-                } catch (IllegalAccessException e) {}
+                } catch (Exception e) {}
 
             }
         }
