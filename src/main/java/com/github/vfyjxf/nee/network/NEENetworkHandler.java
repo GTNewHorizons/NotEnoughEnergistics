@@ -6,8 +6,11 @@ import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
 import com.github.vfyjxf.nee.network.packet.PacketExtremeRecipe;
 import com.github.vfyjxf.nee.network.packet.PacketNEIBookmark;
 import com.github.vfyjxf.nee.network.packet.PacketNEIPatternRecipe;
+import com.github.vfyjxf.nee.network.packet.PacketOpenGui;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
+import com.github.vfyjxf.nee.network.packet.PacketValueConfigClient;
+import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
 
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
@@ -53,5 +56,16 @@ public class NEENetworkHandler {
                 nextId(),
                 Side.SERVER);
         INSTANCE.registerMessage(PacketNEIBookmark.Handler.class, PacketNEIBookmark.class, nextId(), Side.SERVER);
+        INSTANCE.registerMessage(PacketOpenGui.Handler.class, PacketOpenGui.class, nextId(), Side.SERVER);
+        INSTANCE.registerMessage(
+                PacketValueConfigServer.Handler.class,
+                PacketValueConfigServer.class,
+                nextId(),
+                Side.SERVER);
+        INSTANCE.registerMessage(
+                PacketValueConfigClient.Handler.class,
+                PacketValueConfigClient.class,
+                nextId(),
+                Side.CLIENT);
     }
 }

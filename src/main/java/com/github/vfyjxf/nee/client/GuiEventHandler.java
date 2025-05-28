@@ -31,6 +31,7 @@ import com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
+import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
@@ -51,6 +52,7 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.api.INEIGuiAdapter;
 import codechicken.nei.guihook.IContainerTooltipHandler;
 import codechicken.nei.recipe.AcceptsFollowingTooltipLineHandler;
+import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.RecipeInfo;
 import codechicken.nei.util.NEIMouseUtils;
 import cpw.mods.fml.common.Loader;
@@ -77,6 +79,10 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
             updateCombinationButtonPosition((GuiContainer) event.gui);
         } else {
             this.buttonList = null;
+        }
+
+        if (event.gui instanceof GuiRecipe<?>) {
+            NEENetworkHandler.getInstance().sendToServer(new PacketValueConfigServer("PatternInterface.check"));
         }
     }
 

@@ -13,10 +13,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.p455w0rd.wirelesscraftingterminal.client.gui.GuiWirelessCraftingTerminal;
 
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
 import com.github.vfyjxf.nee.nei.NEETerminalOverlayButton.NEEItemOverlayState;
-import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.Ingredient;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ModIDs;
@@ -34,6 +34,7 @@ import codechicken.nei.recipe.GuiOverlayButton.ItemOverlayState;
 import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.GuiRecipeButton;
 import codechicken.nei.recipe.IRecipeHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -42,7 +43,6 @@ import io.netty.buffer.ByteBuf;
 public class NEECraftingTerminalHandler implements IOverlayHandler {
 
     public static final NEECraftingTerminalHandler instance = new NEECraftingTerminalHandler();
-    public static final int RECIPE_LENGTH = 9;
 
     private NEECraftingTerminalHandler() {}
 
@@ -54,17 +54,17 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
         try {
             final List<PositionedStack> ingredients = recipe.getIngredientStacks(recipeIndex);
 
-            if (GuiUtils.isGuiWirelessCrafting(firstGui)) {
+            if (Loader.isModLoaded(ModIDs.WCT) && firstGui instanceof GuiWirelessCraftingTerminal) {
                 moveItemsForWirelessCrafting(firstGui, ingredients);
             } else {
-                PacketNEIRecipe packet = new PacketNEIRecipe(packIngredients(firstGui, ingredients, false, 4));
+                PacketNEIRecipe packet = new PacketNEIRecipe(packIngredients(firstGui, ingredients, false));
                 // don't use gtnh ae2's method;
                 int packetSize = getPacketSize(packet);
                 if (packetSize >= 32 * 1024) {
                     AELog.warn(
                             "Recipe for " + recipe.getRecipeName()
                                     + " has too many variants, reduced version will be used");
-                    packet = new PacketNEIRecipe(packIngredients(firstGui, ingredients, true, 4));
+                    packet = new PacketNEIRecipe(packIngredients(firstGui, ingredients, true));
                 }
 
                 if (packetSize >= 0) {
@@ -107,8 +107,8 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
      * Copied from GTNewHorizons/Applied-Energistics-2-Unofficial
      */
     @SuppressWarnings("unchecked")
-    private NBTTagCompound packIngredients(GuiContainer gui, List<PositionedStack> ingredients, boolean limited,
-            int multiplier) throws IOException {
+    private NBTTagCompound packIngredients(GuiContainer gui, List<PositionedStack> ingredients, boolean limited)
+            throws IOException {
         final NBTTagCompound recipe = new NBTTagCompound();
 
         for (final PositionedStack positionedStack : ingredients) {
@@ -123,7 +123,6 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
                         // prefer pure crystals.
                         for (ItemStack stack : positionedStack.getFilteredPermutations()) {
                             stack = stack.copy();
-                            stack.stackSize *= multiplier;
                             if (Platform.isRecipePrioritized(stack)) {
                                 list.add(0, stack);
                             } else {
@@ -171,7 +170,7 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
         try {
             net.p455w0rd.wirelesscraftingterminal.core.sync.network.NetworkHandler.instance.sendToServer(
                     new net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketNEIRecipe(
-                            packIngredients(firstGui, ingredients, false, 4)));
+                            packIngredients(firstGui, ingredients, false)));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,7 +183,8 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
         }
     }
 
-    private boolean isGuiCraftingTerm(GuiRecipe<?> gui) {
-        return this.getClass().isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
+    public static boolean isGuiCraftingTerm(GuiRecipe<?> gui) {
+        return NEECraftingTerminalHandler.class.isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
     }
+
 }

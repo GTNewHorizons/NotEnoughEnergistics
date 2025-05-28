@@ -9,11 +9,8 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.network.NEENetworkHandler;
-import com.github.vfyjxf.nee.network.packet.PacketCraftingRequest;
 
 import appeng.api.storage.data.IAEItemStack;
-import appeng.util.item.AEItemStack;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 
@@ -45,7 +42,7 @@ public class IngredientTracker {
     }
 
     public List<Ingredient> getIngredients() {
-        return ingredients;
+        return this.ingredients;
     }
 
     public List<ItemStack> getRequireToCraftStacks() {
@@ -73,27 +70,23 @@ public class IngredientTracker {
     }
 
     public List<ItemStack> getRequireStacks() {
-        return requireStacks;
+        return this.requireStacks;
     }
 
     public boolean hasNext() {
-        return currentIndex < getRequireStacks().size();
+        return this.currentIndex < getRequireStacks().size();
     }
 
-    public void requestNextIngredient(boolean noPreview) {
-        IAEItemStack stack = AEItemStack.create(this.getRequiredStack(currentIndex));
-        if (stack != null) {
-            NEENetworkHandler.getInstance().sendToServer(new PacketCraftingRequest(stack, noPreview));
-        }
-        currentIndex++;
+    public ItemStack getNextIngredient() {
+        return getRequiredStack(this.currentIndex++);
     }
 
     public ItemStack getRequiredStack(int index) {
-        return this.getRequireStacks().get(index);
+        return getRequireStacks().get(index);
     }
 
     public int getRecipeIndex() {
-        return recipeIndex;
+        return this.recipeIndex;
     }
 
     public void addAvailableStack(ItemStack stack) {
@@ -129,14 +122,14 @@ public class IngredientTracker {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void calculateIngredients() {
         final List<IAEItemStack> stacks = GuiUtils
                 .getStorageStacks(this.termGui, stack -> NEEConfig.matchOtherItems || stack.isCraftable());
 
         for (Ingredient ingredient : this.ingredients) {
+            ingredient.setCurrentCount(0);
             for (IAEItemStack stack : stacks) {
-                if (ingredient.getIngredient().contains(stack.getItemStack()) && stack.getStackSize() > 0) {
+                if (stack.getStackSize() > 0 && ingredient.getIngredient().contains(stack.getItemStack())) {
                     ingredient.addCount(stack.getStackSize());
                     if (ingredient.requiresToCraft()) {
                         stack.setStackSize(0);

@@ -1,0 +1,52 @@
+package com.github.vfyjxf.nee.network.packet;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
+
+import com.github.vfyjxf.nee.network.NEEGuiHandler;
+
+import appeng.container.AEBaseContainer;
+import appeng.container.ContainerOpenContext;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import io.netty.buffer.ByteBuf;
+
+public class PacketOpenGui implements IMessage {
+
+    private int guiId;
+
+    public PacketOpenGui() {}
+
+    public PacketOpenGui(int guiId) {
+        this.guiId = guiId;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        this.guiId = buf.readInt();
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf) {
+        buf.writeInt(this.guiId);
+    }
+
+    public static final class Handler implements IMessageHandler<PacketOpenGui, IMessage> {
+
+        @Override
+        public IMessage onMessage(PacketOpenGui message, MessageContext ctx) {
+            final EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+
+            if (player.openContainer instanceof AEBaseContainer baseContainer) {
+                final ContainerOpenContext context = baseContainer.getOpenContext();
+                if (context != null) {
+                    final TileEntity tile = context.getTile();
+                    NEEGuiHandler.openGui(player, message.guiId, tile, context.getSide());
+                }
+            }
+
+            return null;
+        }
+    }
+}

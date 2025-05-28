@@ -9,17 +9,15 @@ import net.minecraft.client.resources.I18n;
 import org.lwjgl.opengl.GL11;
 
 import com.github.vfyjxf.nee.config.NEEConfig;
-import com.github.vfyjxf.nee.nei.NEETerminalOverlayButton.NEEItemOverlayState;
 import com.github.vfyjxf.nee.utils.Ingredient;
 
 import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.Image;
 import codechicken.nei.LayoutManager;
 import codechicken.nei.NEIClientConfig;
+import codechicken.nei.PositionedStack;
 import codechicken.nei.drawable.DrawableBuilder;
 import codechicken.nei.recipe.GuiOverlayButton;
-import codechicken.nei.recipe.GuiOverlayButton.ItemOverlayFormat;
-import codechicken.nei.recipe.GuiOverlayButton.ItemOverlayState;
 import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.GuiRecipeButton;
 import codechicken.nei.recipe.RecipeHandlerRef;
@@ -65,12 +63,12 @@ public class NEETerminalOverlayButton extends GuiOverlayButton {
         }
 
         public void draw(ItemOverlayFormat format) {
-            boolean doCraftingHelp = NEIClientConfig.isKeyHashDown("nee.nopreview")
+            final boolean doCraftingHelp = NEIClientConfig.isKeyHashDown("nee.nopreview")
                     || NEIClientConfig.isKeyHashDown("nee.preview");
 
             if (this.ingredient.isCraftable()
                     && (!this.isCraftingTerm || doCraftingHelp && this.ingredient.requiresToCraft())) {
-                Image icon = this.isPresent ? checkIcon : crossIcon;
+                final Image icon = this.isPresent ? checkIcon : crossIcon;
 
                 if (format == ItemOverlayFormat.BACKGROUND) {
                     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -112,13 +110,28 @@ public class NEETerminalOverlayButton extends GuiOverlayButton {
         hotkeys = super.handleHotkeys(gui, mousex, mousey, hotkeys);
 
         if (ingredientsOverlay().stream().allMatch(
-                state -> state instanceof NEEItemOverlayState overlayState && showCraftingHotkeys(overlayState))) {
-            hotkeys.put(
-                    NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
-                    I18n.format("neenergistics.gui.tooltip.crafting.preview"));
-            hotkeys.put(
-                    NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
-                    I18n.format("neenergistics.gui.tooltip.crafting.nopreview"));
+                state -> state.isPresent()
+                        || state instanceof NEEItemOverlayState overlayState && showCraftingHotkeys(overlayState))) {
+            final PositionedStack pStack = this.handlerRef.handler.getResultStack(handlerRef.recipeIndex);
+
+            if (NEECraftingPreviewHandler.instance.canCraftRecipeResult(gui, pStack)) {
+                hotkeys.put(
+                        NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                        I18n.format("neenergistics.gui.tooltip.crafting.preview.result"));
+
+                hotkeys.put(
+                        NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                        I18n.format("neenergistics.gui.tooltip.crafting.nopreview.result"));
+            } else {
+                hotkeys.put(
+                        NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                        I18n.format("neenergistics.gui.tooltip.crafting.preview"));
+
+                hotkeys.put(
+                        NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                        I18n.format("neenergistics.gui.tooltip.crafting.nopreview"));
+            }
+
         }
 
         return hotkeys;
@@ -128,7 +141,7 @@ public class NEETerminalOverlayButton extends GuiOverlayButton {
         return button.getIngredient().isCraftable() || !button.getIngredient().requiresToCraft();
     }
 
-    public static void updateRecipeButtons(GuiRecipe guiRecipe, List<GuiRecipeButton> buttonList) {
+    public static void updateRecipeButtons(GuiRecipe<?> guiRecipe, List<GuiRecipeButton> buttonList) {
         for (int i = 0; i < buttonList.size(); i++) {
             if (buttonList.get(i) instanceof GuiOverlayButton btn) {
                 buttonList.set(i, new NEETerminalOverlayButton(btn));

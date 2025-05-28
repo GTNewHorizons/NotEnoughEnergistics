@@ -1,6 +1,7 @@
 package com.github.vfyjxf.nee.nei;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
@@ -9,9 +10,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketArcaneRecipe;
+import com.github.vfyjxf.nee.utils.Ingredient;
+import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import appeng.util.Platform;
+import codechicken.nei.ItemsTooltipLineHandler;
+import codechicken.nei.NEIClientUtils;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
 import codechicken.nei.recipe.GuiOverlayButton;
@@ -24,6 +29,48 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
  * @author vfyjxf
  */
 public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
+
+    public class NEEArcaneOverlayButton extends NEETerminalOverlayButton {
+
+        public NEEArcaneOverlayButton(GuiOverlayButton button) {
+            super(button.firstGui, button.handlerRef, button.xPosition, button.yPosition);
+        }
+
+        @Override
+        protected List<ItemOverlayState> ingredientsOverlay() {
+            List<PositionedStack> ingredients = this.handlerRef.handler
+                    .getIngredientStacks(this.handlerRef.recipeIndex);
+
+            if (this.itemPresenceCache.size() != ingredients.size()) {
+                this.itemPresenceCache.clear();
+
+                final IngredientTracker tracker = new IngredientTracker(
+                        firstGui,
+                        this.handlerRef.handler,
+                        this.handlerRef.recipeIndex);
+
+                for (Ingredient ingredient : tracker.getIngredients()) {
+                    this.itemPresenceCache.add(new NEEItemOverlayState(ingredient, true));
+                }
+
+                List<ItemStack> items = this.itemPresenceCache.stream().filter(state -> !state.isPresent())
+                        .map(state -> state.getSlot().item).collect(Collectors.toList());
+
+                if (!items.isEmpty()) {
+                    this.missedMaterialsTooltipLineHandler = new ItemsTooltipLineHandler(
+                            NEIClientUtils.translate("recipe.overlay.missing"),
+                            items,
+                            true,
+                            Integer.MAX_VALUE);
+                } else {
+                    this.missedMaterialsTooltipLineHandler = null;
+                }
+            }
+
+            return this.itemPresenceCache;
+        }
+
+    }
 
     public static final NEEKnowledgeInscriberHandler instance = new NEEKnowledgeInscriberHandler();
 
@@ -104,11 +151,19 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     @SubscribeEvent
     public void onActionPerformedEventPre(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
 
-        if (NEEConfig.noShift && event.gui instanceof GuiRecipe guiRecipe
-                && (isGuiKnowledgeInscriber(guiRecipe) || isGuiArcaneCraftingTerm(guiRecipe))) {
-            for (int i = 0; i < event.buttonList.size(); i++) {
-                if (event.buttonList.get(i) instanceof GuiOverlayButton btn) {
-                    btn.setRequireShiftForOverlayRecipe(false);
+        if (NEEConfig.noShift && event.gui instanceof GuiRecipe guiRecipe) {
+
+            if (isGuiArcaneCraftingTerm(guiRecipe)) {
+                for (int i = 0; i < event.buttonList.size(); i++) {
+                    if (event.buttonList.get(i) instanceof GuiOverlayButton btn) {
+                        event.buttonList.set(i, new NEEArcaneOverlayButton(btn));
+                    }
+                }
+            } else if (isGuiKnowledgeInscriber(guiRecipe)) {
+                for (int i = 0; i < event.buttonList.size(); i++) {
+                    if (event.buttonList.get(i) instanceof GuiOverlayButton btn) {
+                        btn.setRequireShiftForOverlayRecipe(false);
+                    }
                 }
             }
         }

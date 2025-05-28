@@ -153,7 +153,7 @@ public class NEINeeConfig implements IConfigureNEI {
                     NEETerminalBookmarkContainerHandler.instance);
         }
 
-        if (Loader.isModLoaded("thaumcraftneiplugin")) {
+        if (Loader.isModLoaded(ModIDs.ThE)) {
             API.registerBookmarkContainerHandler(
                     GuiArcaneCraftingTerminal.class,
                     NEETerminalBookmarkContainerHandler.instance);
@@ -242,7 +242,7 @@ public class NEINeeConfig implements IConfigureNEI {
 
     private void installThaumicEnergisticsSupport() {
 
-        if (Loader.isModLoaded("thaumcraftneiplugin")) {
+        if (Loader.isModLoaded(ModIDs.ThE)) {
             NotEnoughEnergistics.logger.info("Install ThaumicEnergistics support");
 
             try {

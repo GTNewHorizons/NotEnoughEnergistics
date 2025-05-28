@@ -8,6 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.utils.ModIDs;
 
 import appeng.api.networking.IGrid;
 import appeng.api.networking.energy.IEnergyGrid;
@@ -57,7 +58,11 @@ public class PacketNEIBookmark implements IMessage {
             final EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             final Container container = player.openContainer;
 
-            if (container instanceof ContainerMEMonitorable monitorable && message.bookmarkItems != null) {
+            if (message.bookmarkItems == null) {
+                return null;
+            }
+
+            if (container instanceof ContainerMEMonitorable monitorable) {
                 final IMEMonitor<IAEItemStack> monitor = monitorable.getMonitor();
                 if (monitor != null) {
                     final IEnergySource energy = monitorable.getPowerSource();
@@ -81,32 +86,31 @@ public class PacketNEIBookmark implements IMessage {
                     }
                 }
 
-            } else if (Loader.isModLoaded("thaumcraftneiplugin")
-                    && container instanceof ContainerPartArcaneCraftingTerminal act) {
-                        final IMEMonitor<IAEItemStack> monitor = getMonitor(container);
-                        final IGrid grid = act.getHostGrid();
-                        if (grid == null || monitor == null) return null;
-                        final IEnergyGrid energy = grid.getCache(IEnergyGrid.class);
-                        final BaseActionSource actionSource = new PlayerSource(player, act.terminal);
+            } else if (Loader.isModLoaded(ModIDs.ThE) && container instanceof ContainerPartArcaneCraftingTerminal act) {
+                final IMEMonitor<IAEItemStack> monitor = getMonitor(container);
+                final IGrid grid = act.getHostGrid();
+                if (grid == null || monitor == null) return null;
+                final IEnergyGrid energy = grid.getCache(IEnergyGrid.class);
+                final BaseActionSource actionSource = new PlayerSource(player, act.terminal);
 
-                        for (Object key : message.bookmarkItems.func_150296_c()) {
-                            final ItemStack bookmarkItem = ItemUtils
-                                    .loadItemStackFromNBT(message.bookmarkItems.getCompoundTag((String) key));
-                            bookmarkItem.stackSize = getFreeStackSize(player, bookmarkItem);
+                for (Object key : message.bookmarkItems.func_150296_c()) {
+                    final ItemStack bookmarkItem = ItemUtils
+                            .loadItemStackFromNBT(message.bookmarkItems.getCompoundTag((String) key));
+                    bookmarkItem.stackSize = getFreeStackSize(player, bookmarkItem);
 
-                            if (bookmarkItem.stackSize > 0) {
-                                final AEItemStack requestStack = AEItemStack.create(bookmarkItem);
-                                final IAEItemStack extractedStack = Platform
-                                        .poweredExtraction(energy, monitor, requestStack, actionSource);
+                    if (bookmarkItem.stackSize > 0) {
+                        final AEItemStack requestStack = AEItemStack.create(bookmarkItem);
+                        final IAEItemStack extractedStack = Platform
+                                .poweredExtraction(energy, monitor, requestStack, actionSource);
 
-                                if (extractedStack != null) {
-                                    InventoryAdaptor.getAdaptor(player, ForgeDirection.UNKNOWN)
-                                            .addItems(extractedStack.getItemStack());
-                                }
-                            }
+                        if (extractedStack != null) {
+                            InventoryAdaptor.getAdaptor(player, ForgeDirection.UNKNOWN)
+                                    .addItems(extractedStack.getItemStack());
                         }
-
                     }
+                }
+
+            }
 
             return null;
         }
