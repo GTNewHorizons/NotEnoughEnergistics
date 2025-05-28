@@ -96,6 +96,7 @@ public class GuiUtils {
             final ItemRepo repo = GuiUtils.getItemRepo(termGui);
 
             if (repo != null) {
+
                 try {
                     @SuppressWarnings("unchecked")
                     final IItemList<IAEItemStack> list = (IItemList<IAEItemStack>) ReflectionHelper
@@ -107,9 +108,21 @@ public class GuiUtils {
                         }
                     }
 
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+                } catch (IllegalAccessException e) {}
+
+                try {
+                    final IAEItemStack[] pins = (IAEItemStack[]) ReflectionHelper.findField(ItemRepo.class, "pins")
+                            .get(repo);
+
+                    for (int i = 0; i < pins.length; i++) {
+                        final IAEItemStack stack = pins[i];
+                        if (stack != null && predicate.test(stack)) {
+                            storageStacks.add(stack.copy());
+                        }
+                    }
+
+                } catch (IllegalAccessException e) {}
+
             }
         }
 

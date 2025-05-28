@@ -433,8 +433,7 @@ public class TilePatternInterface extends AENetworkInvTile
                 final ImmutableSet<ICraftingCPU> cpuSet = cg.getCpus();
 
                 for (ICraftingCPU cpu : cpuSet) {
-                    if (cpu instanceof CraftingCPUCluster) {
-                        CraftingCPUCluster cluster = (CraftingCPUCluster) cpu;
+                    if (cpu instanceof CraftingCPUCluster cluster) {
                         final IItemList<IAEItemStack> pendingList = AEApi.instance().storage().createItemList();
                         cluster.getListOfItem(pendingList, CraftingItemList.PENDING);
                         for (IAEItemStack pendingStack : pendingList) {
@@ -668,12 +667,10 @@ public class TilePatternInterface extends AENetworkInvTile
         try {
             final ICraftingGrid cg = this.getProxy().getCrafting();
             final ImmutableSet<ICraftingCPU> cpuSet = cg.getCpus();
-
             final IItemList<IAEItemStack> pendingList = AEApi.instance().storage().createItemList();
 
             for (ICraftingCPU cpu : cpuSet) {
-                if (cpu instanceof CraftingCPUCluster) {
-                    CraftingCPUCluster cluster = (CraftingCPUCluster) cpu;
+                if (cpu instanceof CraftingCPUCluster cluster) {
                     cluster.getListOfItem(pendingList, CraftingItemList.PENDING);
                 }
             }
