@@ -149,7 +149,7 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     }
 
     @SubscribeEvent
-    public void onActionPerformedEventPre(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
+    public void onActionPerformedEventPost(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
 
         if (NEEConfig.noShift && event.gui instanceof GuiRecipe guiRecipe) {
 
@@ -171,7 +171,7 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     }
 
     private boolean isGuiKnowledgeInscriber(GuiRecipe<?> gui) {
-        return this.getClass().isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
+        return gui.firstGui != null && this.getClass().isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
     }
 
     private boolean isGuiArcaneCraftingTerm(GuiRecipe<?> gui) {

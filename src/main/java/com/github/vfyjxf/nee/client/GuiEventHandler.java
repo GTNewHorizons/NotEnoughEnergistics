@@ -95,8 +95,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
     }
 
     private boolean isGuiPatternTerm(GuiScreen guiScreen) {
-        if (guiScreen instanceof GuiContainer) {
-            final GuiContainer guiContainer = (GuiContainer) guiScreen;
+        if (guiScreen instanceof GuiContainer guiContainer) {
 
             if (Loader.isModLoaded(ModIDs.FC) && guiContainer instanceof FCGuiEncodeTerminal) {
                 return false;

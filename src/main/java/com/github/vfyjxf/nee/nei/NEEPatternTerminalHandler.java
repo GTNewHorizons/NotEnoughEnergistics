@@ -281,14 +281,14 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
     }
 
     @SubscribeEvent
-    public void onActionPerformedEventPre(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
+    public void onActionPerformedEventPost(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
         if (event.gui instanceof GuiRecipe guiRecipe && isGuiPatternTerm(guiRecipe)) {
             NEETerminalOverlayButton.updateRecipeButtons(guiRecipe, event.buttonList);
         }
     }
 
     private boolean isGuiPatternTerm(GuiRecipe<?> gui) {
-        return this.getClass().isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
+        return gui.firstGui != null && this.getClass().isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
     }
 
 }
