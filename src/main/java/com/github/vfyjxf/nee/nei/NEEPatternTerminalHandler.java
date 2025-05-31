@@ -66,8 +66,9 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
         NEENetworkHandler.getInstance().sendToServer(packRecipe(handler, recipeIndex, multiplier));
 
-        if (Loader.isModLoaded(ModIDs.FC) && GuiUtils.isFluidCraftPatternTermEx(gui)) {
-            fluidCraftOverlayRecipe(gui, handler, recipeIndex, multiplier);
+        if (Loader.isModLoaded(ModIDs.FC)
+                && (GuiUtils.isFluidCraftPatternTermEx(gui) || GuiUtils.isFluidCraftPatternTerm(gui))) {
+            fluidCraftOverlayRecipe(gui, handler, recipeIndex);
         }
 
         return 0;
@@ -86,9 +87,8 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
     }
 
     @Optional.Method(modid = ModIDs.FC)
-    private void fluidCraftOverlayRecipe(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex,
-            int multiplier) {
-        FluidPatternTerminalRecipeTransferHandler.INSTANCE.transferRecipe(firstGui, recipe, recipeIndex, multiplier);
+    private void fluidCraftOverlayRecipe(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex) {
+        FluidPatternTerminalRecipeTransferHandler.INSTANCE.overlayRecipe(firstGui, recipe, recipeIndex, true);
     }
 
     private PacketNEIPatternRecipe packRecipe(IRecipeHandler recipe, int recipeIndex, int multiplier) {
