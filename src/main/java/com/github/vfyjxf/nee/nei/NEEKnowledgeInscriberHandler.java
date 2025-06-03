@@ -13,6 +13,7 @@ import com.github.vfyjxf.nee.network.packet.PacketArcaneRecipe;
 import com.github.vfyjxf.nee.utils.Ingredient;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.utils.ModIDs;
 
 import appeng.util.Platform;
 import codechicken.nei.ItemsTooltipLineHandler;
@@ -23,6 +24,7 @@ import codechicken.nei.recipe.GuiOverlayButton;
 import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.GuiRecipeButton;
 import codechicken.nei.recipe.IRecipeHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
@@ -175,7 +177,8 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     }
 
     private boolean isGuiArcaneCraftingTerm(GuiRecipe<?> gui) {
-        return gui.firstGui instanceof thaumicenergistics.client.gui.GuiArcaneCraftingTerminal;
+        return Loader.isModLoaded(ModIDs.ThE)
+                && gui.firstGui instanceof thaumicenergistics.client.gui.GuiArcaneCraftingTerminal;
     }
 
 }

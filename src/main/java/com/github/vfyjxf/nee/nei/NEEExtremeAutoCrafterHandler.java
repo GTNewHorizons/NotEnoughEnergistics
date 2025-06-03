@@ -67,7 +67,7 @@ public class NEEExtremeAutoCrafterHandler implements IOverlayHandler {
 
     @SubscribeEvent
     public void onActionPerformedEventPost(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
-        if (NEEConfig.noShift && event.gui instanceof GuiRecipe && isGuiExtremeTerm((GuiRecipe<?>) event.gui)) {
+        if (NEEConfig.noShift && event.gui instanceof GuiRecipe guiRecipe && isGuiExtremeTerm(guiRecipe)) {
             for (int i = 0; i < event.buttonList.size(); i++) {
                 if (event.buttonList.get(i) instanceof GuiOverlayButton btn) {
                     btn.setRequireShiftForOverlayRecipe(false);
