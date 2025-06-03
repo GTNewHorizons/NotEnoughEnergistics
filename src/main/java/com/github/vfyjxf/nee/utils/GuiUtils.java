@@ -68,6 +68,10 @@ public class GuiUtils {
         return isFluidCraftModloaded && guiScreen instanceof GuiFluidPatternTerminalEx;
     }
 
+    public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen) {
+        return isFluidCraftModloaded && guiScreen instanceof GuiFluidPatternTerminal;
+    }
+
     public static boolean isPatternTerm(GuiScreen guiScreen) {
         return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx
                 || isFluidCraftModloaded && (guiScreen instanceof GuiFluidPatternTerminal
