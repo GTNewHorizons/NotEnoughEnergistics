@@ -114,22 +114,24 @@ public class NEETerminalOverlayButton extends GuiOverlayButton {
                         || state instanceof NEEItemOverlayState overlayState && showCraftingHotkeys(overlayState))) {
             final PositionedStack pStack = this.handlerRef.handler.getResultStack(handlerRef.recipeIndex);
 
-            if (NEECraftingPreviewHandler.instance.canCraftRecipeResult(gui, pStack)) {
-                hotkeys.put(
-                        NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
-                        I18n.format("neenergistics.gui.tooltip.crafting.preview.result"));
+            if (pStack != null) {
+                if (NEECraftingPreviewHandler.instance.canCraftRecipeResult(gui, pStack)) {
+                    hotkeys.put(
+                            NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                            I18n.format("neenergistics.gui.tooltip.crafting.preview.result"));
 
-                hotkeys.put(
-                        NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
-                        I18n.format("neenergistics.gui.tooltip.crafting.nopreview.result"));
-            } else {
-                hotkeys.put(
-                        NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
-                        I18n.format("neenergistics.gui.tooltip.crafting.preview"));
+                    hotkeys.put(
+                            NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                            I18n.format("neenergistics.gui.tooltip.crafting.nopreview.result"));
+                } else {
+                    hotkeys.put(
+                            NEIClientConfig.getKeyName("nee.preview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                            I18n.format("neenergistics.gui.tooltip.crafting.preview"));
 
-                hotkeys.put(
-                        NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
-                        I18n.format("neenergistics.gui.tooltip.crafting.nopreview"));
+                    hotkeys.put(
+                            NEIClientConfig.getKeyName("nee.nopreview", 0, NEIMouseUtils.MOUSE_BTN_LMB),
+                            I18n.format("neenergistics.gui.tooltip.crafting.nopreview"));
+                }
             }
 
         }

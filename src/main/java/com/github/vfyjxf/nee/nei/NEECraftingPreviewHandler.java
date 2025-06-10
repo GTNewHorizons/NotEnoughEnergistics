@@ -61,14 +61,15 @@ public class NEECraftingPreviewHandler {
     private NEECraftingPreviewHandler() {}
 
     public boolean handle(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex) {
+        final PositionedStack pStack = recipe.getResultStack(recipeIndex);
         this.isAutoStart = NEIClientConfig.isKeyHashDown("nee.nopreview");
         this.modID = getModID(firstGui.inventorySlots);
         this.resultStackSize = 0;
         this.patternCompound = null;
         this.tracker = null;
 
-        if ((this.isAutoStart || NEIClientConfig.isKeyHashDown("nee.preview")) && !this.modID.isEmpty()) {
-            final PositionedStack pStack = recipe.getResultStack(recipeIndex);
+        if (pStack != null && (this.isAutoStart || NEIClientConfig.isKeyHashDown("nee.preview"))
+                && !this.modID.isEmpty()) {
             final IAEItemStack aeItemStack = AEItemStack.create(pStack.item);
             this.resultStackSize = pStack.item.stackSize;
 
