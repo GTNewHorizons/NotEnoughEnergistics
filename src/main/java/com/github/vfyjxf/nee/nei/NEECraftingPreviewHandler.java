@@ -41,6 +41,7 @@ import appeng.util.item.AEItemStack;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
+import codechicken.nei.recipe.TemplateRecipeHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -68,14 +69,14 @@ public class NEECraftingPreviewHandler {
         this.patternCompound = null;
         this.tracker = null;
 
-        if (pStack != null && (this.isAutoStart || NEIClientConfig.isKeyHashDown("nee.preview"))
-                && !this.modID.isEmpty()) {
-            final IAEItemStack aeItemStack = AEItemStack.create(pStack.item);
-            this.resultStackSize = pStack.item.stackSize;
-
+        if ((this.isAutoStart || NEIClientConfig.isKeyHashDown("nee.preview")) && !this.modID.isEmpty()) {
             firstGui.mc.displayGuiScreen(firstGui);
 
-            if (existsRecipeResult(firstGui, pStack)) {
+            if (pStack != null) {
+                this.resultStackSize = pStack.item.stackSize;
+            }
+
+            if (pStack != null && existsRecipeResult(firstGui, pStack)) {
 
                 if (this.isAutoStart) {
                     final PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
@@ -86,11 +87,11 @@ public class NEECraftingPreviewHandler {
                             true);
                     NEENetworkHandler.getInstance().sendToServer(craftingRequest);
                 } else {
-                    openCraftAmount(firstGui, aeItemStack);
+                    openCraftAmount(firstGui, pStack.item);
                 }
 
                 return true;
-            } else if (this.isPatternInterfaceExists) {
+            } else if (pStack != null && this.isPatternInterfaceExists && isCraftingTableRecipe(recipe)) {
                 this.patternCompound = getPatternStack(recipe, recipeIndex, Minecraft.getMinecraft().theWorld);
 
                 if (this.isAutoStart) {
@@ -102,7 +103,7 @@ public class NEECraftingPreviewHandler {
                             true);
                     NEENetworkHandler.getInstance().sendToServer(craftingRequest);
                 } else {
-                    openCraftAmount(firstGui, aeItemStack);
+                    openCraftAmount(firstGui, pStack.item);
                 }
 
                 return true;
@@ -114,8 +115,22 @@ public class NEECraftingPreviewHandler {
 
                     if (this.isAutoStart) {
                         requestNextIngredient();
+                    } else if (pStack != null) {
+                        openCraftAmount(firstGui, pStack.item);
                     } else {
-                        openCraftAmount(firstGui, aeItemStack);
+                        PositionedStack otherStack = null;
+
+                        for (PositionedStack positionedStack : recipe.getOtherStacks(recipeIndex)) {
+                            otherStack = positionedStack;
+                            break;
+                        }
+
+                        if (otherStack != null) {
+                            this.resultStackSize = otherStack.item.stackSize;
+                            openCraftAmount(firstGui, otherStack.item);
+                        } else {
+                            return false;
+                        }
                     }
 
                     return true;
@@ -131,7 +146,8 @@ public class NEECraftingPreviewHandler {
         return false;
     }
 
-    private void openCraftAmount(GuiContainer firstGui, IAEItemStack aeItemStack) {
+    private void openCraftAmount(GuiContainer firstGui, ItemStack itemstack) {
+        final IAEItemStack aeItemStack = AEItemStack.create(itemstack);
 
         if (this.modID.equals(ModIDs.ThE)) {
             Packet_S_ArcaneCraftingTerminal.sendAutoCraft(Minecraft.getMinecraft().thePlayer, aeItemStack);
@@ -292,6 +308,15 @@ public class NEECraftingPreviewHandler {
         }
     }
 
+    private boolean isCraftingTableRecipe(IRecipeHandler recipe) {
+        if (recipe instanceof TemplateRecipeHandler templateRecipeHandler) {
+            String overlayIdentifier = templateRecipeHandler.getOverlayIdentifier();
+            return "crafting".equals(overlayIdentifier) || "crafting2x2".equals(overlayIdentifier);
+        } else {
+            return false;
+        }
+    }
+
     private NBTTagCompound getPatternStack(IRecipeHandler recipeHandler, int recipeIndex, World world) {
         final InventoryCrafting ic = new InventoryCrafting(new ContainerNull(), 3, 3);
         final List<PositionedStack> ingredients = recipeHandler.getIngredientStacks(recipeIndex);
@@ -358,8 +383,18 @@ public class NEECraftingPreviewHandler {
         this.isPatternInterfaceExists = isPatternInterfaceExists;
     }
 
-    public boolean canCraftRecipeResult(GuiContainer firstGui, PositionedStack pStack) {
-        return pStack != null && (this.isPatternInterfaceExists || existsRecipeResult(firstGui, pStack));
+    public boolean canCraftRecipeResult(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex) {
+        final PositionedStack pStack = recipe.getResultStack(recipeIndex);
+
+        if (pStack == null) {
+            return false;
+        }
+
+        if (this.isPatternInterfaceExists && isCraftingTableRecipe(recipe)) {
+            return true;
+        }
+
+        return existsRecipeResult(firstGui, pStack);
     }
 
     private boolean existsRecipeResult(GuiContainer firstGui, PositionedStack pStack) {
