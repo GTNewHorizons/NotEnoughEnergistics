@@ -43,9 +43,9 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
-import thaumicenergistics.common.network.packet.server.Packet_S_ArcaneCraftingTerminal;
 
 public class NEECraftingPreviewHandler {
 
@@ -150,26 +150,42 @@ public class NEECraftingPreviewHandler {
         final IAEItemStack aeItemStack = AEItemStack.create(itemstack);
 
         if (this.modID.equals(ModIDs.ThE)) {
-            Packet_S_ArcaneCraftingTerminal.sendAutoCraft(Minecraft.getMinecraft().thePlayer, aeItemStack);
+            sendToArcaneCraftingerver(aeItemStack);
         } else if (this.modID.equals(ModIDs.FC)) {
             ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
-            com.glodblock.github.network.CPacketInventoryAction packet = new com.glodblock.github.network.CPacketInventoryAction(
-                    InventoryAction.AUTO_CRAFT,
-                    0,
-                    0);
-            com.glodblock.github.FluidCraft.proxy.netHandler.sendToServer(packet);
+            sendToFluidCraftingServer();
         } else if (this.modID.equals(ModIDs.WCT)) {
             ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
-            net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketInventoryAction packet = new net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketInventoryAction(
-                    InventoryAction.AUTO_CRAFT,
-                    0,
-                    0);
-            net.p455w0rd.wirelesscraftingterminal.core.sync.network.NetworkHandler.instance.sendToServer(packet);
+            sendToWirelessCraftingServer();
         } else if (this.modID.equals("AE")) {
             ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
             NetworkHandler.instance.sendToServer(new PacketInventoryAction(InventoryAction.AUTO_CRAFT, 0, 0));
         }
 
+    }
+
+    @Optional.Method(modid = ModIDs.ThE)
+    protected void sendToArcaneCraftingerver(IAEItemStack aeItemStack) {
+        thaumicenergistics.common.network.packet.server.Packet_S_ArcaneCraftingTerminal
+                .sendAutoCraft(Minecraft.getMinecraft().thePlayer, aeItemStack);
+    }
+
+    @Optional.Method(modid = ModIDs.FC)
+    protected void sendToFluidCraftingServer() {
+        com.glodblock.github.network.CPacketInventoryAction packet = new com.glodblock.github.network.CPacketInventoryAction(
+                InventoryAction.AUTO_CRAFT,
+                0,
+                0);
+        com.glodblock.github.FluidCraft.proxy.netHandler.sendToServer(packet);
+    }
+
+    @Optional.Method(modid = ModIDs.WCT)
+    protected void sendToWirelessCraftingServer() {
+        net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketInventoryAction packet = new net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketInventoryAction(
+                InventoryAction.AUTO_CRAFT,
+                0,
+                0);
+        net.p455w0rd.wirelesscraftingterminal.core.sync.network.NetworkHandler.instance.sendToServer(packet);
     }
 
     @SubscribeEvent
