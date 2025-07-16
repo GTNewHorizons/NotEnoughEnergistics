@@ -11,6 +11,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
@@ -67,7 +68,7 @@ public class PacketNEIPatternRecipe implements IMessage {
             EntityPlayerMP player = ctx.getServerHandler().playerEntity;
             Container container = player.openContainer;
 
-            if (message.input != null && container instanceof AEBaseContainer
+            if (message.input != null && GuiUtils.isPatternContainer(container)
                     && container instanceof IContainerCraftingPacket) {
                 AEBaseContainer baseContainer = (AEBaseContainer) container;
                 setCraftingRecipe(baseContainer, message.output == null);
