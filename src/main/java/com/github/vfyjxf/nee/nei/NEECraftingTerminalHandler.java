@@ -185,7 +185,7 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
 
     public static boolean isGuiCraftingTerm(GuiRecipe<?> gui) {
         return gui.firstGui != null
-                && NEECraftingTerminalHandler.class.isInstance(gui.getHandler().getOverlayHandler(gui.firstGui, 0));
+                && gui.getHandler().getOverlayHandler(gui.firstGui, 0) instanceof NEECraftingTerminalHandler;
     }
 
 }

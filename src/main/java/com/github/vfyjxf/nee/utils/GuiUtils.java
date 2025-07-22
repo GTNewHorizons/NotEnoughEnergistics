@@ -22,6 +22,7 @@ import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IItemList;
+import appeng.client.gui.implementations.GuiMEMonitorable;
 import appeng.client.gui.implementations.GuiPatternTerm;
 import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.client.me.ItemRepo;
@@ -78,6 +79,7 @@ public class GuiUtils {
                         || guiScreen instanceof GuiFluidPatternTerminalEx);
     }
 
+    @Deprecated
     public static ItemRepo getItemRepo(GuiContainer termGui) {
         Class<?> clazz = termGui.getClass();
         ItemRepo repo = null;
@@ -96,37 +98,13 @@ public class GuiUtils {
     public static List<IAEItemStack> getStorageStacks(GuiContainer termGui, Predicate<IAEItemStack> predicate) {
         final List<IAEItemStack> storageStacks = new ArrayList<>();
 
-        if (termGui != null) {
-            final ItemRepo repo = GuiUtils.getItemRepo(termGui);
+        if (!(termGui instanceof GuiMEMonitorable monitor)) return storageStacks;
 
-            if (repo != null) {
+        final IItemList<IAEItemStack> list = monitor.getAvaibleItems();
 
-                try {
-                    @SuppressWarnings("unchecked")
-                    final IItemList<IAEItemStack> list = (IItemList<IAEItemStack>) ReflectionHelper
-                            .findField(ItemRepo.class, "list").get(repo);
-
-                    for (IAEItemStack stack : list) {
-                        if (predicate.test(stack)) {
-                            storageStacks.add(stack.copy());
-                        }
-                    }
-
-                } catch (Exception e) {}
-
-                try {
-                    final IAEItemStack[] pins = (IAEItemStack[]) ReflectionHelper.findField(ItemRepo.class, "pins")
-                            .get(repo);
-
-                    for (int i = 0; i < pins.length; i++) {
-                        final IAEItemStack stack = pins[i];
-                        if (stack != null && predicate.test(stack)) {
-                            storageStacks.add(stack.copy());
-                        }
-                    }
-
-                } catch (Exception e) {}
-
+        for (IAEItemStack stack : list) {
+            if (predicate.test(stack)) {
+                storageStacks.add(stack.copy());
             }
         }
 
