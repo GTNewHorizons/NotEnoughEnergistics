@@ -78,7 +78,7 @@ public class NEECraftingTerminalHandler implements IOverlayHandler {
 
     @Override
     public boolean canFillCraftingGrid(GuiContainer firstGui, IRecipeHandler handler, int recipeIndex) {
-        return presenceOverlay(firstGui, handler, recipeIndex).stream().allMatch(state -> state.isPresent());
+        return true;
     }
 
     /**
