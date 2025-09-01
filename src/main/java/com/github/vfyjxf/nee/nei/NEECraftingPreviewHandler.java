@@ -175,7 +175,7 @@ public class NEECraftingPreviewHandler {
         com.glodblock.github.network.CPacketInventoryAction packet = new com.glodblock.github.network.CPacketInventoryAction(
                 InventoryAction.AUTO_CRAFT,
                 0,
-                0);
+                0L);
         com.glodblock.github.FluidCraft.proxy.netHandler.sendToServer(packet);
     }
 

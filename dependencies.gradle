@@ -1,22 +1,22 @@
 dependencies {
 
-    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-675-GTNH:dev")
-    api("com.github.GTNewHorizons:NotEnoughItems:2.7.74-GTNH:dev")
+    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-683-GTNH:dev")
+    api("com.github.GTNewHorizons:NotEnoughItems:2.7.79-GTNH:dev")
     api('com.github.GTNewHorizons:CodeChickenCore:1.4.7:dev')
 
-    implementation("com.github.GTNewHorizons:Baubles-Expanded:2.1.9-GTNH:dev")
+    implementation("com.github.GTNewHorizons:Baubles-Expanded:2.1.13-GTNH:dev")
     implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.12.7:dev")
-    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.4.108-gtnh:dev")
+    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.4.111-gtnh:dev")
 
-    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.51.428:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:Avaritia:1.72:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.51.438:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:Avaritia:1.73:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Avaritiaddons:1.9.1-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:BuildCraftCompat:7.1.18:dev") { transitive = false }
     compileOnly('com.github.GTNewHorizons:EnderIO:2.9.22:dev') {transitive=false}
     compileOnly("com.github.GTNewHorizons:ForestryMC:4.10.17:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:GTplusplus:1.12.11:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:ThaumicEnergistics:1.7.11-GTNH:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:Botania:1.12.21-GTNH:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:Botania:1.12.23-GTNH:dev") { transitive = false }
     compileOnly("com.gregoriust.gregtech:gregtech_1.7.10:6.14.23:dev") { transitive = false }
     compileOnly("curse.maven:thaumcraft-nei-plugin-225095:2241913") { transitive = false }
     compileOnly("curse.maven:thermal-expansion-69163:2388759") { transitive = false }
