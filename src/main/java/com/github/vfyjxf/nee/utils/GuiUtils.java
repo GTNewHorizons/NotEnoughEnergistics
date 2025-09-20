@@ -115,7 +115,7 @@ public class GuiUtils {
                 } catch (Exception e) {}
 
                 try {
-                    final IAEItemStack[] pins = (IAEItemStack[]) ReflectionHelper.findField(ItemRepo.class, "pins")
+                    final IAEItemStack[] pins = (IAEItemStack[]) ReflectionHelper.findField(ItemRepo.class, "pinsRepo")
                             .get(repo);
 
                     for (int i = 0; i < pins.length; i++) {
