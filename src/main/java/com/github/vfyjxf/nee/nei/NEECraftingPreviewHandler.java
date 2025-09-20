@@ -56,6 +56,7 @@ public class NEECraftingPreviewHandler {
     private NBTTagCompound patternCompound = null;
     private IngredientTracker tracker = null;
     private boolean isAutoStart = false;
+    private boolean isRequesting = false;
     private int resultStackSize = 0;
     private String modID = "";
 
@@ -67,6 +68,7 @@ public class NEECraftingPreviewHandler {
         this.modID = getModID(firstGui.inventorySlots);
         this.resultStackSize = 0;
         this.patternCompound = null;
+        this.isRequesting = false;
         this.tracker = null;
 
         if ((this.isAutoStart || NEIClientConfig.isKeyHashDown("nee.preview")) && !this.modID.isEmpty()) {
@@ -190,17 +192,36 @@ public class NEECraftingPreviewHandler {
 
     @SubscribeEvent
     public void onGuiCraftConfirmOpen(GuiOpenEvent event) {
+        if (this.patternCompound == null && this.tracker == null) {
+            return;
+        }
+
+        if (!this.isRequesting && (event.gui instanceof GuiCraftAmount
+                || Loader.isModLoaded(ModIDs.FC) && event.gui instanceof GuiFluidCraftAmount)) {
+            this.isRequesting = true;
+            return;
+        }
+
         final GuiScreen old = Minecraft.getMinecraft().currentScreen;
 
+        if (this.isRequesting && !(event.gui instanceof GuiCraftConfirm) && !(old instanceof GuiCraftConfirm)) {
+            removePatternIfNeeded();
+            this.isRequesting = false;
+            this.tracker = null;
+            return;
+        }
+
         if (this.patternCompound != null && old instanceof GuiCraftConfirm) {
-            this.patternCompound = null;
+            removePatternIfNeeded();
+            this.isRequesting = false;
         }
 
         if (this.tracker != null && old instanceof GuiCraftConfirm) {
-            if (old != null && this.tracker.hasNext()) {
+            if (this.tracker.hasNext()) {
                 requestNextIngredient();
             } else {
                 this.tracker = null;
+                this.isRequesting = false;
             }
         }
     }
@@ -225,8 +246,14 @@ public class NEECraftingPreviewHandler {
 
                 this.tracker.calculateIngredients();
 
-                requestNextIngredient();
-                event.setCanceled(true);
+                if (this.tracker.hasNext()) {
+                    requestNextIngredient();
+                    event.setCanceled(true);
+                } else {
+                    this.tracker = null;
+                    this.isRequesting = false;
+                }
+
             } else if (this.patternCompound != null) {
                 PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
                         this.modID,
@@ -245,24 +272,27 @@ public class NEECraftingPreviewHandler {
 
         if ((this.tracker != null || this.patternCompound != null) && event.gui instanceof GuiCraftConfirm guiConfirm
                 && getCancelButton(guiConfirm) == event.button) {
-
-            if (this.patternCompound != null) {
-                PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
-                        this.modID,
-                        PacketCraftingRequest.COMMAND_REMOVE_PATTERN,
-                        this.patternCompound,
-                        0,
-                        false);
-                NEENetworkHandler.getInstance().sendToServer(craftingRequest);
-            }
-
-            this.patternCompound = null;
+            removePatternIfNeeded();
+            this.isRequesting = false;
             this.tracker = null;
         }
     }
 
     private static GuiButton getCancelButton(GuiCraftConfirm gui) {
         return ReflectionHelper.getPrivateValue(GuiCraftConfirm.class, gui, "cancel");
+    }
+
+    private void removePatternIfNeeded() {
+        if (this.patternCompound != null) {
+            PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
+                    this.modID,
+                    PacketCraftingRequest.COMMAND_REMOVE_PATTERN,
+                    this.patternCompound,
+                    0,
+                    false);
+            NEENetworkHandler.getInstance().sendToServer(craftingRequest);
+            this.patternCompound = null;
+        }
     }
 
     private static int getCraftAmount(GuiContainer screen, GuiButton button) {
