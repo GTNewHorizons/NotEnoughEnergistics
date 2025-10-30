@@ -8,8 +8,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.p455w0rd.wirelesscraftingterminal.common.WCTGuiHandler;
-import net.p455w0rd.wirelesscraftingterminal.reference.Reference;
 
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
 import com.github.vfyjxf.nee.utils.GuiUtils;
@@ -242,8 +240,6 @@ public class PacketCraftingRequest implements IMessage {
         } else if (container instanceof AEBaseContainer baseContainer) {
             if (Loader.isModLoaded(ModIDs.ThE) && this.modID.equals(ModIDs.ThE)) {
                 openTHContainerCraftConfirm(grid, requireToCraftStack, (IActionHost) baseContainer.getTarget(), player);
-            } else if (Loader.isModLoaded(ModIDs.WCT) && this.modID.equals(ModIDs.WCT)) {
-                openWCTContainerCraftConfirm(baseContainer, grid, requireToCraftStack, player);
             } else {
                 openAEContainerCraftConfirm(baseContainer, grid, requireToCraftStack, player);
             }
@@ -312,19 +308,4 @@ public class PacketCraftingRequest implements IMessage {
                 });
 
     }
-
-    @Optional.Method(modid = ModIDs.WCT)
-    private void openWCTContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid,
-            IAEItemStack requireToCraftStack, EntityPlayerMP player) {
-
-        openContainerCraftConfirm(grid, requireToCraftStack, player, baseContainer.getActionSource(), job -> {
-            final int x = (int) player.posX;
-            final int y = (int) player.posY;
-            final int z = (int) player.posZ;
-
-            WCTGuiHandler.launchGui(Reference.GUI_CRAFT_CONFIRM, player, player.worldObj, x, y, z);
-        });
-
-    }
-
 }
