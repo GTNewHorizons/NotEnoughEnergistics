@@ -120,7 +120,6 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutputs = new ArrayList<>();
         if (canProcessRecipe(recipe)) {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
-            recipeOutputs.removeIf(positionedStack -> getFluidFromDisplayStack(positionedStack.items[0]) != null);
             // remove output if it's chance != 10000
             recipeOutputs.removeIf(
                     stack -> stack instanceof FixedPositionedStack && !(((FixedPositionedStack) stack).mChance == 10000

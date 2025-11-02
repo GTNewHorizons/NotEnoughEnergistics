@@ -166,22 +166,33 @@ public class PacketNEIPatternRecipe implements IMessage {
 
                 for (int i = 0; i < recipeInput.length; i++) {
                     final ItemStack nextStack = recipeInput[i];
-                    final IAEStack<?> aes;
+                    if (nextStack == null) continue;
 
+                    final IAEStack<?> aes;
                     if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
                         aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
                     } else {
-                        aes = AEItemStack.create(recipeInput[i]);
+                        aes = AEItemStack.create(nextStack);
                     }
 
                     input.put(i, aes);
                 }
 
                 for (int i = 0; i < recipeOutput.length; i++) {
-                    IAEStack<?> aes = AEItemStack.create(recipeOutput[i]);
+                    final ItemStack nextStack = recipeOutput[i];
+                    if (nextStack == null) continue;
+
+                    IAEStack<?> aes;
+                    if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
+                        aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
+                    } else {
+                        aes = AEItemStack.create(nextStack);
+                    }
+
                     output.put(i, aes);
                 }
 
+                container.clear();
                 container.receiveSlotStacks(StorageName.CRAFTING_INPUT, input);
                 container.receiveSlotStacks(StorageName.CRAFTING_OUTPUT, output);
             }
