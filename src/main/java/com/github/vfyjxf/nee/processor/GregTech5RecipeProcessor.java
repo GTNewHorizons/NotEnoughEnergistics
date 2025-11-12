@@ -100,8 +100,7 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (canProcessRecipe(recipe)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            recipeInputs.removeIf(
-                    positionedStack -> positionedStack.item.stackSize == 0);
+            recipeInputs.removeIf(positionedStack -> positionedStack.item.stackSize == 0);
 
             if (!recipeInputs.isEmpty()) {
                 ItemStack specialItem = recipeInputs.get(recipeInputs.size() - 1).items[0];
