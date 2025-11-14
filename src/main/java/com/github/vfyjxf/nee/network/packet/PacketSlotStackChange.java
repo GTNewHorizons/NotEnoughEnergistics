@@ -3,17 +3,21 @@ package com.github.vfyjxf.nee.network.packet;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
+import appeng.api.storage.StorageName;
+import appeng.api.storage.data.IAEStack;
+import appeng.container.implementations.ContainerPatternTerm;
+import appeng.util.item.AEItemStack;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 /**
  * @author vfyjxf
@@ -62,15 +66,14 @@ public class PacketSlotStackChange implements IMessage {
 
         @Override
         public IMessage onMessage(PacketSlotStackChange message, MessageContext ctx) {
-            Container container = ctx.getServerHandler().playerEntity.openContainer;
-            ItemStack nextStack = message.getStack();
-            if (nextStack != null) {
-                for (Integer craftingSlot : message.getCraftingSlots()) {
-                    Slot currentSlot = container.getSlot(craftingSlot);
-                    if (currentSlot != null) {
-                        currentSlot.putStack(nextStack);
-                    }
+            final IAEStack<?> nextStack = AEItemStack.create(message.getStack());
+            if (nextStack != null
+                    && ctx.getServerHandler().playerEntity.openContainer instanceof ContainerPatternTerm cpt) {
+                final Int2ObjectMap<IAEStack<?>> temp = new Int2ObjectOpenHashMap<>();
+                for (int craftingSlot : message.getCraftingSlots()) {
+                    temp.put(craftingSlot, nextStack);
                 }
+                cpt.receiveSlotStacks(StorageName.CRAFTING_INPUT, temp);
             }
             return null;
         }
