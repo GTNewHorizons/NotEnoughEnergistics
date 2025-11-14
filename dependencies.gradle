@@ -1,12 +1,12 @@
 dependencies {
 
-    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-731-GTNH-pre:dev")
+    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-743-GTNH-pre:dev")
     api("com.github.GTNewHorizons:NotEnoughItems:2.8.26-GTNH:dev")
     api('com.github.GTNewHorizons:CodeChickenCore:1.4.7:dev')
 
     implementation("com.github.GTNewHorizons:Baubles-Expanded:2.2.2-GTNH:dev")
     implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.12.8-pre:dev")
-    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.14-gtnh-pre:dev")
+    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.23-gtnh-pre:dev")
 
     compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.94:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Avaritia:1.77:dev") { transitive = false }
