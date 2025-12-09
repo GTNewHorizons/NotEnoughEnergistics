@@ -101,17 +101,8 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         if (canProcessRecipe(recipe)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
             recipeInputs.removeIf(positionedStack -> positionedStack.item.stackSize == 0);
-
-            if (!recipeInputs.isEmpty()) {
-                ItemStack specialItem = recipeInputs.get(recipeInputs.size() - 1).items[0];
-                if ((specialItem.isItemEqual(ItemList.Tool_DataStick.get(1))
-                        || specialItem.isItemEqual(ItemList.Tool_DataOrb.get(1))
-                                && (recipe.getRecipeName().equals("gt.recipe.scanner")
-                                        || recipe.getRecipeName().equals("gt.recipe.fakeAssemblylineProcess"))))
-                    recipeInputs.remove(recipeInputs.size() - 1);
-            }
-            return recipeInputs;
         }
+
         return recipeInputs;
     }
 

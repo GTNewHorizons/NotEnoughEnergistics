@@ -88,7 +88,7 @@ public class PacketNEIPatternRecipe implements IMessage {
         private void setCraftingRecipe(AEBaseContainer container, boolean craftingMode) {
 
             if (container instanceof ContainerPatternTerm cpt) {
-                cpt.getPatternTerminal().setCraftingRecipe(craftingMode);
+                cpt.setCraftingMode(craftingMode);
             }
 
         }
