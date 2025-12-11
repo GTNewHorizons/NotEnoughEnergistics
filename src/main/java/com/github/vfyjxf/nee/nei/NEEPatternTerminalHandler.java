@@ -20,12 +20,9 @@ import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketNEIPatternRecipe;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
-import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.Ingredient;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
-import com.github.vfyjxf.nee.utils.ModIDs;
-import com.glodblock.github.nei.FluidPatternTerminalRecipeTransferHandler;
 
 import appeng.util.Platform;
 import codechicken.nei.NEIServerUtils;
@@ -36,8 +33,6 @@ import codechicken.nei.recipe.GuiRecipe;
 import codechicken.nei.recipe.GuiRecipeButton;
 import codechicken.nei.recipe.IRecipeHandler;
 import codechicken.nei.recipe.TemplateRecipeHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 /**
@@ -66,11 +61,6 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
         NEENetworkHandler.getInstance().sendToServer(packRecipe(handler, recipeIndex, multiplier));
 
-        if (Loader.isModLoaded(ModIDs.FC)
-                && (GuiUtils.isFluidCraftPatternTermEx(gui) || GuiUtils.isFluidCraftPatternTerm(gui))) {
-            fluidCraftOverlayRecipe(gui, handler, recipeIndex);
-        }
-
         return 0;
     }
 
@@ -84,11 +74,6 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
         }
 
         return itemPresenceSlots;
-    }
-
-    @Optional.Method(modid = ModIDs.FC)
-    private void fluidCraftOverlayRecipe(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex) {
-        FluidPatternTerminalRecipeTransferHandler.INSTANCE.overlayRecipe(firstGui, recipe, recipeIndex, true);
     }
 
     private PacketNEIPatternRecipe packRecipe(IRecipeHandler recipe, int recipeIndex, int multiplier) {

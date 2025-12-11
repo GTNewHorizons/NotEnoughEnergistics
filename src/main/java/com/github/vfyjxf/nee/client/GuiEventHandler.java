@@ -32,16 +32,15 @@ import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
-import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
-import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.GuiLevelMaintainer;
-import com.glodblock.github.client.gui.base.FCGuiEncodeTerminal;
-import com.glodblock.github.client.gui.container.base.FCContainerEncodeTerminal;
 
 import appeng.api.events.GuiScrollEvent;
+import appeng.api.storage.data.IAEStack;
 import appeng.client.gui.AEBaseGui;
 import appeng.client.gui.implementations.GuiInterface;
+import appeng.client.gui.implementations.GuiPatternTerm;
+import appeng.client.gui.slots.VirtualMEPatternSlot;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.slot.SlotFake;
@@ -96,10 +95,6 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
 
     private boolean isGuiPatternTerm(GuiScreen guiScreen) {
         if (guiScreen instanceof GuiContainer guiContainer) {
-
-            if (Loader.isModLoaded(ModIDs.FC) && guiContainer instanceof FCGuiEncodeTerminal) {
-                return false;
-            }
 
             return RecipeInfo.getOverlayHandler(guiContainer, "crafting") instanceof NEEPatternTerminalHandler
                     || RecipeInfo.getOverlayHandler(guiContainer, "smelting") instanceof NEEPatternTerminalHandler;
@@ -179,8 +174,6 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
 
         if (container instanceof ContainerPatternTerm) {
             return ((ContainerPatternTerm) container).isCraftingMode();
-        } else if (Loader.isModLoaded(ModIDs.FC) && container instanceof FCContainerEncodeTerminal) {
-            return ((FCContainerEncodeTerminal) container).isCraftingMode();
         }
 
         return false;
@@ -244,16 +237,15 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
     @SubscribeEvent
     public boolean handleMouseWheelInput(GuiScrollEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
-        Slot currentSlot = getFakeSlotAtPosition((GuiContainer) mc.currentScreen, event.mouseX, event.mouseY);
 
-        if (currentSlot != null) {
-            // try to change current itemstack to next ingredient;
-            if (NEIClientConfig.isKeyHashDown("nee.ingredient") && GuiUtils.isCraftingSlot(currentSlot)) {
-                handleRecipeIngredientChange(event.guiScreen, currentSlot, event.scrollAmount);
+        if (mc.currentScreen instanceof GuiPatternTerm gpt
+                && gpt.getVirtualMESlotUnderMouse() instanceof VirtualMEPatternSlot slot) {
+            if (NEIClientConfig.isKeyHashDown("nee.ingredient")) {
+                handleRecipeIngredientChange(gpt, slot, event.scrollAmount);
                 return true;
             } else if (NEIClientConfig.isKeyHashDown("nee.count")) {
-                NEENetworkHandler.getInstance()
-                        .sendToServer(new PacketStackCountChange(currentSlot.slotNumber, event.scrollAmount));
+                NEENetworkHandler.getInstance().sendToServer(
+                        new PacketStackCountChange(slot.getSlotIndex(), slot.getStorageName(), event.scrollAmount));
                 return true;
             }
         }
@@ -326,46 +318,39 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
         return null;
     }
 
-    private void handleRecipeIngredientChange(GuiContainer gui, Slot currentSlot, int dWheel) {
+    private void handleRecipeIngredientChange(GuiPatternTerm gui, VirtualMEPatternSlot currentSlot, int dWheel) {
         final int currentSlotIndex = currentSlot.getSlotIndex();
         final PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients
                 .get(INPUT_KEY + currentSlotIndex);
 
         if (currentIngredients != null && currentIngredients.items.length > 1) {
+            final IAEStack<?> aes = currentSlot.getAEStack();
+            if (aes == null) return;
+            final ItemStack slotStack = aes.getItemStackForNEI();
+            if (slotStack == null) return;
             final List<Integer> craftingSlots = new ArrayList<>();
             final List<ItemStack> items = currentIngredients.getFilteredPermutations();
-            final int currentStackIndex = ItemUtils.getPermutationIndex(currentSlot.getStack(), items);
+            final int currentStackIndex = ItemUtils.getPermutationIndex(slotStack, items);
             final ItemStack nextStack = items.get((items.size() - dWheel + currentStackIndex) % items.size());
             final ItemStack currentStack = currentIngredients.item;
 
             if (NEEConfig.allowSynchronousSwitchIngredient) {
-                for (Slot slot : getCraftingSlots(gui)) {
+                for (VirtualMEPatternSlot slot : gui.getCraftingSlots()) {
                     final PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
                             .get(INPUT_KEY + slot.getSlotIndex());
 
                     if (slotIngredients != null && slotIngredients.containsWithNBT(nextStack)
                             && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, currentStack)) {
                         slotIngredients.setPermutationToRender(nextStack);
-                        craftingSlots.add(slot.slotNumber);
+                        craftingSlots.add(slot.getSlotIndex());
                     }
                 }
             } else {
                 currentIngredients.setPermutationToRender(nextStack);
-                craftingSlots.add(currentSlot.slotNumber);
+                craftingSlots.add(currentSlot.getSlotIndex());
             }
 
             NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(nextStack, craftingSlots));
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<Slot> getCraftingSlots(GuiContainer gui) {
-        List<Slot> craftingSlots = new ArrayList<>();
-        for (Slot slot : (List<Slot>) gui.inventorySlots.inventorySlots) {
-            if (GuiUtils.isCraftingSlot(slot)) {
-                craftingSlots.add(slot);
-            }
-        }
-        return craftingSlots;
     }
 }

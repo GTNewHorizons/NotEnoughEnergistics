@@ -7,28 +7,30 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
-import com.github.vfyjxf.nee.utils.ModIDs;
-import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
 
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.ISecurityGrid;
 import appeng.api.networking.storage.IStorageGrid;
+import appeng.api.storage.StorageName;
+import appeng.api.storage.data.IAEStack;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.helpers.IContainerCraftingPacket;
-import cpw.mods.fml.common.Loader;
+import appeng.util.item.AEFluidStack;
+import appeng.util.item.AEItemStack;
+import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 public class PacketNEIPatternRecipe implements IMessage {
 
@@ -70,7 +72,7 @@ public class PacketNEIPatternRecipe implements IMessage {
 
             if (message.input != null && GuiUtils.isPatternContainer(container)
                     && container instanceof IContainerCraftingPacket) {
-                AEBaseContainer baseContainer = (AEBaseContainer) container;
+                ContainerPatternTerm baseContainer = (ContainerPatternTerm) container;
                 setCraftingRecipe(baseContainer, message.output == null);
 
                 if (message.output == null) {
@@ -86,9 +88,7 @@ public class PacketNEIPatternRecipe implements IMessage {
         private void setCraftingRecipe(AEBaseContainer container, boolean craftingMode) {
 
             if (container instanceof ContainerPatternTerm cpt) {
-                cpt.getPatternTerminal().setCraftingRecipe(craftingMode);
-            } else if (Loader.isModLoaded(ModIDs.FC) && container instanceof ContainerFluidPatternTerminal cfpt) {
-                cfpt.getPatternTerminal().setCraftingRecipe(craftingMode);
+                cpt.setCraftingMode(craftingMode);
             }
 
         }
@@ -104,9 +104,8 @@ public class PacketNEIPatternRecipe implements IMessage {
             return matrix;
         }
 
-        private void craftingRecipe(AEBaseContainer container, PacketNEIPatternRecipe message) {
-            final IContainerCraftingPacket cct = (IContainerCraftingPacket) container;
-            final IGridNode node = cct.getNetworkNode();
+        private void craftingRecipe(ContainerPatternTerm container, PacketNEIPatternRecipe message) {
+            final IGridNode node = container.getNetworkNode();
 
             if (node == null) {
                 return;
@@ -120,22 +119,22 @@ public class PacketNEIPatternRecipe implements IMessage {
 
             final IStorageGrid inv = grid.getCache(IStorageGrid.class);
             final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
-            final IInventory craftMatrix = cct.getInventoryByName("crafting");
 
-            if (inv != null && craftMatrix != null && security != null) {
-                final ItemStack[] recipeInput = getMatrix(message.input, INPUT_KEY, craftMatrix.getSizeInventory());
+            if (inv != null && security != null) {
+                var list = new Int2ObjectOpenHashMap<IAEStack<?>>();
+                final ItemStack[] recipeInput = getMatrix(message.input, INPUT_KEY, 9);
 
                 for (int i = 0; i < recipeInput.length; i++) {
-                    craftMatrix.setInventorySlotContents(i, recipeInput[i]);
+                    IAEStack<?> aes = AEItemStack.create(recipeInput[i]);
+                    list.put(i, aes);
                 }
 
-                container.onCraftMatrixChanged(craftMatrix);
+                container.receiveSlotStacks(StorageName.CRAFTING_INPUT, list);
             }
         }
 
-        private void processRecipe(AEBaseContainer container, PacketNEIPatternRecipe message) {
-            final IContainerCraftingPacket cct = (IContainerCraftingPacket) container;
-            final IGridNode node = cct.getNetworkNode();
+        private void processRecipe(ContainerPatternTerm container, PacketNEIPatternRecipe message) {
+            final IGridNode node = container.getNetworkNode();
 
             if (node == null) {
                 return;
@@ -149,26 +148,54 @@ public class PacketNEIPatternRecipe implements IMessage {
 
             final IStorageGrid inv = grid.getCache(IStorageGrid.class);
             final ISecurityGrid security = grid.getCache(ISecurityGrid.class);
-            final IInventory craftMatrix = cct.getInventoryByName("crafting");
-            final IInventory outputMatrix = cct.getInventoryByName("output");
 
-            if (inv != null && craftMatrix != null && outputMatrix != null && security != null) {
-                final ItemStack[] recipeInput = getMatrix(message.input, INPUT_KEY, craftMatrix.getSizeInventory());
-                final ItemStack[] recipeOutput = getMatrix(message.output, OUTPUT_KEY, outputMatrix.getSizeInventory());
+            if (inv != null && security != null) {
+                var input = new Int2ObjectOpenHashMap<IAEStack<?>>();
+                var output = new Int2ObjectOpenHashMap<IAEStack<?>>();
+
+                final ItemStack[] recipeInput = getMatrix(
+                        message.input,
+                        INPUT_KEY,
+                        container.getPatternInputsWidth() * container.getPatternInputsHeigh()
+                                * container.getPatternInputPages());
+                final ItemStack[] recipeOutput = getMatrix(
+                        message.output,
+                        OUTPUT_KEY,
+                        container.getPatternOutputsWidth() * container.getPatternOutputsHeigh()
+                                * container.getPatternOutputPages());
 
                 for (int i = 0; i < recipeInput.length; i++) {
-                    craftMatrix.setInventorySlotContents(i, recipeInput[i]);
+                    final ItemStack nextStack = recipeInput[i];
+                    if (nextStack == null) continue;
+
+                    final IAEStack<?> aes;
+                    if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
+                        aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
+                    } else {
+                        aes = AEItemStack.create(nextStack);
+                    }
+
+                    input.put(i, aes);
                 }
 
                 for (int i = 0; i < recipeOutput.length; i++) {
-                    outputMatrix.setInventorySlotContents(i, recipeOutput[i]);
+                    final ItemStack nextStack = recipeOutput[i];
+                    if (nextStack == null) continue;
+
+                    IAEStack<?> aes;
+                    if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
+                        aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
+                    } else {
+                        aes = AEItemStack.create(nextStack);
+                    }
+
+                    output.put(i, aes);
                 }
 
-                container.onCraftMatrixChanged(craftMatrix);
-                container.onCraftMatrixChanged(outputMatrix);
+                container.clear();
+                container.receiveSlotStacks(StorageName.CRAFTING_INPUT, input);
+                container.receiveSlotStacks(StorageName.CRAFTING_OUTPUT, output);
             }
         }
-
     }
-
 }

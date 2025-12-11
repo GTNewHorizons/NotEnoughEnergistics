@@ -44,6 +44,7 @@ import appeng.api.networking.ticking.TickRateModulation;
 import appeng.api.networking.ticking.TickingRequest;
 import appeng.api.storage.IMEMonitor;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import appeng.api.storage.data.IItemList;
 import appeng.api.util.AECableType;
 import appeng.api.util.DimensionalCoord;
@@ -434,9 +435,9 @@ public class TilePatternInterface extends AENetworkInvTile
 
                 for (ICraftingCPU cpu : cpuSet) {
                     if (cpu instanceof CraftingCPUCluster cluster) {
-                        final IItemList<IAEItemStack> pendingList = AEApi.instance().storage().createItemList();
-                        cluster.getListOfItem(pendingList, CraftingItemList.PENDING);
-                        for (IAEItemStack pendingStack : pendingList) {
+                        final IItemList<IAEStack<?>> pendingList = AEApi.instance().storage().createAEStackList();
+                        cluster.getModernListOfItem(pendingList, CraftingItemList.PENDING);
+                        for (IAEStack<?> pendingStack : pendingList) {
                             if (pendingStack.isSameType(result)) {
                                 cluster.cancel();
                                 break;
@@ -667,15 +668,15 @@ public class TilePatternInterface extends AENetworkInvTile
         try {
             final ICraftingGrid cg = this.getProxy().getCrafting();
             final ImmutableSet<ICraftingCPU> cpuSet = cg.getCpus();
-            final IItemList<IAEItemStack> pendingList = AEApi.instance().storage().createItemList();
+            final IItemList<IAEStack<?>> pendingList = AEApi.instance().storage().createAEStackList();
 
             for (ICraftingCPU cpu : cpuSet) {
                 if (cpu instanceof CraftingCPUCluster cluster) {
-                    cluster.getListOfItem(pendingList, CraftingItemList.PENDING);
+                    cluster.getModernListOfItem(pendingList, CraftingItemList.PENDING);
                 }
             }
 
-            for (IAEItemStack pendingStack : pendingList) {
+            for (IAEStack<?> pendingStack : pendingList) {
                 if (pendingStack.isSameType(stack)) {
                     return false;
                 }

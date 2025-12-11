@@ -12,22 +12,15 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
-import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
-import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminal;
-import com.glodblock.github.client.gui.container.ContainerFluidPatternTerminalEx;
-
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IItemList;
 import appeng.client.gui.implementations.GuiPatternTerm;
-import appeng.client.gui.implementations.GuiPatternTermEx;
 import appeng.client.me.ItemRepo;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
-import appeng.container.implementations.ContainerPatternTermEx;
 import appeng.helpers.IContainerCraftingPacket;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -38,8 +31,6 @@ import thaumicenergistics.common.container.ContainerPartArcaneCraftingTerminal;
  * @author vfyjxf
  */
 public class GuiUtils {
-
-    private static final boolean isFluidCraftModloaded = Loader.isModLoaded(ModIDs.FC);
 
     public static boolean isCraftingSlot(Slot slot) {
         if (slot == null) {
@@ -54,28 +45,12 @@ public class GuiUtils {
         return craftMatrix.equals(slot.inventory);
     }
 
-    public static boolean isFluidCraftPatternContainer(Container container) {
-        return isFluidCraftModloaded && (container instanceof ContainerFluidPatternTerminal
-                || container instanceof ContainerFluidPatternTerminalEx);
-    }
-
     public static boolean isPatternContainer(Container container) {
-        return container instanceof ContainerPatternTerm || container instanceof ContainerPatternTermEx
-                || isFluidCraftPatternContainer(container);
-    }
-
-    public static boolean isFluidCraftPatternTermEx(GuiScreen guiScreen) {
-        return isFluidCraftModloaded && guiScreen instanceof GuiFluidPatternTerminalEx;
-    }
-
-    public static boolean isFluidCraftPatternTerm(GuiScreen guiScreen) {
-        return isFluidCraftModloaded && guiScreen instanceof GuiFluidPatternTerminal;
+        return container instanceof ContainerPatternTerm;
     }
 
     public static boolean isPatternTerm(GuiScreen guiScreen) {
-        return guiScreen instanceof GuiPatternTerm || guiScreen instanceof GuiPatternTermEx
-                || isFluidCraftModloaded && (guiScreen instanceof GuiFluidPatternTerminal
-                        || guiScreen instanceof GuiFluidPatternTerminalEx);
+        return guiScreen instanceof GuiPatternTerm;
     }
 
     public static ItemRepo getItemRepo(GuiContainer termGui) {

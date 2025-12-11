@@ -20,11 +20,6 @@ import com.github.vfyjxf.nee.nei.NEETerminalBookmarkContainerHandler;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
 import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ModIDs;
-import com.glodblock.github.client.gui.GuiFluidCraftingWireless;
-import com.glodblock.github.client.gui.GuiFluidPatternExWireless;
-import com.glodblock.github.client.gui.GuiFluidPatternTerminal;
-import com.glodblock.github.client.gui.GuiFluidPatternTerminalEx;
-import com.glodblock.github.client.gui.GuiFluidPatternWireless;
 
 import appeng.client.gui.implementations.GuiCraftingTerm;
 import appeng.client.gui.implementations.GuiInterface;
@@ -74,8 +69,6 @@ public class NEINeeConfig implements IConfigureNEI {
 
         installWirelessCraftingTermSupport();
 
-        installFluidPatternTerminalSupport(new HashSet<>(identifiers));
-
         installThaumicEnergisticsSupport();
 
         installAvaritiaSupport();
@@ -84,41 +77,7 @@ public class NEINeeConfig implements IConfigureNEI {
 
         installPatternTerminalExSupport(new HashSet<>(identifiers));
 
-        installFluidPatternTerminalExSupport(new HashSet<>(identifiers));
-
         installlBookmarkContainerHandler();
-    }
-
-    private void installFluidPatternTerminalExSupport(Set<String> identifiers) {
-        if (Loader.isModLoaded(ModIDs.FC)) {
-            identifiers.remove("crafting");
-            identifiers.remove("crafting2x2");
-            for (String ident : identifiers) {
-                API.registerGuiOverlay(GuiFluidPatternTerminalEx.class, ident);
-                API.registerGuiOverlay(GuiFluidPatternExWireless.class, ident);
-
-                API.registerGuiOverlayHandler(
-                        GuiFluidPatternTerminalEx.class,
-                        NEEPatternTerminalHandler.instance,
-                        ident);
-                API.registerGuiOverlayHandler(
-                        GuiFluidPatternExWireless.class,
-                        NEEPatternTerminalHandler.instance,
-                        ident);
-            }
-        }
-    }
-
-    private void installFluidPatternTerminalSupport(Set<String> identifiers) {
-        if (Loader.isModLoaded(ModIDs.FC)) {
-            for (String ident : identifiers) {
-                API.registerGuiOverlay(GuiFluidPatternTerminal.class, ident);
-                API.registerGuiOverlay(GuiFluidPatternWireless.class, ident);
-
-                API.registerGuiOverlayHandler(GuiFluidPatternTerminal.class, NEEPatternTerminalHandler.instance, ident);
-                API.registerGuiOverlayHandler(GuiFluidPatternWireless.class, NEEPatternTerminalHandler.instance, ident);
-            }
-        }
     }
 
     private void installlBookmarkContainerHandler() {
@@ -127,25 +86,6 @@ public class NEINeeConfig implements IConfigureNEI {
         API.registerBookmarkContainerHandler(GuiCraftingTerm.class, NEETerminalBookmarkContainerHandler.instance);
         API.registerBookmarkContainerHandler(GuiMEMonitorable.class, NEETerminalBookmarkContainerHandler.instance);
         API.registerBookmarkContainerHandler(GuiMEPortableCell.class, NEETerminalBookmarkContainerHandler.instance);
-
-        if (Loader.isModLoaded(ModIDs.FC)) {
-            API.registerBookmarkContainerHandler(
-                    GuiFluidPatternWireless.class,
-                    NEETerminalBookmarkContainerHandler.instance);
-            API.registerBookmarkContainerHandler(
-                    GuiFluidPatternTerminal.class,
-                    NEETerminalBookmarkContainerHandler.instance);
-            API.registerBookmarkContainerHandler(
-                    GuiFluidPatternTerminalEx.class,
-                    NEETerminalBookmarkContainerHandler.instance);
-            API.registerBookmarkContainerHandler(
-                    GuiFluidPatternExWireless.class,
-                    NEETerminalBookmarkContainerHandler.instance);
-
-            API.registerBookmarkContainerHandler(
-                    GuiFluidCraftingWireless.class,
-                    NEETerminalBookmarkContainerHandler.instance);
-        }
 
         if (Loader.isModLoaded(ModIDs.WCT)) {
             API.registerBookmarkContainerHandler(
@@ -214,17 +154,6 @@ public class NEINeeConfig implements IConfigureNEI {
         API.registerGuiOverlay(GuiCraftingTerm.class, "crafting2x2");
         API.registerGuiOverlayHandler(GuiCraftingTerm.class, NEECraftingTerminalHandler.instance, "crafting");
         API.registerGuiOverlayHandler(GuiCraftingTerm.class, NEECraftingTerminalHandler.instance, "crafting2x2");
-
-        if (Loader.isModLoaded(ModIDs.FC)) {
-            API.registerGuiOverlayHandler(
-                    GuiFluidCraftingWireless.class,
-                    NEECraftingTerminalHandler.instance,
-                    "crafting");
-            API.registerGuiOverlayHandler(
-                    GuiFluidCraftingWireless.class,
-                    NEECraftingTerminalHandler.instance,
-                    "crafting2x2");
-        }
     }
 
     private void installWirelessCraftingTermSupport() {

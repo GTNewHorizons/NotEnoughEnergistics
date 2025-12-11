@@ -24,8 +24,6 @@ import com.github.vfyjxf.nee.utils.Ingredient;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
-import com.glodblock.github.client.gui.GuiFluidCraftAmount;
-import com.glodblock.github.client.gui.base.FCGuiAmount;
 
 import appeng.api.storage.data.IAEItemStack;
 import appeng.client.gui.implementations.GuiAmount;
@@ -153,9 +151,6 @@ public class NEECraftingPreviewHandler {
 
         if (this.modID.equals(ModIDs.ThE)) {
             sendToArcaneCraftingerver(aeItemStack);
-        } else if (this.modID.equals(ModIDs.FC)) {
-            ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
-            sendToFluidCraftingServer();
         } else if (this.modID.equals(ModIDs.WCT)) {
             ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
             sendToWirelessCraftingServer();
@@ -170,15 +165,6 @@ public class NEECraftingPreviewHandler {
     protected void sendToArcaneCraftingerver(IAEItemStack aeItemStack) {
         thaumicenergistics.common.network.packet.server.Packet_S_ArcaneCraftingTerminal
                 .sendAutoCraft(Minecraft.getMinecraft().thePlayer, aeItemStack);
-    }
-
-    @Optional.Method(modid = ModIDs.FC)
-    protected void sendToFluidCraftingServer() {
-        com.glodblock.github.network.CPacketInventoryAction packet = new com.glodblock.github.network.CPacketInventoryAction(
-                InventoryAction.AUTO_CRAFT,
-                0,
-                0L);
-        com.glodblock.github.FluidCraft.proxy.netHandler.sendToServer(packet);
     }
 
     @Optional.Method(modid = ModIDs.WCT)
@@ -196,8 +182,7 @@ public class NEECraftingPreviewHandler {
             return;
         }
 
-        if (!this.isRequesting && (event.gui instanceof GuiCraftAmount
-                || Loader.isModLoaded(ModIDs.FC) && event.gui instanceof GuiFluidCraftAmount)) {
+        if (!this.isRequesting && event.gui instanceof GuiCraftAmount) {
             this.isRequesting = true;
             return;
         }
@@ -298,14 +283,7 @@ public class NEECraftingPreviewHandler {
     private static int getCraftAmount(GuiContainer screen, GuiButton button) {
 
         try {
-            if (Loader.isModLoaded(ModIDs.FC) && screen instanceof GuiFluidCraftAmount gui) {
-
-                if (ReflectionHelper.getPrivateValue(FCGuiAmount.class, gui, "submit") == button) {
-                    return (int) ReflectionHelper.findMethod(FCGuiAmount.class, gui, new String[] { "getAmount" })
-                            .invoke(gui);
-                }
-
-            } else if (screen instanceof GuiCraftAmount gui) {
+            if (screen instanceof GuiCraftAmount gui) {
 
                 if (ReflectionHelper.getPrivateValue(GuiAmount.class, gui, "nextBtn") == button) {
                     return (int) ReflectionHelper.findMethod(GuiAmount.class, gui, new String[] { "getAmount" })
