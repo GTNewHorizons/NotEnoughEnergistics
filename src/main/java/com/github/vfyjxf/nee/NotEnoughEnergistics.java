@@ -33,7 +33,10 @@ public class NotEnoughEnergistics {
     public static final String MODID = "neenergistics";
     public static final String NAME = "NotEnoughEnergistics";
     public static final String VERSION = Tags.VERSION;
-    public static final String DEPENDENCIES = "required-after:NotEnoughItems;required-after:appliedenergistics2@[rv3.beta.22,),[rv3.beta-22,),[rv3-beta.22,),[rv3-beta-22,);after:ae2wct;after:ae2fc";
+    public static final String DEPENDENCIES = "required-after:" + "NotEnoughItems;required-after:"
+            + "appliedenergistics2@[rv3-beta-754-GTNH,);after:"
+            + "ae2wct@[1.12.10,);after:"
+            + "ae2fc@[1.5.30-gtnh,);";
     public static final String GUI_FACTORY = "com.github.vfyjxf.nee.config.NEEConfigGuiFactory";
     public static final Logger logger = LogManager.getLogger("NotEnoughEnergistics");
 
