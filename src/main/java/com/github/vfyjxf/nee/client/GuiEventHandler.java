@@ -41,6 +41,8 @@ import appeng.client.gui.AEBaseGui;
 import appeng.client.gui.implementations.GuiInterface;
 import appeng.client.gui.implementations.GuiPatternTerm;
 import appeng.client.gui.slots.VirtualMEPatternSlot;
+import appeng.client.gui.slots.VirtualMEPhantomSlot;
+import appeng.client.gui.slots.VirtualMESlot;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.slot.SlotFake;
@@ -256,13 +258,13 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
     @Override
     public List<String> handleItemTooltip(GuiContainer gui, ItemStack itemstack, int mousex, int mousey,
             List<String> currenttip) {
-        final Slot currentSlot = itemstack != null ? getFakeSlotAtPosition(gui, mousex, mousey) : null;
+        final VirtualMEPhantomSlot currentSlot = itemstack != null ? getPhantomSlotUnderMouse(gui) : null;
 
         if (currentSlot != null) {
             PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients
                     .get(INPUT_KEY + currentSlot.getSlotIndex());
             if (currentIngredients != null && currentIngredients.items.length > 1
-                    && currentIngredients.containsWithNBT(currentSlot.getStack())) {
+                    && currentIngredients.containsWithNBT(itemstack)) {
 
                 if (this.acceptsFollowingTooltipLineHandler == null
                         || this.acceptsFollowingTooltipLineHandler.tooltipGUID != currentIngredients) {
@@ -285,11 +287,12 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
 
     @Override
     public Map<String, String> handleHotkeys(GuiContainer gui, int mousex, int mousey, Map<String, String> hotkeys) {
-        final Slot currentSlot = getFakeSlotAtPosition(gui, mousex, mousey);
+        final VirtualMEPhantomSlot currentSlot = getPhantomSlotUnderMouse(gui);
+
+        final boolean isPatternTerminal = isGuiPatternTerm(gui);
 
         if (currentSlot != null) {
-
-            if (this.acceptsFollowingTooltipLineHandler != null) {
+            if (isPatternTerminal && this.acceptsFollowingTooltipLineHandler != null) {
                 hotkeys.put(
                         NEIClientConfig.getKeyName(
                                 "nee.ingredient",
@@ -307,11 +310,11 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
         return hotkeys;
     }
 
-    private Slot getFakeSlotAtPosition(GuiContainer gui, int mousex, int mousey) {
+    private VirtualMEPhantomSlot getPhantomSlotUnderMouse(GuiContainer gui) {
         if (gui instanceof GuiInterface || isPatternTerm(gui)) {
-            final Slot currentSlot = gui.getSlotAtPosition(mousex, mousey);
-            if (currentSlot instanceof SlotFake && currentSlot.getHasStack()) {
-                return currentSlot;
+            final VirtualMESlot currentSlot = ((AEBaseGui) gui).getVirtualMESlotUnderMouse();
+            if (currentSlot instanceof VirtualMEPhantomSlot phantomSlot && phantomSlot.getAEStack() != null) {
+                return phantomSlot;
             }
         }
 
