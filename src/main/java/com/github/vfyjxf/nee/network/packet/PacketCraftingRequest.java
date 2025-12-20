@@ -292,7 +292,7 @@ public class PacketCraftingRequest implements IMessage {
             Platform.openGUI(player, openContext.getTile(), openContext.getSide(), GuiBridge.GUI_CRAFTING_CONFIRM);
 
             if (player.openContainer instanceof ContainerCraftConfirm ccc) {
-                ccc.setPrimaryGui(baseContainer.getPrimaryGui());
+                ccc.setPrimaryGui(baseContainer.createPrimaryGui());
             }
         });
     }
