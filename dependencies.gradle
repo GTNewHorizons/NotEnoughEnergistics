@@ -1,21 +1,21 @@
 dependencies {
 
-    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-762-GTNH:dev")
-    api("com.github.GTNewHorizons:NotEnoughItems:2.8.43-GTNH:dev")
+    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-770-GTNH:dev")
+    api("com.github.GTNewHorizons:NotEnoughItems:2.8.44-GTNH:dev")
     api('com.github.GTNewHorizons:CodeChickenCore:1.4.10:dev')
 
-    implementation("com.github.GTNewHorizons:Baubles-Expanded:2.2.4-GTNH:dev")
-    implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.12.11:dev")
-    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.34-gtnh:dev")
+    implementation("com.github.GTNewHorizons:Baubles-Expanded:2.2.6-GTNH:dev")
+    implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.12.12:dev")
+    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.38-gtnh:dev")
 
-    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.152:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.173:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Avaritia:1.78:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Avaritiaddons:1.9.3-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:BuildCraftCompat:7.1.18:dev") { transitive = false }
     compileOnly('com.github.GTNewHorizons:EnderIO:2.10.10:dev') {transitive=false}
-    compileOnly("com.github.GTNewHorizons:ForestryMC:4.11.2:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:ForestryMC:4.11.4:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:GTplusplus:1.12.11:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:ThaumicEnergistics:1.7.16-GTNH:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:ThaumicEnergistics:1.7.18-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Botania:1.13.6-GTNH:dev") { transitive = false }
     compileOnly("com.gregoriust.gregtech:gregtech_1.7.10:6.14.23:dev") { transitive = false }
     compileOnly("curse.maven:thaumcraft-nei-plugin-225095:2241913") { transitive = false }
