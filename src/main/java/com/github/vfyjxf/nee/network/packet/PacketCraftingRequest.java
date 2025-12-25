@@ -289,7 +289,12 @@ public class PacketCraftingRequest implements IMessage {
 
         openContainerCraftConfirm(grid, requireToCraftStack, player, baseContainer.getActionSource(), job -> {
             final ContainerOpenContext openContext = baseContainer.getOpenContext();
-            Platform.openGUI(player, openContext.getTile(), openContext.getSide(), GuiBridge.GUI_CRAFTING_CONFIRM);
+            Platform.openGUI(
+                    player,
+                    openContext.getTile(),
+                    openContext.getSide(),
+                    GuiBridge.GUI_CRAFTING_CONFIRM,
+                    baseContainer.getTargetSlotIndex());
 
             if (player.openContainer instanceof ContainerCraftConfirm ccc) {
                 ccc.setPrimaryGui(baseContainer.createPrimaryGui());
