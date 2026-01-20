@@ -353,18 +353,31 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                             && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotStack, baseStack)
                             && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, baseStack)) {
 
-                        // If the current slot's stack size is not the recipe default, inherit it to nextStack
-                        long nextStackAmount = slotStack.stackSize == baseStack.stackSize ? nextStack.stackSize
-                                : slotAEStack.getStackSize();
+                        // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier
+                        // to nextStack.
+                        long nextStackAmount;
+                        if (slotStack.stackSize % baseStack.stackSize == 0) {
+                            nextStackAmount = (long) nextStack.stackSize * (slotStack.stackSize / baseStack.stackSize);
+                        } else {
+                            nextStackAmount = slotAEStack.getStackSize();
+                        }
+
                         craftingSlotss
                                 .put(slot.getSlotIndex(), AEItemStack.create(nextStack).setStackSize(nextStackAmount));
                         slotIngredients.setPermutationToRender(nextStack);
                     }
                 }
             } else {
-                // If the current slot's stack size is not the recipe default, inherit it to nextStack
-                long nextStackAmount = baseSlotStack.stackSize == baseIngredients.item.stackSize ? nextStack.stackSize
-                        : aes.getStackSize();
+                // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier to
+                // nextStack.
+                long nextStackAmount;
+                if (baseSlotStack.stackSize % baseIngredients.item.stackSize == 0) {
+                    nextStackAmount = (long) nextStack.stackSize
+                            * (baseSlotStack.stackSize / baseIngredients.item.stackSize);
+                } else {
+                    nextStackAmount = aes.getStackSize();
+                }
+
                 craftingSlotss
                         .put(currentSlot.getSlotIndex(), AEItemStack.create(nextStack).setStackSize(nextStackAmount));
                 baseIngredients.setPermutationToRender(nextStack);
