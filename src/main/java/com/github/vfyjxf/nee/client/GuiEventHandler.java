@@ -7,8 +7,6 @@ import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +34,7 @@ import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.glodblock.github.client.gui.GuiLevelMaintainer;
 
 import appeng.api.events.GuiScrollEvent;
+import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IAEStack;
 import appeng.client.gui.AEBaseGui;
 import appeng.client.gui.implementations.GuiInterface;
@@ -46,6 +45,7 @@ import appeng.client.gui.slots.VirtualMESlot;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.slot.SlotFake;
+import appeng.util.item.AEItemStack;
 import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.NEIServerUtils;
@@ -58,6 +58,8 @@ import codechicken.nei.recipe.RecipeInfo;
 import codechicken.nei.util.NEIMouseUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltipHandler {
 
@@ -215,8 +217,9 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                 }
 
                 if (sendPacket) {
-                    NEENetworkHandler.getInstance().sendToServer(
-                            new PacketSlotStackChange(copyStack, Collections.singletonList(currentSlot.slotNumber)));
+                    Int2ObjectMap<IAEItemStack> map = new Int2ObjectOpenHashMap<IAEItemStack>();
+                    map.put(currentSlot.slotNumber, AEItemStack.create(copyStack));
+                    NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(map));
                     if (!NEEConfig.keepGhostitems) {
                         draggedStack.stackSize = 0;
                     }
@@ -323,37 +326,64 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
 
     private void handleRecipeIngredientChange(GuiPatternTerm gui, VirtualMEPatternSlot currentSlot, int dWheel) {
         final int currentSlotIndex = currentSlot.getSlotIndex();
-        final PositionedStack currentIngredients = NEEPatternTerminalHandler.ingredients
-                .get(INPUT_KEY + currentSlotIndex);
+        final PositionedStack baseIngredients = NEEPatternTerminalHandler.ingredients.get(INPUT_KEY + currentSlotIndex);
 
-        if (currentIngredients != null && currentIngredients.items.length > 1) {
+        if (baseIngredients != null && baseIngredients.items.length > 1) {
             final IAEStack<?> aes = currentSlot.getAEStack();
             if (aes == null) return;
-            final ItemStack slotStack = aes.getItemStackForNEI();
-            if (slotStack == null) return;
-            final List<Integer> craftingSlots = new ArrayList<>();
-            final List<ItemStack> items = currentIngredients.getFilteredPermutations();
-            final int currentStackIndex = ItemUtils.getPermutationIndex(slotStack, items);
-            final ItemStack nextStack = items.get((items.size() - dWheel + currentStackIndex) % items.size());
-            final ItemStack currentStack = currentIngredients.item;
+            final ItemStack baseSlotStack = aes.getItemStackForNEI();
+            if (baseSlotStack == null) return;
+            final List<ItemStack> items = baseIngredients.getFilteredPermutations();
+            final int currentStackIndex = ItemUtils.getPermutationIndex(baseSlotStack, items);
+            final ItemStack nextStack = items.get((items.size() - dWheel + currentStackIndex) % items.size()).copy();
 
+            final Int2ObjectMap<IAEItemStack> craftingSlotss = new Int2ObjectOpenHashMap<>();
             if (NEEConfig.allowSynchronousSwitchIngredient) {
+                final ItemStack baseStack = baseIngredients.item;
                 for (VirtualMEPatternSlot slot : gui.getCraftingSlots()) {
+                    IAEStack<?> slotAEStack = slot.getAEStack();
+                    if (!(slotAEStack instanceof IAEItemStack ais)) continue;
+                    final ItemStack slotStack = ais.getItemStackForNEI();
+                    if (slotStack == null) continue;
+
                     final PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
                             .get(INPUT_KEY + slot.getSlotIndex());
 
                     if (slotIngredients != null && slotIngredients.containsWithNBT(nextStack)
-                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, currentStack)) {
+                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotStack, baseStack)
+                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, baseStack)) {
+
+                        // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier
+                        // to nextStack.
+                        long nextStackAmount;
+                        if (slotStack.stackSize % baseStack.stackSize == 0) {
+                            nextStackAmount = (long) nextStack.stackSize * (slotStack.stackSize / baseStack.stackSize);
+                        } else {
+                            nextStackAmount = slotAEStack.getStackSize();
+                        }
+
+                        craftingSlotss
+                                .put(slot.getSlotIndex(), AEItemStack.create(nextStack).setStackSize(nextStackAmount));
                         slotIngredients.setPermutationToRender(nextStack);
-                        craftingSlots.add(slot.getSlotIndex());
                     }
                 }
             } else {
-                currentIngredients.setPermutationToRender(nextStack);
-                craftingSlots.add(currentSlot.getSlotIndex());
+                // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier to
+                // nextStack.
+                long nextStackAmount;
+                if (baseSlotStack.stackSize % baseIngredients.item.stackSize == 0) {
+                    nextStackAmount = (long) nextStack.stackSize
+                            * (baseSlotStack.stackSize / baseIngredients.item.stackSize);
+                } else {
+                    nextStackAmount = aes.getStackSize();
+                }
+
+                craftingSlotss
+                        .put(currentSlot.getSlotIndex(), AEItemStack.create(nextStack).setStackSize(nextStackAmount));
+                baseIngredients.setPermutationToRender(nextStack);
             }
 
-            NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(nextStack, craftingSlots));
+            NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(craftingSlotss));
         }
     }
 }

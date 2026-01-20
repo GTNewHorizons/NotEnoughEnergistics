@@ -1,17 +1,16 @@
 package com.github.vfyjxf.nee.network.packet;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
-import net.minecraft.item.ItemStack;
+import javax.annotation.Nonnull;
 
-import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.NotEnoughEnergistics;
 
 import appeng.api.storage.StorageName;
+import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IAEStack;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.util.item.AEItemStack;
-import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -24,41 +23,48 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
  */
 public class PacketSlotStackChange implements IMessage {
 
-    private ItemStack stack;
-    private List<Integer> craftingSlots;
+    private IAEItemStack stack;
+    private Int2ObjectMap<IAEItemStack> slotStacks;
 
     public PacketSlotStackChange() {}
 
-    public PacketSlotStackChange(ItemStack stack, List<Integer> craftingSlots) {
-        this.stack = stack;
-        this.craftingSlots = craftingSlots;
+    public PacketSlotStackChange(@Nonnull Int2ObjectMap<IAEItemStack> slotStacks) {
+        this.slotStacks = slotStacks;
     }
 
-    public ItemStack getStack() {
+    public IAEItemStack getStack() {
         return stack;
     }
 
-    public List<Integer> getCraftingSlots() {
-        return craftingSlots;
+    public Int2ObjectMap<IAEItemStack> getSlotStacks() {
+        return slotStacks;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.stack = ItemUtils.loadItemStackFromNBT(ByteBufUtils.readTag(buf));
-        int craftingSlotsSize = buf.readInt();
-        this.craftingSlots = new ArrayList<>(craftingSlotsSize);
-        for (int i = 0; i < craftingSlotsSize; i++) {
+        int mapSize = buf.readInt();
+        this.slotStacks = new Int2ObjectOpenHashMap<>(mapSize);
+        for (int i = 0; i < mapSize; i++) {
             int slotNumber = buf.readInt();
-            craftingSlots.add(slotNumber);
+            try {
+                IAEItemStack stack = AEItemStack.loadItemStackFromPacket(buf);
+                this.slotStacks.put(slotNumber, stack);
+            } catch (IOException e) {
+                NotEnoughEnergistics.logger.error(e);
+            }
         }
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, ItemUtils.writeItemStackToNBT(this.stack, this.stack.stackSize));
-        buf.writeInt(this.craftingSlots.size());
-        for (Integer craftingSlot : this.craftingSlots) {
-            buf.writeInt(craftingSlot);
+        buf.writeInt(this.slotStacks.size());
+        for (Int2ObjectMap.Entry<IAEItemStack> entry : this.slotStacks.int2ObjectEntrySet()) {
+            buf.writeInt(entry.getIntKey());
+            try {
+                entry.getValue().writeToPacket(buf);
+            } catch (IOException e) {
+                NotEnoughEnergistics.logger.error(e);
+            }
         }
     }
 
@@ -66,12 +72,10 @@ public class PacketSlotStackChange implements IMessage {
 
         @Override
         public IMessage onMessage(PacketSlotStackChange message, MessageContext ctx) {
-            final IAEStack<?> nextStack = AEItemStack.create(message.getStack());
-            if (nextStack != null
-                    && ctx.getServerHandler().playerEntity.openContainer instanceof ContainerPatternTerm cpt) {
+            if (ctx.getServerHandler().playerEntity.openContainer instanceof ContainerPatternTerm cpt) {
                 final Int2ObjectMap<IAEStack<?>> temp = new Int2ObjectOpenHashMap<>();
-                for (int craftingSlot : message.getCraftingSlots()) {
-                    temp.put(craftingSlot, nextStack);
+                for (Int2ObjectMap.Entry<IAEItemStack> entry : message.getSlotStacks().int2ObjectEntrySet()) {
+                    temp.put(entry.getIntKey(), entry.getValue());
                 }
                 cpt.receiveSlotStacks(StorageName.CRAFTING_INPUT, temp);
             }
