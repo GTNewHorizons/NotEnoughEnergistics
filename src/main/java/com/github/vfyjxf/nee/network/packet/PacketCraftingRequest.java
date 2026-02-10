@@ -11,7 +11,6 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
 import com.github.vfyjxf.nee.utils.GuiUtils;
-import com.github.vfyjxf.nee.utils.ModIDs;
 
 import appeng.api.AEApi;
 import appeng.api.config.CraftingMode;
@@ -21,29 +20,25 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.crafting.ICraftingGrid;
 import appeng.api.networking.crafting.ICraftingJob;
 import appeng.api.networking.security.BaseActionSource;
-import appeng.api.networking.security.IActionHost;
 import appeng.api.networking.security.ISecurityGrid;
-import appeng.api.networking.security.PlayerSource;
 import appeng.api.networking.storage.IStorageGrid;
 import appeng.api.storage.IMEMonitor;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.container.AEBaseContainer;
 import appeng.container.ContainerOpenContext;
+import appeng.container.ContainerSubGui;
+import appeng.container.PrimaryGui;
 import appeng.container.implementations.ContainerCraftConfirm;
 import appeng.core.AELog;
 import appeng.core.sync.GuiBridge;
 import appeng.me.cache.CraftingGridCache;
 import appeng.tile.inventory.AppEngInternalInventory;
 import appeng.util.Platform;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import thaumicenergistics.common.ThEGuiHandler;
-import thaumicenergistics.common.container.ContainerPartArcaneCraftingTerminal;
 
 public class PacketCraftingRequest implements IMessage {
 
@@ -233,18 +228,9 @@ public class PacketCraftingRequest implements IMessage {
 
     public void openCraftConfirm(Container container, IGrid grid, IAEItemStack requireToCraftStack,
             EntityPlayerMP player) {
-
-        if (Loader.isModLoaded(ModIDs.ThE) && this.modID.equals(ModIDs.ThE)
-                && container instanceof ContainerPartArcaneCraftingTerminal cpact) {
-            openTHContainerCraftConfirm(grid, requireToCraftStack, (IActionHost) cpact.terminal, player);
-        } else if (container instanceof AEBaseContainer baseContainer) {
-            if (Loader.isModLoaded(ModIDs.ThE) && this.modID.equals(ModIDs.ThE)) {
-                openTHContainerCraftConfirm(grid, requireToCraftStack, (IActionHost) baseContainer.getTarget(), player);
-            } else {
-                openAEContainerCraftConfirm(baseContainer, grid, requireToCraftStack, player);
-            }
+        if (container instanceof AEBaseContainer baseContainer) {
+            openAEContainerCraftConfirm(baseContainer, grid, requireToCraftStack, player);
         }
-
     }
 
     private void openContainerCraftConfirm(IGrid grid, IAEItemStack requireToCraftStack, EntityPlayerMP player,
@@ -289,6 +275,8 @@ public class PacketCraftingRequest implements IMessage {
 
         openContainerCraftConfirm(grid, requireToCraftStack, player, baseContainer.getActionSource(), job -> {
             final ContainerOpenContext openContext = baseContainer.getOpenContext();
+            final PrimaryGui pGui = baseContainer instanceof ContainerSubGui ? baseContainer.getPrimaryGui()
+                    : baseContainer.createPrimaryGui();
             Platform.openGUI(
                     player,
                     openContext.getTile(),
@@ -297,23 +285,8 @@ public class PacketCraftingRequest implements IMessage {
                     baseContainer.getTargetSlotIndex());
 
             if (player.openContainer instanceof ContainerCraftConfirm ccc) {
-                ccc.setPrimaryGui(baseContainer.createPrimaryGui());
+                ccc.setPrimaryGui(pGui);
             }
         });
-    }
-
-    @Optional.Method(modid = ModIDs.ThE)
-    private void openTHContainerCraftConfirm(IGrid grid, IAEItemStack requireToCraftStack, IActionHost host,
-            EntityPlayerMP player) {
-
-        openContainerCraftConfirm(
-                grid,
-                requireToCraftStack,
-                player,
-                new PlayerSource(player, host),
-                job -> {
-                    ThEGuiHandler.launchGui(ThEGuiHandler.AUTO_CRAFTING_CONFIRM, player, player.worldObj, 0, 0, 0);
-                });
-
     }
 }

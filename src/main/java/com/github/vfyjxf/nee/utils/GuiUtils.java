@@ -16,16 +16,14 @@ import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.storage.data.IAEItemStack;
-import appeng.api.storage.data.IItemList;
+import appeng.api.storage.data.IAEStack;
 import appeng.client.gui.implementations.GuiPatternTerm;
 import appeng.client.me.ItemRepo;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.helpers.IContainerCraftingPacket;
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import cpw.mods.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
-import thaumicenergistics.common.container.ContainerPartArcaneCraftingTerminal;
 
 /**
  * @author vfyjxf
@@ -78,29 +76,28 @@ public class GuiUtils {
 
                 try {
                     @SuppressWarnings("unchecked")
-                    final IItemList<IAEItemStack> list = (IItemList<IAEItemStack>) ReflectionHelper
+                    final Iterable<IAEStack<?>> list = (Iterable<IAEStack<?>>) ReflectionHelper
                             .findField(ItemRepo.class, "list").get(repo);
 
-                    for (IAEItemStack stack : list) {
-                        if (predicate.test(stack)) {
-                            storageStacks.add(stack.copy());
+                    for (IAEStack<?> stack : list) {
+                        if (stack instanceof IAEItemStack ais && predicate.test(ais)) {
+                            storageStacks.add(ais.copy());
                         }
                     }
 
-                } catch (Exception e) {}
+                } catch (Exception ignored) {}
 
                 try {
-                    final IAEItemStack[] pins = (IAEItemStack[]) ReflectionHelper.findField(ItemRepo.class, "pinsRepo")
+                    final IAEStack<?>[] pins = (IAEStack<?>[]) ReflectionHelper.findField(ItemRepo.class, "pinsRepo")
                             .get(repo);
 
-                    for (int i = 0; i < pins.length; i++) {
-                        final IAEItemStack stack = pins[i];
-                        if (stack != null && predicate.test(stack)) {
-                            storageStacks.add(stack.copy());
+                    for (final IAEStack<?> stack : pins) {
+                        if (stack instanceof IAEItemStack ais && predicate.test(ais)) {
+                            storageStacks.add(ais.copy());
                         }
                     }
 
-                } catch (Exception e) {}
+                } catch (Exception ignored) {}
 
             }
         }
@@ -109,25 +106,16 @@ public class GuiUtils {
     }
 
     public static IGrid getGrid(Container container) {
-
-        if (Loader.isModLoaded(ModIDs.ThE) && container instanceof ContainerPartArcaneCraftingTerminal act) {
-            final IGridNode gridNode = act.terminal.getGridNode(ForgeDirection.UNKNOWN);
+        if (container instanceof AEBaseContainer baseContainer
+                && baseContainer.getTarget() instanceof IGridHost gridHost) {
+            final IGridNode gridNode = gridHost.getGridNode(ForgeDirection.UNKNOWN);
 
             if (gridNode == null) {
                 return null;
             }
 
             return gridNode.getGrid();
-        } else if (container instanceof AEBaseContainer baseContainer
-                && baseContainer.getTarget() instanceof IGridHost gridHost) {
-                    final IGridNode gridNode = gridHost.getGridNode(ForgeDirection.UNKNOWN);
-
-                    if (gridNode == null) {
-                        return null;
-                    }
-
-                    return gridNode.getGrid();
-                }
+        }
 
         return null;
     }
