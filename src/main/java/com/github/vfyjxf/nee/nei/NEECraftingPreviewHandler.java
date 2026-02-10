@@ -149,9 +149,7 @@ public class NEECraftingPreviewHandler {
     private void openCraftAmount(GuiContainer firstGui, ItemStack itemstack) {
         final IAEItemStack aeItemStack = AEItemStack.create(itemstack);
 
-        if (this.modID.equals(ModIDs.ThE)) {
-            sendToArcaneCraftingerver(aeItemStack);
-        } else if (this.modID.equals(ModIDs.WCT)) {
+        if (this.modID.equals(ModIDs.WCT)) {
             ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
             sendToWirelessCraftingServer();
         } else if (this.modID.equals("AE")) {
@@ -159,12 +157,6 @@ public class NEECraftingPreviewHandler {
             NetworkHandler.instance.sendToServer(new PacketInventoryAction(InventoryAction.AUTO_CRAFT, 0, 0));
         }
 
-    }
-
-    @Optional.Method(modid = ModIDs.ThE)
-    protected void sendToArcaneCraftingerver(IAEItemStack aeItemStack) {
-        thaumicenergistics.common.network.packet.server.Packet_S_ArcaneCraftingTerminal
-                .sendAutoCraft(Minecraft.getMinecraft().thePlayer, aeItemStack);
     }
 
     @Optional.Method(modid = ModIDs.WCT)
