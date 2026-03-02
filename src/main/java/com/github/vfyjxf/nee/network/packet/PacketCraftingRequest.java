@@ -257,7 +257,7 @@ public class PacketCraftingRequest implements IMessage {
             if (player.openContainer instanceof ContainerCraftConfirm ccc) {
                 ccc.setItemToCraft(requireToCraftStack);
                 ccc.setJob(futureJob);
-                ccc.setAutoStart(this.isAutoStart);
+                ccc.setAutoStartAndFollow(this.isAutoStart);
                 ccc.detectAndSendChanges();
             }
 
