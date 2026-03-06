@@ -1,5 +1,7 @@
 package com.github.vfyjxf.nee.processor;
 
+import static com.github.vfyjxf.nee.processor.RecipeProcessor.ThaumicEnergistics_isLoaded;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -42,7 +44,11 @@ public class TCNEIPluginRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            recipeInputs.removeIf(positionedStack -> positionedStack.item.getItem() instanceof ItemAspect);
+
+            if (!ThaumicEnergistics_isLoaded) {
+                recipeInputs.removeIf(positionedStack -> positionedStack.item.getItem() instanceof ItemAspect);
+            }
+
             return recipeInputs;
         }
         return recipeInputs;
@@ -54,6 +60,11 @@ public class TCNEIPluginRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutputs.add(recipe.getResultStack(recipeIndex));
+
+            if (!ThaumicEnergistics_isLoaded) {
+                recipeOutputs.removeIf(positionedStack -> positionedStack.item.getItem() instanceof ItemAspect);
+            }
+
             return recipeOutputs;
         }
         return recipeOutputs;

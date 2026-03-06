@@ -2,6 +2,9 @@ package com.github.vfyjxf.nee.network.packet;
 
 import static com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler.OUTPUT_KEY;
+import static com.github.vfyjxf.nee.processor.RecipeProcessor.TCNEIPlugin_isLoaded;
+import static com.github.vfyjxf.nee.processor.RecipeProcessor.ThaumicEnergistics_isLoaded;
+import static thaumicenergistics.common.storage.AEEssentiaStackType.ESSENTIA_STACK_ID;
 
 import javax.annotation.Nonnull;
 
@@ -10,6 +13,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import com.djgiannuzz.thaumcraftneiplugin.items.ItemAspect;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
@@ -18,6 +22,7 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.ISecurityGrid;
 import appeng.api.networking.storage.IStorageGrid;
 import appeng.api.storage.StorageName;
+import appeng.api.storage.data.AEStackTypeRegistry;
 import appeng.api.storage.data.IAEStack;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
@@ -171,9 +176,13 @@ public class PacketNEIPatternRecipe implements IMessage {
                     final IAEStack<?> aes;
                     if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
                         aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
+                    } else if (TCNEIPlugin_isLoaded && ThaumicEnergistics_isLoaded) {
+                        aes = aspectConverter(nextStack);
                     } else {
                         aes = AEItemStack.create(nextStack);
                     }
+
+                    if (aes == null) continue;
 
                     input.put(i, aes);
                 }
@@ -185,9 +194,13 @@ public class PacketNEIPatternRecipe implements IMessage {
                     IAEStack<?> aes;
                     if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
                         aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
+                    } else if (TCNEIPlugin_isLoaded && ThaumicEnergistics_isLoaded) {
+                        aes = aspectConverter(nextStack);
                     } else {
                         aes = AEItemStack.create(nextStack);
                     }
+
+                    if (aes == null) continue;
 
                     output.put(i, aes);
                 }
@@ -196,6 +209,14 @@ public class PacketNEIPatternRecipe implements IMessage {
                 container.receiveSlotStacks(StorageName.CRAFTING_INPUT, input);
                 container.receiveSlotStacks(StorageName.CRAFTING_OUTPUT, output);
             }
+        }
+
+        private IAEStack<?> aspectConverter(final ItemStack is) {
+            if (is.getItem() instanceof ItemAspect) {
+                return AEStackTypeRegistry.getType(ESSENTIA_STACK_ID).convertStackFromItem(is);
+            }
+
+            return AEItemStack.create(is);
         }
     }
 }
