@@ -27,7 +27,7 @@ This mod removes that functionality and allows the player to use NEI's transfer 
 - You can use shift + mouse wheel to choose ingredient.
 - you can use ctrl+ click [?] in crafting terminal to request the items while missing in AE and having existing pattern in AE(alt + click for no preview)
 
-## Compatible Modslist as followed：
+## Compatible Mods:
 
 - [x]  AppliedEnergistics2
 - [x]  Vanilla
@@ -38,7 +38,8 @@ This mod removes that functionality and allows the player to use NEI's transfer 
 - [x]  EnderIO 
 - [x]  Forestry (Doesn't support Fermenter and Still,because they don't have an item output)
 - [x]  Thaumcraft NEI Plugin
-- [x]  Thaumic Energistics (Allows you to transfer ArcaneRecipe from NEI to Knowledge Inscriber, it requires Thaumcraft NEI Plugin)
+- [x]  Aspect Recipe Index
+- [x]  Thaumic Energistics (Allows you to transfer ArcaneRecipe from NEI to Knowledge Inscriber, it requires either Aspect Recipe Index or Thaumcraft NEI Plugin)
 - [x]  ThermalExpansion
 - [x]  ImmersiveEngineering
 - [x]  Mekanism
