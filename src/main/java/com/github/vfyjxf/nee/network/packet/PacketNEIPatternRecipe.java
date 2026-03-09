@@ -173,14 +173,7 @@ public class PacketNEIPatternRecipe implements IMessage {
                     final ItemStack nextStack = recipeInput[i];
                     if (nextStack == null) continue;
 
-                    final IAEStack<?> aes;
-                    if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
-                        aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
-                    } else if (TCNEIPlugin_isLoaded && ThaumicEnergistics_isLoaded) {
-                        aes = aspectConverter(nextStack);
-                    } else {
-                        aes = AEItemStack.create(nextStack);
-                    }
+                    final IAEStack<?> aes = this.getAEStack(nextStack);
 
                     if (aes == null) continue;
 
@@ -191,14 +184,7 @@ public class PacketNEIPatternRecipe implements IMessage {
                     final ItemStack nextStack = recipeOutput[i];
                     if (nextStack == null) continue;
 
-                    IAEStack<?> aes;
-                    if (StackInfo.itemStackToNBT(nextStack).hasKey("gtFluidName")) {
-                        aes = AEFluidStack.create(StackInfo.getFluid(nextStack));
-                    } else if (TCNEIPlugin_isLoaded && ThaumicEnergistics_isLoaded) {
-                        aes = aspectConverter(nextStack);
-                    } else {
-                        aes = AEItemStack.create(nextStack);
-                    }
+                    final IAEStack<?> aes = this.getAEStack(nextStack);
 
                     if (aes == null) continue;
 
@@ -211,12 +197,14 @@ public class PacketNEIPatternRecipe implements IMessage {
             }
         }
 
-        private IAEStack<?> aspectConverter(final ItemStack is) {
-            if (is.getItem() instanceof ItemAspect) {
+        private IAEStack<?> getAEStack(final ItemStack is) {
+            if (StackInfo.itemStackToNBT(is).hasKey("gtFluidName")) {
+                return AEFluidStack.create(StackInfo.getFluid(is));
+            } else if (TCNEIPlugin_isLoaded && ThaumicEnergistics_isLoaded && is.getItem() instanceof ItemAspect) {
                 return AEStackTypeRegistry.getType(ESSENTIA_STACK_ID).convertStackFromItem(is);
+            } else {
+                return AEItemStack.create(is);
             }
-
-            return AEItemStack.create(is);
         }
     }
 }
