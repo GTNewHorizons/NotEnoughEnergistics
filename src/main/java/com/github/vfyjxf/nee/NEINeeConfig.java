@@ -188,9 +188,23 @@ public class NEINeeConfig implements IConfigureNEI {
                         NEEKnowledgeInscriberHandler.instance,
                         "arcaneshapelessrecipes");
 
-            } catch (ClassNotFoundException e) {
+                API.registerGuiOverlay(GuiKnowledgeInscriber.class, "thaumcraft.arcane.shaped");
+                API.registerGuiOverlay(GuiKnowledgeInscriber.class, "thaumcraft.arcane.shapeless");
+                API.registerGuiOverlay(GuiKnowledgeInscriber.class, "thaumcraft.wands");
+                API.registerGuiOverlayHandler(
+                        GuiKnowledgeInscriber.class,
+                        NEEKnowledgeInscriberHandler.instance,
+                        "thaumcraft.arcane.shaped");
+                API.registerGuiOverlayHandler(
+                        GuiKnowledgeInscriber.class,
+                        NEEKnowledgeInscriberHandler.instance,
+                        "thaumcraft.arcane.shapeless");
+                API.registerGuiOverlayHandler(
+                        GuiKnowledgeInscriber.class,
+                        NEEKnowledgeInscriberHandler.instance,
+                        "thaumcraft.wands");
 
-            }
+            } catch (ClassNotFoundException ignored) {}
 
         }
     }

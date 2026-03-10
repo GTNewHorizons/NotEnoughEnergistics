@@ -1,5 +1,8 @@
 package com.github.vfyjxf.nee.nei;
 
+import static com.github.vfyjxf.nee.processor.RecipeProcessor.AspectRecipeIndex_isLoaded;
+import static com.github.vfyjxf.nee.processor.RecipeProcessor.TCNEIPlugin_isLoaded;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +17,8 @@ import com.github.vfyjxf.nee.utils.Ingredient;
 import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
+import com.gtnewhorizons.aspectrecipeindex.nei.arcaneworkbench.ArcaneSlotPositioner;
+import com.gtnewhorizons.aspectrecipeindex.nei.arcaneworkbench.ShapedArcaneRecipeHandler;
 
 import appeng.util.Platform;
 import codechicken.nei.ItemsTooltipLineHandler;
@@ -32,7 +37,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
  */
 public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
 
-    public class NEEArcaneOverlayButton extends NEETerminalOverlayButton {
+    public static class NEEArcaneOverlayButton extends NEETerminalOverlayButton {
 
         public NEEArcaneOverlayButton(GuiOverlayButton button) {
             super(button.firstGui, button.handlerRef, button.xPosition, button.yPosition);
@@ -82,7 +87,6 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     private NEEKnowledgeInscriberHandler() {
 
         try {
-            // "Knowledge Inscriber"
             knowledgeInscriberClz = Class.forName("thaumicenergistics.client.gui.GuiKnowledgeInscriber");
         } catch (ClassNotFoundException ignored) {}
 
@@ -104,57 +108,57 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
         final List<PositionedStack> ingredients = recipe.getIngredientStacks(recipeIndex);
 
         if (itemAspectClz != null) {
+            // Aspect Recipe Index already does not include vis in the ingredients for arcane recipes so they do not
+            // need to be removed.
             ingredients.removeIf(positionedStack -> itemAspectClz.isInstance(positionedStack.item.getItem()));
         }
-
-        for (PositionedStack positionedStack : ingredients) {
-            if (positionedStack.items != null && positionedStack.items.length > 0) {
-                final int slotIndex = getSlotIndex(positionedStack.relx * 100 + positionedStack.rely);
-                final ItemStack[] currentStackList = positionedStack.items;
-                ItemStack stack = positionedStack.item;
-
-                for (ItemStack currentStack : currentStackList) {
-                    if (Platform.isRecipePrioritized(currentStack)) {
-                        stack = currentStack.copy();
-                    }
-                }
-
-                recipeInputs.setTag("#" + slotIndex, ItemUtils.writeItemStackToNBT(stack, stack.stackSize));
+        // Also applies to shapeless and wand handlers through inheritance
+        if (AspectRecipeIndex_isLoaded && recipe instanceof ShapedArcaneRecipeHandler) {
+            for (PositionedStack ps : ingredients) {
+                addIndexedIngredient(ps, ArcaneSlotPositioner.getSlotIndex(ps), recipeInputs);
+            }
+        } else if (TCNEIPlugin_isLoaded) {
+            for (PositionedStack ps : ingredients) {
+                addIndexedIngredient(ps, getSlotIndex(ps.relx * 100 + ps.rely), recipeInputs);
             }
         }
-
         return new PacketArcaneRecipe(recipeInputs);
     }
 
-    private int getSlotIndex(int xy) {
-        switch (xy) {
-            case 7533:
-                return 1;
-            case 10333:
-                return 2;
-            case 4960:
-                return 3;
-            case 7660:
-                return 4;
-            case 10360:
-                return 5;
-            case 4987:
-                return 6;
-            case 7687:
-                return 7;
-            case 10387:
-                return 8;
-            case 4832:
-            default:
-                return 0;
+    private static void addIndexedIngredient(PositionedStack ps, int i, NBTTagCompound recipeInputs) {
+        if (ps.items != null && ps.items.length > 0) {
+            ItemStack stack = getPrioritizedItem(ps.items);
+            if (stack == null) return;
+            recipeInputs.setTag("#" + i, ItemUtils.writeItemStackToNBT(stack, stack.stackSize));
         }
+    }
+
+    private static ItemStack getPrioritizedItem(ItemStack[] ps) {
+        for (ItemStack currentStack : ps) {
+            if (Platform.isRecipePrioritized(currentStack)) {
+                return currentStack.copy();
+            }
+        }
+        return ps[0];
+    }
+
+    private int getSlotIndex(int xy) {
+        return switch (xy) {
+            case 7533 -> 1;
+            case 10333 -> 2;
+            case 4960 -> 3;
+            case 7660 -> 4;
+            case 10360 -> 5;
+            case 4987 -> 6;
+            case 7687 -> 7;
+            case 10387 -> 8;
+            default -> 0;
+        };
     }
 
     @SubscribeEvent
     public void onActionPerformedEventPost(GuiRecipeButton.UpdateRecipeButtonsEvent.Post event) {
-
-        if (NEEConfig.noShift && event.gui instanceof GuiRecipe guiRecipe) {
-
+        if (NEEConfig.noShift && event.gui instanceof GuiRecipe<?>guiRecipe) {
             if (isGuiArcaneCraftingTerm(guiRecipe)) {
                 for (int i = 0; i < event.buttonList.size(); i++) {
                     if (event.buttonList.get(i) instanceof GuiOverlayButton btn) {
