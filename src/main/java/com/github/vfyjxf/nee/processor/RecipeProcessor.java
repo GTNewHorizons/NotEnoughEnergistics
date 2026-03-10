@@ -11,8 +11,9 @@ public class RecipeProcessor {
 
     public static final String NULL_IDENTIFIER = "null";
     public static List<IRecipeProcessor> recipeProcessors = new ArrayList<>();
-    public static boolean TCNEIPlugin_isLoaded = Loader.isModLoaded("thaumcraftneiplugin");
-    public static boolean ThaumicEnergistics_isLoaded = Loader.isModLoaded("thaumicenergistics");
+    public static final boolean TCNEIPlugin_isLoaded = Loader.isModLoaded("thaumcraftneiplugin");
+    public static final boolean ThaumicEnergistics_isLoaded = Loader.isModLoaded("thaumicenergistics");
+    public static final boolean AspectRecipeIndex_isLoaded = Loader.isModLoaded("aspectrecipeindex");
 
     public static void init() {
         NotEnoughEnergistics.logger.info("-----Not Enough Energistics Init Start-----");
@@ -59,6 +60,10 @@ public class RecipeProcessor {
         if (Loader.isModLoaded("Forestry")) {
             NotEnoughEnergistics.logger.info("Found Forestry, install Forestry support");
             recipeProcessors.add(new ForestryRecipeProcessor());
+        }
+        if (AspectRecipeIndex_isLoaded) {
+            NotEnoughEnergistics.logger.info("Found Aspect Recipe Index, install Aspect Recipe Index support");
+            recipeProcessors.add(new AspectRecipeIndexRecipeProcessor());
         }
         if (TCNEIPlugin_isLoaded) {
             NotEnoughEnergistics.logger.info("Found TCNEIPlugin, install TCNEIPlugin support");
