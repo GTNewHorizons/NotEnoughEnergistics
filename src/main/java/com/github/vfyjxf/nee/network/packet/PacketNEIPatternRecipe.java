@@ -2,6 +2,7 @@ package com.github.vfyjxf.nee.network.packet;
 
 import static com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler.INPUT_KEY;
 import static com.github.vfyjxf.nee.nei.NEEPatternTerminalHandler.OUTPUT_KEY;
+import static com.github.vfyjxf.nee.processor.RecipeProcessor.AspectRecipeIndex_isLoaded;
 import static com.github.vfyjxf.nee.processor.RecipeProcessor.TCNEIPlugin_isLoaded;
 import static com.github.vfyjxf.nee.processor.RecipeProcessor.ThaumicEnergistics_isLoaded;
 import static thaumicenergistics.common.storage.AEEssentiaStackType.ESSENTIA_STACK_ID;
@@ -200,11 +201,16 @@ public class PacketNEIPatternRecipe implements IMessage {
         private IAEStack<?> getAEStack(final ItemStack is) {
             if (StackInfo.itemStackToNBT(is).hasKey("gtFluidName")) {
                 return AEFluidStack.create(StackInfo.getFluid(is));
-            } else if (TCNEIPlugin_isLoaded && ThaumicEnergistics_isLoaded && is.getItem() instanceof ItemAspect) {
+            } else if (ThaumicEnergistics_isLoaded && isAspect(is)) {
                 return AEStackTypeRegistry.getType(ESSENTIA_STACK_ID).convertStackFromItem(is);
             } else {
                 return AEItemStack.create(is);
             }
+        }
+
+        private static boolean isAspect(ItemStack is) {
+            return (TCNEIPlugin_isLoaded && is.getItem() instanceof ItemAspect) || (AspectRecipeIndex_isLoaded
+                    && is.getItem() instanceof com.gtnewhorizons.aspectrecipeindex.common.items.ItemAspect);
         }
     }
 }
