@@ -34,7 +34,7 @@ public class NEEConfig {
     public static boolean enableNEIDragDrop = true;
     public static boolean useStackSizeFromNEI = true;
     public static boolean keepGhostitems = true;
-    public static boolean includeConfigCircuitInPatterns = false;
+    public static boolean includeNonConsumableIngredients = false;
 
     public static int draggedStackDefaultSize = 1;
 
@@ -87,11 +87,11 @@ public class NEEConfig {
                     itemCombinationWhitelist,
                     "Whitelist for item combination").getStringList();
 
-            includeConfigCircuitInPatterns = config.get(
+            includeNonConsumableIngredients = config.get(
                     CATEGORY_PATTERN_TRANSFER,
-                    "includeConfigCircuitInPatterns",
+                    "includeNonConsumableIngredients",
                     false,
-                    "If true, include GT config circuits (1-24, non-consumable) when transferring NEI recipes to ME patterns.")
+                    "If true, include non-consumable ingredients (NEI stackSize = 0) when transferring NEI recipes to ME patterns.")
                     .getBoolean();
         }
 
@@ -195,11 +195,11 @@ public class NEEConfig {
                     itemCombinationWhitelist,
                     "Whitelist for item combination").getStringList();
 
-            includeConfigCircuitInPatterns = config.get(
+            includeNonConsumableIngredients = config.get(
                     CATEGORY_PATTERN_TRANSFER,
-                    "includeConfigCircuitInPatterns",
+                    "includeNonConsumableIngredients",
                     false,
-                    "If true, include GT config circuits (1-24, non-consumable) when transferring NEI recipes to ME patterns.")
+                    "If true, include non-consumable ingredients (NEI stackSize = 0) when transferring NEI recipes to ME patterns.")
                     .getBoolean();
         }
 
