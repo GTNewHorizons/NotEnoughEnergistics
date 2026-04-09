@@ -1,5 +1,6 @@
 package com.github.vfyjxf.nee.utils;
 
+import static com.github.vfyjxf.nee.config.NEEConfig.includeConfigCircuitInPatterns;
 import static com.github.vfyjxf.nee.config.NEEConfig.transformBlacklist;
 import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityList;
 import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityModList;
@@ -266,5 +267,20 @@ public final class ItemUtils {
                 stack.setTagCompound(NBT);
             }
         }
+    }
+
+    public static boolean shouldKeepZeroSizeIngredient(ItemStack stack) {
+        if (!includeConfigCircuitInPatterns || stack == null) {
+            return false;
+        }
+
+        GameRegistry.UniqueIdentifier itemId = GameRegistry.findUniqueIdentifierFor(stack.getItem());
+        if (itemId == null || !"gregtech".equals(itemId.modId)) {
+            return false;
+        }
+
+        // GT config circuit: meta 1-24, non-consumable, stackable
+        int meta = stack.getItemDamage();
+        return meta >= 1 && meta <= 24 && stack.getMaxStackSize() > 1;
     }
 }

@@ -14,6 +14,8 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
+import com.github.vfyjxf.nee.utils.ItemUtils;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import gregtech.api.enums.ItemList;
@@ -100,7 +102,15 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (canProcessRecipe(recipe)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            recipeInputs.removeIf(positionedStack -> positionedStack.item.stackSize == 0);
+            for (PositionedStack positionedStack : recipeInputs) {
+                if (positionedStack.item.stackSize == 0
+                        && ItemUtils.shouldKeepZeroSizeIngredient(positionedStack.item)) {
+                    positionedStack.item.stackSize = 1;
+                }
+            }
+            recipeInputs.removeIf(
+                    positionedStack -> positionedStack.item.stackSize == 0
+                            && !ItemUtils.shouldKeepZeroSizeIngredient(positionedStack.item));
         }
 
         return recipeInputs;
