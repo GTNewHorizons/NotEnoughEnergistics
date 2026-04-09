@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.item.ItemStack;
 
-import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.config.NEEConfig;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
@@ -50,16 +50,14 @@ public class GregTech6RecipeProcessor implements IRecipeProcessor {
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
             for (PositionedStack positionedStack : recipeInputs) {
-                if (positionedStack.item.stackSize == 0
-                        && ItemUtils.shouldKeepZeroSizeIngredient(positionedStack.item)) {
+                if (NEEConfig.includeNonConsumableIngredients && positionedStack.item.stackSize == 0) {
                     positionedStack.item.stackSize = 1;
                 }
             }
             // remove fluid
             recipeInputs.removeIf(
                     positionedStack -> FL.getFluid(positionedStack.item, true) != null
-                            || (positionedStack.item.stackSize == 0
-                                    && !ItemUtils.shouldKeepZeroSizeIngredient(positionedStack.item)));
+                            || (positionedStack.item.stackSize == 0 && !NEEConfig.includeNonConsumableIngredients));
             // try to remove machine
             if (recipe instanceof NEI_RecipeMap) {
                 Field mRecipeMapField = ReflectionHelper.findField(NEI_RecipeMap.class, "mRecipeMap");

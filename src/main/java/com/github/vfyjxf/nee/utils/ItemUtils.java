@@ -1,6 +1,5 @@
 package com.github.vfyjxf.nee.utils;
 
-import static com.github.vfyjxf.nee.config.NEEConfig.includeNonConsumableIngredients;
 import static com.github.vfyjxf.nee.config.NEEConfig.transformBlacklist;
 import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityList;
 import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityModList;
@@ -269,7 +268,4 @@ public final class ItemUtils {
         }
     }
 
-    public static boolean shouldKeepZeroSizeIngredient(ItemStack stack) {
-        return includeNonConsumableIngredients && stack != null;
-    }
 }
