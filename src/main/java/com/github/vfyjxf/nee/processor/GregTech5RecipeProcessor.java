@@ -123,8 +123,9 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
             // remove output if it's chance != 10000
             recipeOutputs.removeIf(
-                    stack -> stack instanceof FixedPositionedStack && !(((FixedPositionedStack) stack).mChance == 10000
-                            || ((FixedPositionedStack) stack).mChance <= 0));
+                    stack -> stack instanceof FixedPositionedStack
+                            && !(((FixedPositionedStack) stack).getChance() == PositionedStack.CHANCE_FULL
+                                    || ((FixedPositionedStack) stack).getChance() <= 0));
             return recipeOutputs;
         }
         return recipeOutputs;
