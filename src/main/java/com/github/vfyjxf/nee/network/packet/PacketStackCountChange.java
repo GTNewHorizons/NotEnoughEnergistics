@@ -74,7 +74,7 @@ public class PacketStackCountChange implements IMessage {
             if (aes != null) {
                 final IAEStack<?> newAes = aes.copy();
                 final Int2ObjectMap<IAEStack<?>> temp = new Int2ObjectOpenHashMap<>();
-                newAes.setStackSize(Math.max(1, aes.getStackSize()) + message.getChangeCount());
+                newAes.setStackSize(Math.max(1, aes.getStackSize() + message.getChangeCount()));
                 temp.put(message.getSlotIndex(), newAes);
                 cpt.receiveSlotStacks(message.getStorageName(), temp);
             }
