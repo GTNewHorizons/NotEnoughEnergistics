@@ -8,7 +8,6 @@ import com.github.vfyjxf.nee.NotEnoughEnergistics;
 
 import appeng.api.storage.StorageName;
 import appeng.api.storage.data.IAEItemStack;
-import appeng.api.storage.data.IAEStack;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.util.item.AEItemStack;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -73,11 +72,9 @@ public class PacketSlotStackChange implements IMessage {
         @Override
         public IMessage onMessage(PacketSlotStackChange message, MessageContext ctx) {
             if (ctx.getServerHandler().playerEntity.openContainer instanceof ContainerPatternTerm cpt) {
-                final Int2ObjectMap<IAEStack<?>> temp = new Int2ObjectOpenHashMap<>();
                 for (Int2ObjectMap.Entry<IAEItemStack> entry : message.getSlotStacks().int2ObjectEntrySet()) {
-                    temp.put(entry.getIntKey(), entry.getValue());
+                    cpt.updateVirtualSlot(StorageName.CRAFTING_INPUT, entry.getIntKey(), entry.getValue());
                 }
-                cpt.receiveSlotStacks(StorageName.CRAFTING_INPUT, temp);
             }
             return null;
         }

@@ -10,8 +10,6 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 /**
  * @author vfyjxf
@@ -73,10 +71,8 @@ public class PacketStackCountChange implements IMessage {
                     .getAEStackInSlot(message.getSlotIndex());
             if (aes != null) {
                 final IAEStack<?> newAes = aes.copy();
-                final Int2ObjectMap<IAEStack<?>> temp = new Int2ObjectOpenHashMap<>();
                 newAes.setStackSize(Math.max(1, aes.getStackSize() + message.getChangeCount()));
-                temp.put(message.getSlotIndex(), newAes);
-                cpt.receiveSlotStacks(message.getStorageName(), temp);
+                cpt.updateVirtualSlot(message.getStorageName(), message.getSlotIndex(), newAes);
             }
         }
     }
