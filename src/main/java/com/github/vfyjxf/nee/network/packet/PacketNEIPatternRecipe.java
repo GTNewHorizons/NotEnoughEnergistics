@@ -135,7 +135,7 @@ public class PacketNEIPatternRecipe implements IMessage {
                     list.put(i, aes);
                 }
 
-                container.receiveSlotStacks(StorageName.CRAFTING_INPUT, list);
+                updateVirtualSlots(container, StorageName.CRAFTING_INPUT, list);
             }
         }
 
@@ -193,8 +193,15 @@ public class PacketNEIPatternRecipe implements IMessage {
                 }
 
                 container.clear();
-                container.receiveSlotStacks(StorageName.CRAFTING_INPUT, input);
-                container.receiveSlotStacks(StorageName.CRAFTING_OUTPUT, output);
+                updateVirtualSlots(container, StorageName.CRAFTING_INPUT, input);
+                updateVirtualSlots(container, StorageName.CRAFTING_OUTPUT, output);
+            }
+        }
+
+        private void updateVirtualSlots(ContainerPatternTerm container, StorageName storageName,
+                Int2ObjectOpenHashMap<IAEStack<?>> stacks) {
+            for (var entry : stacks.int2ObjectEntrySet()) {
+                container.updateVirtualSlot(storageName, entry.getIntKey(), entry.getValue());
             }
         }
 
