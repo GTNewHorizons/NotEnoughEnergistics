@@ -1,25 +1,25 @@
 dependencies {
 
-    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-911-GTNH:dev")
-    api("com.github.GTNewHorizons:NotEnoughItems:2.8.93-GTNH:dev")
-    api('com.github.GTNewHorizons:CodeChickenCore:1.4.12:dev')
+    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-982-GTNH:dev")
+    api("com.github.GTNewHorizons:NotEnoughItems:2.8.102-GTNH:dev")
+    api('com.github.GTNewHorizons:CodeChickenCore:1.4.15:dev')
 
-    implementation("com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH:dev")
-    implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.12.14:dev")
-    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.76-gtnh:dev")
+    implementation("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")
+    implementation("com.github.GTNewHorizons:WirelessCraftingTerminal:1.12.16:dev")
+    implementation("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.91-gtnh:dev")
 
-    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.584:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:Avaritia:1.96:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.52.602:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:Avaritia:1.97:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Avaritiaddons:1.9.4-GTNH:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:BuildCraftCompat:7.1.20:dev") { transitive = false }
-    compileOnly('com.github.GTNewHorizons:EnderIO:2.10.25:dev') {transitive=false}
-    compileOnly("com.github.GTNewHorizons:ForestryMC:4.11.14:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:ThaumicEnergistics:1.7.45-GTNH:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:Botania:1.13.16-GTNH:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:BuildCraftCompat:7.1.21:dev") { transitive = false }
+    compileOnly('com.github.GTNewHorizons:EnderIO:2.10.31:dev') {transitive=false}
+    compileOnly("com.github.GTNewHorizons:ForestryMC:4.11.26:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:ThaumicEnergistics:1.7.54-GTNH:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:Botania:1.13.25-GTNH:dev") { transitive = false }
     compileOnly("com.gregoriust.gregtech:gregtech_1.7.10:6.14.23:dev") { transitive = false }
     compileOnly("curse.maven:thaumcraft-nei-plugin-225095:2241913") { transitive = false }
     compileOnly("curse.maven:thermal-expansion-69163:2388759") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:AspectRecipeIndex:1.0.15:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:AspectRecipeIndex:1.1.1:dev") { transitive = false }
 
     runtimeOnly("curse.maven:cofh-core-69162:2388751")
 }
