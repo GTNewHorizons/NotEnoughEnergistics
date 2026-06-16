@@ -41,7 +41,6 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import codechicken.nei.recipe.TemplateRecipeHandler;
 import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 
@@ -149,23 +148,11 @@ public class NEECraftingPreviewHandler {
     private void openCraftAmount(GuiContainer firstGui, ItemStack itemstack) {
         final IAEItemStack aeItemStack = AEItemStack.create(itemstack);
 
-        if (this.modID.equals(ModIDs.WCT)) {
-            ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
-            sendToWirelessCraftingServer();
-        } else if (this.modID.equals("AE")) {
-            ((AEBaseContainer) firstGui.inventorySlots).setTargetStack(aeItemStack);
+        if (firstGui.inventorySlots instanceof AEBaseContainer baseContainer) {
+            baseContainer.setTargetStack(aeItemStack);
             NetworkHandler.instance.sendToServer(new PacketInventoryAction(InventoryAction.AUTO_CRAFT, 0, 0));
         }
 
-    }
-
-    @Optional.Method(modid = ModIDs.WCT)
-    protected void sendToWirelessCraftingServer() {
-        net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketInventoryAction packet = new net.p455w0rd.wirelesscraftingterminal.core.sync.packets.PacketInventoryAction(
-                InventoryAction.AUTO_CRAFT,
-                0,
-                0);
-        net.p455w0rd.wirelesscraftingterminal.core.sync.network.NetworkHandler.instance.sendToServer(packet);
     }
 
     @SubscribeEvent
