@@ -154,6 +154,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                         recipeInputs.setTag(
                                 INPUT_KEY + inputIndex,
                                 ItemUtils.writeItemStackToNBT(currentStack, currentStack.stackSize * multiplier));
+                        positionedStack.setPermutationToRender(currentStack);
                         NEEPatternTerminalHandler.ingredients.put(INPUT_KEY + inputIndex, positionedStack);
                         inputIndex++;
                     }
