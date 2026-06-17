@@ -7,6 +7,7 @@ import static com.github.vfyjxf.nee.utils.GuiUtils.isPatternTerm;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -328,14 +329,16 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
         final int currentSlotIndex = currentSlot.getSlotIndex();
         final PositionedStack baseIngredients = NEEPatternTerminalHandler.ingredients.get(INPUT_KEY + currentSlotIndex);
 
-        if (baseIngredients != null && baseIngredients.items.length > 1) {
+        if (baseIngredients != null) {
             final IAEStack<?> aes = currentSlot.getAEStack();
             if (aes == null) return;
             final ItemStack baseSlotStack = aes.getItemStackForNEI();
             if (baseSlotStack == null) return;
-            final List<ItemStack> items = baseIngredients.getFilteredPermutations();
+            final List<ItemStack> items = getUniquePermutations(baseIngredients);
+            if (items.size() <= 1) return;
             final int currentStackIndex = ItemUtils.getPermutationIndex(baseSlotStack, items);
-            final ItemStack nextStack = items.get((items.size() - dWheel + currentStackIndex) % items.size()).copy();
+            if (currentStackIndex < 0) return;
+            final ItemStack nextStack = items.get(Math.floorMod(currentStackIndex - dWheel, items.size())).copy();
 
             final Int2ObjectMap<IAEItemStack> craftingSlotss = new Int2ObjectOpenHashMap<>();
             if (NEEConfig.allowSynchronousSwitchIngredient) {
@@ -383,7 +386,28 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                 baseIngredients.setPermutationToRender(nextStack);
             }
 
-            NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(craftingSlotss));
+            if (!craftingSlotss.isEmpty()) {
+                NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(craftingSlotss));
+            }
         }
+    }
+
+    private List<ItemStack> getUniquePermutations(PositionedStack ingredients) {
+        final List<ItemStack> uniqueItems = new ArrayList<>();
+        for (ItemStack stack : ingredients.getFilteredPermutations()) {
+            boolean alreadyAdded = false;
+            for (ItemStack uniqueStack : uniqueItems) {
+                if (NEIServerUtils.areStacksSameTypeWithNBT(uniqueStack, stack)) {
+                    alreadyAdded = true;
+                    break;
+                }
+            }
+
+            if (!alreadyAdded) {
+                uniqueItems.add(stack);
+            }
+        }
+
+        return uniqueItems;
     }
 }
