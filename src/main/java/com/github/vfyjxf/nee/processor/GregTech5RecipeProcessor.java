@@ -20,7 +20,6 @@ import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import gregtech.api.enums.ItemList;
 import gregtech.api.recipe.RecipeCategory;
-import gregtech.nei.GTNEIDefaultHandler.FixedPositionedStack;
 
 /**
  * @author vfyjxf
@@ -121,11 +120,6 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutputs = new ArrayList<>();
         if (canProcessRecipe(recipe)) {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
-            // remove output if it's chance != 10000
-            recipeOutputs.removeIf(
-                    stack -> stack instanceof FixedPositionedStack
-                            && !(((FixedPositionedStack) stack).getChance() == PositionedStack.CHANCE_FULL
-                                    || ((FixedPositionedStack) stack).getChance() <= 0));
             return recipeOutputs;
         }
         return recipeOutputs;
