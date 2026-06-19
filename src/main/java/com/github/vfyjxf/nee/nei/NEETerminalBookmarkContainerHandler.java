@@ -11,6 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketNEIBookmark;
 import com.github.vfyjxf.nee.utils.GuiUtils;
+import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import codechicken.nei.api.IBookmarkContainerHandler;
 
@@ -38,6 +39,6 @@ public class NEETerminalBookmarkContainerHandler implements IBookmarkContainerHa
     }
 
     private NBTTagCompound packBookmarkItem(ItemStack bookmarkItem) {
-        return bookmarkItem.writeToNBT(new NBTTagCompound());
+        return ItemUtils.writeItemStackToNBT(bookmarkItem, bookmarkItem.stackSize);
     }
 }
