@@ -22,6 +22,7 @@ import com.google.gson.JsonSyntaxException;
 import codechicken.nei.NEIServerUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
+import gregtech.api.enums.ItemList;
 
 public final class ItemUtils {
 
@@ -183,10 +184,22 @@ public final class ItemUtils {
         return null;
     }
 
+    public static boolean areStacksSameType(ItemStack aStack, ItemStack bStack) {
+        if (Loader.isModLoaded("gregtech_nh") && aStack != null
+                && bStack != null
+                && aStack.getItem() == ItemList.Display_Fluid.getItem()
+                && bStack.getItem() == ItemList.Display_Fluid.getItem()) {
+            return ItemList.Display_Fluid.getItem().getDamage(aStack)
+                    == ItemList.Display_Fluid.getItem().getDamage(bStack);
+        } else {
+            return NEIServerUtils.areStacksSameTypeCraftingWithNBT(aStack, bStack);
+        }
+    }
+
     public static int getPermutationIndex(ItemStack stack, List<ItemStack> items) {
 
         for (int index = 0; index < items.size(); index++) {
-            if (NEIServerUtils.areStacksSameTypeCraftingWithNBT(items.get(index), stack)) {
+            if (areStacksSameType(items.get(index), stack)) {
                 return index;
             }
         }

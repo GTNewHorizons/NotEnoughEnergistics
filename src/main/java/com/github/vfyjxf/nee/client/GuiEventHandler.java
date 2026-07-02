@@ -350,28 +350,34 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
 
             final FluidStack nextFluidStack = getFluidStackOrNull(nextStack);
 
+            final ItemStack baseStack = baseIngredients.item;
+            final FluidStack baseFluidStack = getFluidStackOrNull(baseStack);
+            final long baseStackSize = baseFluidStack == null ? baseStack.stackSize : baseFluidStack.amount;
+
             final Int2ObjectMap<IAEStack<?>> craftingSlots = new Int2ObjectOpenHashMap<>();
             if (NEEConfig.allowSynchronousSwitchIngredient) {
-                final ItemStack baseStack = baseIngredients.item;
                 for (VirtualMEPatternSlot slot : gui.getCraftingSlots()) {
                     IAEStack<?> slotAEStack = slot.getAEStack();
                     if (!(slotAEStack instanceof IAEItemStack) && !(slotAEStack instanceof IAEFluidStack)) continue;
                     final ItemStack slotStack = slotAEStack.getItemStackForNEI();
                     if (slotStack == null) continue;
 
+                    final FluidStack slotFluidStack = getFluidStackOrNull(slotStack);
+                    final long slotStackSize = slotFluidStack == null ? slotStack.stackSize : slotFluidStack.amount;
+
                     final PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
                             .get(INPUT_KEY + slot.getSlotIndex());
 
                     if (slotIngredients != null && slotIngredients.containsWithNBT(nextStack)
-                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotStack, baseStack)
-                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, baseStack)) {
+                            && ItemUtils.areStacksSameType(slotStack, baseStack)
+                            && ItemUtils.areStacksSameType(slotIngredients.item, baseStack)) {
 
                         // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier
                         // to nextStack.
                         final long nextStackAmount;
-                        if (slotStack.stackSize % baseStack.stackSize == 0) {
+                        if (slotStackSize % baseStackSize == 0) {
                             long nextSize = nextFluidStack != null ? nextFluidStack.amount : nextStack.stackSize;
-                            nextStackAmount = nextSize * (slotStack.stackSize / baseStack.stackSize);
+                            nextStackAmount = nextSize * (slotStackSize / baseStackSize);
                         } else {
                             nextStackAmount = slotAEStack.getStackSize();
                         }
@@ -386,12 +392,16 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                     }
                 }
             } else {
+                FluidStack baseSlotFluidStack = getFluidStackOrNull(baseSlotStack);
+                final long baseSlotStackSize = baseSlotFluidStack == null ? baseSlotStack.stackSize
+                        : baseSlotFluidStack.amount;
+
                 // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier to
                 // nextStack.
                 long nextStackAmount;
-                if (baseSlotStack.stackSize % baseIngredients.item.stackSize == 0) {
+                if (baseSlotStackSize % baseStackSize == 0) {
                     long nextSize = nextFluidStack == null ? nextStack.stackSize : nextFluidStack.amount;
-                    nextStackAmount = nextSize * (baseSlotStack.stackSize / baseIngredients.item.stackSize);
+                    nextStackAmount = nextSize * (baseSlotStackSize / baseStackSize);
                 } else {
                     nextStackAmount = aes.getStackSize();
                 }
