@@ -22,9 +22,10 @@ import com.google.gson.JsonSyntaxException;
 import codechicken.nei.NEIServerUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
-import gregtech.api.enums.ItemList;
 
 public final class ItemUtils {
+
+    private static final String GT_DISPLAY_FLUID_ITEM_ID = "gt.GregTech_FluidDisplay";
 
     public static Gson gson = new Gson();
     public static List<StackProcessor> transformItemBlacklist = getTransformItemBlacklist();
@@ -185,15 +186,15 @@ public final class ItemUtils {
     }
 
     public static boolean areStacksSameType(ItemStack aStack, ItemStack bStack) {
-        if (Loader.isModLoaded("gregtech_nh") && aStack != null
-                && bStack != null
-                && aStack.getItem() == ItemList.Display_Fluid.getItem()
-                && bStack.getItem() == ItemList.Display_Fluid.getItem()) {
-            return ItemList.Display_Fluid.getItem().getDamage(aStack)
-                    == ItemList.Display_Fluid.getItem().getDamage(bStack);
-        } else {
-            return NEIServerUtils.areStacksSameTypeCraftingWithNBT(aStack, bStack);
+        if (Loader.isModLoaded(ModIDs.GT) && aStack != null && bStack != null) {
+            Item displayFluidItem = GameRegistry.findItem(ModIDs.GT, GT_DISPLAY_FLUID_ITEM_ID);
+            if (displayFluidItem != null && aStack.getItem() == displayFluidItem
+                    && bStack.getItem() == displayFluidItem) {
+                return displayFluidItem.getDamage(aStack) == displayFluidItem.getDamage(bStack);
+            }
         }
+
+        return NEIServerUtils.areStacksSameTypeCraftingWithNBT(aStack, bStack);
     }
 
     public static int getPermutationIndex(ItemStack stack, List<ItemStack> items) {
@@ -265,7 +266,7 @@ public final class ItemUtils {
     }
 
     public static void transformGTTool(ItemStack stack) {
-        if (!Loader.isModLoaded("gregtech")) return;
+        if (!Loader.isModLoaded(ModIDs.GT)) return;
         if (GT_MetaGenerated_ToolClass != null
                 && GT_MetaGenerated_ToolClass.isAssignableFrom(stack.getItem().getClass())) {
             NBTTagCompound NBT = stack.getTagCompound();

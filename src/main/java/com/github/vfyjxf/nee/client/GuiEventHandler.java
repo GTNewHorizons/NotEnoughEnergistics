@@ -37,6 +37,7 @@ import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
 import com.github.vfyjxf.nee.processor.GregTech5RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.GuiLevelMaintainer;
 
 import appeng.api.events.GuiScrollEvent;
@@ -442,7 +443,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
 
     @Nullable
     private FluidStack getFluidStackOrNull(@Nonnull ItemStack displayStack) {
-        if (Loader.isModLoaded("gregtech_nh") && displayStack.getItem() == ItemList.Display_Fluid.getItem()) {
+        if (Loader.isModLoaded(ModIDs.GT) && displayStack.getItem() == ItemList.Display_Fluid.getItem()) {
             return GregTech5RecipeProcessor.getFluidFromDisplayStack(displayStack);
         }
 
