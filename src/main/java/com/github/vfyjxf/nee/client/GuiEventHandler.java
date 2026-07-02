@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -20,6 +23,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.fluids.FluidStack;
 
 import org.lwjgl.input.Mouse;
 
@@ -31,10 +35,13 @@ import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
+import com.github.vfyjxf.nee.processor.GregTech5RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ItemUtils;
+import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.GuiLevelMaintainer;
 
 import appeng.api.events.GuiScrollEvent;
+import appeng.api.storage.data.IAEFluidStack;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IAEStack;
 import appeng.client.gui.AEBaseGui;
@@ -46,6 +53,7 @@ import appeng.client.gui.slots.VirtualMESlot;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.container.slot.SlotFake;
+import appeng.util.item.AEFluidStack;
 import appeng.util.item.AEItemStack;
 import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.NEIClientConfig;
@@ -59,6 +67,7 @@ import codechicken.nei.recipe.RecipeInfo;
 import codechicken.nei.util.NEIMouseUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import gregtech.api.enums.ItemList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
@@ -218,7 +227,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                 }
 
                 if (sendPacket) {
-                    Int2ObjectMap<IAEItemStack> map = new Int2ObjectOpenHashMap<IAEItemStack>();
+                    Int2ObjectMap<IAEStack<?>> map = new Int2ObjectOpenHashMap<>();
                     map.put(currentSlot.slotNumber, AEItemStack.create(copyStack));
                     NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(map));
                     if (!NEEConfig.keepGhostitems) {
@@ -340,54 +349,75 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
             if (currentStackIndex < 0) return;
             final ItemStack nextStack = items.get(Math.floorMod(currentStackIndex - dWheel, items.size())).copy();
 
-            final Int2ObjectMap<IAEItemStack> craftingSlotss = new Int2ObjectOpenHashMap<>();
+            final FluidStack nextFluidStack = getFluidStackOrNull(nextStack);
+
+            final ItemStack baseStack = baseIngredients.item;
+            final FluidStack baseFluidStack = getFluidStackOrNull(baseStack);
+            final long baseStackSize = baseFluidStack == null ? baseStack.stackSize : baseFluidStack.amount;
+
+            final Int2ObjectMap<IAEStack<?>> craftingSlots = new Int2ObjectOpenHashMap<>();
             if (NEEConfig.allowSynchronousSwitchIngredient) {
-                final ItemStack baseStack = baseIngredients.item;
                 for (VirtualMEPatternSlot slot : gui.getCraftingSlots()) {
                     IAEStack<?> slotAEStack = slot.getAEStack();
-                    if (!(slotAEStack instanceof IAEItemStack ais)) continue;
-                    final ItemStack slotStack = ais.getItemStackForNEI();
+                    if (!(slotAEStack instanceof IAEItemStack) && !(slotAEStack instanceof IAEFluidStack)) continue;
+                    final ItemStack slotStack = slotAEStack.getItemStackForNEI();
                     if (slotStack == null) continue;
+
+                    final FluidStack slotFluidStack = getFluidStackOrNull(slotStack);
+                    final long slotStackSize = slotFluidStack == null ? slotStack.stackSize : slotFluidStack.amount;
 
                     final PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
                             .get(INPUT_KEY + slot.getSlotIndex());
 
                     if (slotIngredients != null && slotIngredients.containsWithNBT(nextStack)
-                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotStack, baseStack)
-                            && NEIServerUtils.areStacksSameTypeCraftingWithNBT(slotIngredients.item, baseStack)) {
+                            && ItemUtils.areStacksSameType(slotStack, baseStack)
+                            && ItemUtils.areStacksSameType(slotIngredients.item, baseStack)) {
 
                         // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier
                         // to nextStack.
-                        long nextStackAmount;
-                        if (slotStack.stackSize % baseStack.stackSize == 0) {
-                            nextStackAmount = (long) nextStack.stackSize * (slotStack.stackSize / baseStack.stackSize);
+                        final long nextStackAmount;
+                        if (baseStackSize > 0 && slotStackSize % baseStackSize == 0) {
+                            long nextSize = nextFluidStack != null ? nextFluidStack.amount : nextStack.stackSize;
+                            nextStackAmount = nextSize * (slotStackSize / baseStackSize);
                         } else {
                             nextStackAmount = slotAEStack.getStackSize();
                         }
 
-                        craftingSlotss
-                                .put(slot.getSlotIndex(), AEItemStack.create(nextStack).setStackSize(nextStackAmount));
+                        IAEStack<?> nextAEStack = slotAEStack instanceof IAEItemStack ? AEItemStack.create(nextStack)
+                                : AEFluidStack.create(nextFluidStack);
+                        if (nextAEStack == null) continue;
+                        nextAEStack.setStackSize(nextStackAmount);
+
+                        craftingSlots.put(slot.getSlotIndex(), nextAEStack);
                         slotIngredients.setPermutationToRender(nextStack);
                     }
                 }
             } else {
+                FluidStack baseSlotFluidStack = getFluidStackOrNull(baseSlotStack);
+                final long baseSlotStackSize = baseSlotFluidStack == null ? baseSlotStack.stackSize
+                        : baseSlotFluidStack.amount;
+
                 // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier to
                 // nextStack.
                 long nextStackAmount;
-                if (baseSlotStack.stackSize % baseIngredients.item.stackSize == 0) {
-                    nextStackAmount = (long) nextStack.stackSize
-                            * (baseSlotStack.stackSize / baseIngredients.item.stackSize);
+                if (baseStackSize > 0 && baseSlotStackSize % baseStackSize == 0) {
+                    long nextSize = nextFluidStack == null ? nextStack.stackSize : nextFluidStack.amount;
+                    nextStackAmount = nextSize * (baseSlotStackSize / baseStackSize);
                 } else {
                     nextStackAmount = aes.getStackSize();
                 }
 
-                craftingSlotss
-                        .put(currentSlot.getSlotIndex(), AEItemStack.create(nextStack).setStackSize(nextStackAmount));
+                IAEStack<?> nextAEStack = nextFluidStack == null ? AEItemStack.create(nextStack)
+                        : AEFluidStack.create(nextFluidStack);
+                if (nextAEStack == null) return;
+                nextAEStack.setStackSize(nextStackAmount);
+
+                craftingSlots.put(currentSlot.getSlotIndex(), nextAEStack);
                 baseIngredients.setPermutationToRender(nextStack);
             }
 
-            if (!craftingSlotss.isEmpty()) {
-                NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(craftingSlotss));
+            if (!craftingSlots.isEmpty()) {
+                NEENetworkHandler.getInstance().sendToServer(new PacketSlotStackChange(craftingSlots));
             }
         }
     }
@@ -409,5 +439,14 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
         }
 
         return uniqueItems;
+    }
+
+    @Nullable
+    private FluidStack getFluidStackOrNull(@Nonnull ItemStack displayStack) {
+        if (Loader.isModLoaded(ModIDs.GT) && displayStack.getItem() == ItemList.Display_Fluid.getItem()) {
+            return GregTech5RecipeProcessor.getFluidFromDisplayStack(displayStack);
+        }
+
+        return null;
     }
 }

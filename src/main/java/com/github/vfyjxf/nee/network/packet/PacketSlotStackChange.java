@@ -7,9 +7,8 @@ import javax.annotation.Nonnull;
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
 
 import appeng.api.storage.StorageName;
-import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import appeng.container.implementations.ContainerPatternTerm;
-import appeng.util.item.AEItemStack;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
@@ -22,20 +21,15 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
  */
 public class PacketSlotStackChange implements IMessage {
 
-    private IAEItemStack stack;
-    private Int2ObjectMap<IAEItemStack> slotStacks;
+    private Int2ObjectMap<IAEStack<?>> slotStacks;
 
     public PacketSlotStackChange() {}
 
-    public PacketSlotStackChange(@Nonnull Int2ObjectMap<IAEItemStack> slotStacks) {
+    public PacketSlotStackChange(@Nonnull Int2ObjectMap<IAEStack<?>> slotStacks) {
         this.slotStacks = slotStacks;
     }
 
-    public IAEItemStack getStack() {
-        return stack;
-    }
-
-    public Int2ObjectMap<IAEItemStack> getSlotStacks() {
+    public Int2ObjectMap<IAEStack<?>> getSlotStacks() {
         return slotStacks;
     }
 
@@ -46,7 +40,7 @@ public class PacketSlotStackChange implements IMessage {
         for (int i = 0; i < mapSize; i++) {
             int slotNumber = buf.readInt();
             try {
-                IAEItemStack stack = AEItemStack.loadItemStackFromPacket(buf);
+                IAEStack<?> stack = IAEStack.fromPacketGeneric(buf);
                 this.slotStacks.put(slotNumber, stack);
             } catch (IOException e) {
                 NotEnoughEnergistics.logger.error(e);
@@ -57,10 +51,10 @@ public class PacketSlotStackChange implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.slotStacks.size());
-        for (Int2ObjectMap.Entry<IAEItemStack> entry : this.slotStacks.int2ObjectEntrySet()) {
+        for (Int2ObjectMap.Entry<IAEStack<?>> entry : this.slotStacks.int2ObjectEntrySet()) {
             buf.writeInt(entry.getIntKey());
             try {
-                entry.getValue().writeToPacket(buf);
+                IAEStack.writeToPacketGeneric(buf, entry.getValue());
             } catch (IOException e) {
                 NotEnoughEnergistics.logger.error(e);
             }
@@ -72,7 +66,7 @@ public class PacketSlotStackChange implements IMessage {
         @Override
         public IMessage onMessage(PacketSlotStackChange message, MessageContext ctx) {
             if (ctx.getServerHandler().playerEntity.openContainer instanceof ContainerPatternTerm cpt) {
-                for (Int2ObjectMap.Entry<IAEItemStack> entry : message.getSlotStacks().int2ObjectEntrySet()) {
+                for (Int2ObjectMap.Entry<IAEStack<?>> entry : message.getSlotStacks().int2ObjectEntrySet()) {
                     cpt.updateVirtualSlot(StorageName.CRAFTING_INPUT, entry.getIntKey(), entry.getValue());
                 }
             }
