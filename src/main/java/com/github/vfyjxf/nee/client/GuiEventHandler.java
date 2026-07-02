@@ -376,7 +376,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                         // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier
                         // to nextStack.
                         final long nextStackAmount;
-                        if (slotStackSize % baseStackSize == 0) {
+                        if (baseStackSize > 0 && slotStackSize % baseStackSize == 0) {
                             long nextSize = nextFluidStack != null ? nextFluidStack.amount : nextStack.stackSize;
                             nextStackAmount = nextSize * (slotStackSize / baseStackSize);
                         } else {
@@ -400,7 +400,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                 // If the current slot's stack size is a multiple of the recipe's default, apply that multiplier to
                 // nextStack.
                 long nextStackAmount;
-                if (baseSlotStackSize % baseStackSize == 0) {
+                if (baseStackSize > 0 && baseSlotStackSize % baseStackSize == 0) {
                     long nextSize = nextFluidStack == null ? nextStack.stackSize : nextFluidStack.amount;
                     nextStackAmount = nextSize * (baseSlotStackSize / baseStackSize);
                 } else {
