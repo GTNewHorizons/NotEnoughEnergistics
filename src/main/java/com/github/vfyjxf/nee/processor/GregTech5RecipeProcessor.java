@@ -1,5 +1,8 @@
 package com.github.vfyjxf.nee.processor;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,16 +13,21 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
+import com.github.vfyjxf.nee.NotEnoughEnergistics;
 import com.github.vfyjxf.nee.config.NEEConfig;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 import gregtech.api.enums.ItemList;
+import gregtech.api.objects.overclockdescriber.OverclockDescriber;
 import gregtech.api.recipe.RecipeCategory;
+import gregtech.api.recipe.RecipeMetadataKey;
+import gregtech.nei.GTNEIDefaultHandler;
 
 /**
  * @author vfyjxf
@@ -128,6 +136,83 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     @Override
     public boolean mergeStacks(IRecipeHandler recipe, int recipeIndex, String identifier) {
         return !"gt.recipe.fakeAssemblylineProcess".equals(identifier);
+    }
+
+    private static final MethodHandle currentRecipeGetterHandle;
+    private static final MethodHandle overclockDescriberGetterHandle;
+    private static final MethodHandle identifierGetterHandle;
+    static {
+        MethodHandle crHandle = null;
+        MethodHandle odHandle = null;
+        MethodHandle idHandle = null;
+        try {
+            var targetClass = GTNEIDefaultHandler.class;
+            Field field = targetClass.getDeclaredField("currentRecipe");
+            field.setAccessible(true);
+            crHandle = MethodHandles.lookup().unreflectGetter(field);
+            field = targetClass.getDeclaredField("overclockDescriber");
+            field.setAccessible(true);
+            odHandle = MethodHandles.lookup().unreflectGetter(field);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            NotEnoughEnergistics.logger.error("Failed to get MethodHandles for GTNEIDefaultHandler!", e);
+        }
+        try {
+            var targetClass = RecipeMetadataKey.class;
+            Field field = targetClass.getDeclaredField("identifier");
+            field.setAccessible(true);
+            idHandle = MethodHandles.lookup().unreflectGetter(field);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            NotEnoughEnergistics.logger.error("Failed to get MethodHandles for RecipeMetadataKey!", e);
+        }
+        currentRecipeGetterHandle = crHandle;
+        overclockDescriberGetterHandle = odHandle;
+        identifierGetterHandle = idHandle;
+    }
+
+    @Override
+    public void appendExtraTags(IRecipeHandler recipe, int recipeIndex, NBTTagCompound extraTags) {
+        if (currentRecipeGetterHandle == null || overclockDescriberGetterHandle == null) return;
+        if (recipe instanceof GTNEIDefaultHandler r) {
+            try {
+                var currentRecipe = (GTNEIDefaultHandler.CachedDefaultRecipe) currentRecipeGetterHandle.invoke(r);
+                var overclockDescriber = (OverclockDescriber) overclockDescriberGetterHandle.invoke(r);
+                var mRecipe = currentRecipe.mRecipe;
+                extraTags.setInteger("EUt", mRecipe.mEUt);
+                extraTags.setInteger("Tier", overclockDescriber.getTier());
+                var metadataStorage = new NBTTagCompound();
+                mRecipe.getMetadataStorage().getEntries().forEach((entry) -> {
+                    var key = entry.getKey();
+                    var value = entry.getValue();
+                    String identifier = "";
+                    if (identifierGetterHandle != null) {
+                        try {
+                            identifier = (String) identifierGetterHandle.invoke(key);
+                        } catch (Throwable ignored) {}
+                    }
+                    if (identifier.isEmpty()) {
+                        identifier = String.valueOf(key);
+                    }
+                    if (value instanceof Integer i) {
+                        metadataStorage.setInteger(identifier, i);
+                    } else if (value instanceof Boolean b) {
+                        metadataStorage.setBoolean(identifier, b);
+                    } else if (value instanceof Float f) {
+                        metadataStorage.setFloat(identifier, f);
+                    } else if (value instanceof Double d) {
+                        metadataStorage.setDouble(identifier, d);
+                    } else if (value instanceof Long l) {
+                        metadataStorage.setLong(identifier, l);
+                    } else {
+                        metadataStorage.setString(identifier, String.valueOf(value));
+                    }
+                });
+                if (!metadataStorage.hasNoTags()) {
+                    extraTags.setTag("metadataStorage", metadataStorage);
+                }
+            } catch (Throwable e) {
+                NotEnoughEnergistics.logger.error("Failed to append extra tags for GT5!", e);
+            }
+        }
     }
 
     private boolean canProcessRecipe(IRecipeHandler recipe) {

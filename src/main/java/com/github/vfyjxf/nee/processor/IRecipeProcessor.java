@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 
@@ -31,4 +33,6 @@ public interface IRecipeProcessor {
     default boolean mergeStacks(IRecipeHandler recipe, int recipeIndex, String identifier) {
         return true;
     }
+
+    default void appendExtraTags(IRecipeHandler recipe, int recipeIndex, NBTTagCompound extraTags) {}
 }
