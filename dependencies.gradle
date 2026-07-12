@@ -1,6 +1,6 @@
 dependencies {
 
-    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:99.99.99:dev")
+    api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-1006-GTNH:dev")
     api("com.github.GTNewHorizons:NotEnoughItems:2.8.102-GTNH:dev")
     api('com.github.GTNewHorizons:CodeChickenCore:1.4.15:dev')
 
