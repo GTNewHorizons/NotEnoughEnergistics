@@ -25,6 +25,7 @@ import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import appeng.util.Platform;
+import codechicken.nei.NEIClientUtils;
 import codechicken.nei.NEIServerUtils;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
@@ -121,7 +122,8 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                     NEEPatternTerminalHandler.ingredients.clear();
 
                     for (PositionedStack positionedStack : mergedInputs) {
-                        ItemStack currentStack = positionedStack.getFilteredPermutations().get(0);
+                        ItemStack currentStack = NEIClientUtils.shiftKey() ? positionedStack.item
+                                : positionedStack.getFilteredPermutations().get(0);
                         ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                         int stackSize = currentStack.stackSize;
 
@@ -218,7 +220,9 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
             }
 
             if (!find) {
-                mergedInputs.add(positionedStack.copy());
+                PositionedStack stack = positionedStack.copy();
+                stack.setPermutationToRender(positionedStack.item);
+                mergedInputs.add(stack);
             }
         }
 
@@ -237,7 +241,8 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
             if (positionedStack.items != null && positionedStack.items.length > 0) {
                 positionedStack = positionedStack.copy();
-                ItemStack stack = positionedStack.getFilteredPermutations().get(0);
+                ItemStack stack = NEIClientUtils.shiftKey() ? positionedStack.item
+                        : positionedStack.getFilteredPermutations().get(0);
 
                 ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                 if (preferModItem != null) {
