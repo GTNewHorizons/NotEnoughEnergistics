@@ -242,7 +242,9 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
             int slotIndex = col + row * 3;
 
             if (positionedStack.items != null && positionedStack.items.length > 0) {
+                ItemStack selected = positionedStack.item;
                 positionedStack = positionedStack.copy();
+                positionedStack.setPermutationToRender(selected);
                 ItemStack stack = NEIClientUtils.shiftKey() ? positionedStack.item
                         : positionedStack.getFilteredPermutations().get(0);
 
