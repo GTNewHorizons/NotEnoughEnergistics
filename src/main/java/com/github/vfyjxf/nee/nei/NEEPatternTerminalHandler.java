@@ -126,7 +126,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                         int stackSize = currentStack.stackSize;
 
                         if (preferModItem != null) {
-                            currentStack = preferModItem.copy();
+                            currentStack = preferModItem;
                             currentStack.stackSize = stackSize;
                         }
 
@@ -210,10 +210,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
                         if (areItemStackEqual
                                 && (firstStack.stackSize + currentStack.stackSize) <= firstStack.getMaxStackSize()) {
-                            int mergedSize = firstStack.stackSize + currentStack.stackSize;
-                            for (ItemStack alternate : storedStack.items) {
-                                alternate.stackSize = mergedSize;
-                            }
+                            firstStack.stackSize = firstStack.stackSize + currentStack.stackSize;
                             find = true;
                         }
                     }
