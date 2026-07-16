@@ -122,11 +122,14 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                     NEEPatternTerminalHandler.ingredients.clear();
 
                     for (PositionedStack positionedStack : mergedInputs) {
-                        ItemStack currentStack = NEIClientUtils.shiftKey() ? positionedStack.item
-                                : positionedStack.getFilteredPermutations().get(0);
-                        ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
+                        ItemStack currentStack =  positionedStack.getFilteredPermutations().get(0);
                         int stackSize = currentStack.stackSize;
-
+                        if (NEIClientUtils.shiftKey())
+                        {
+                            currentStack = positionedStack.item;
+                            currentStack.stackSize = stackSize;
+                        }
+                        ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                         if (preferModItem != null) {
                             currentStack = preferModItem;
                             currentStack.stackSize = stackSize;
