@@ -102,12 +102,15 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
         }
         int inputIndex = 0;
         int outputIndex = 0;
+        NBTTagCompound extraTags = new NBTTagCompound();
+        extraTags.setString("recipe_id", identifier);
 
         // get all recipe inputs and other stacks,use first item
         for (IRecipeProcessor processor : RecipeProcessor.recipeProcessors) {
             if (processor.getAllOverlayIdentifier().contains(identifier)) {
                 final List<PositionedStack> inputs = processor.getRecipeInput(recipe, recipeIndex, identifier);
                 final List<PositionedStack> outputs = processor.getRecipeOutput(recipe, recipeIndex, identifier);
+                processor.appendExtraTags(recipe, recipeIndex, extraTags);
                 final String recipeProcessorId = processor.getRecipeProcessorId();
 
                 if (!inputs.isEmpty() && !outputs.isEmpty()) {
@@ -185,7 +188,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
             }
         }
 
-        return new PacketNEIPatternRecipe(recipeInputs, recipeOutputs);
+        return PacketNEIPatternRecipe.CreatePacket(recipeInputs, recipeOutputs, extraTags);
     }
 
     private List<PositionedStack> getMergedInputs(List<PositionedStack> inputs, IRecipeProcessor processor,
@@ -228,6 +231,8 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
     private PacketNEIPatternRecipe packCraftingTableRecipe(IRecipeHandler recipe, int recipeIndex) {
         final List<PositionedStack> ingredients = recipe.getIngredientStacks(recipeIndex);
         final NBTTagCompound recipeInputs = new NBTTagCompound();
+        NBTTagCompound extraTags = new NBTTagCompound();
+        extraTags.setString("recipe_id", "crafting");
         NEEPatternTerminalHandler.ingredients.clear();
 
         for (PositionedStack positionedStack : ingredients) {
@@ -263,7 +268,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
         }
 
-        return new PacketNEIPatternRecipe(recipeInputs, null);
+        return PacketNEIPatternRecipe.CreatePacket(recipeInputs, null, extraTags);
     }
 
     @SubscribeEvent

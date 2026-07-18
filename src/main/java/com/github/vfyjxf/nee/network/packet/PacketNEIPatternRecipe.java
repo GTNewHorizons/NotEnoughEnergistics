@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import com.djgiannuzz.thaumcraftneiplugin.items.ItemAspect;
+import com.github.vfyjxf.nee.config.NEEConfig;
 import com.github.vfyjxf.nee.utils.GuiUtils;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
@@ -28,6 +29,7 @@ import appeng.api.storage.data.IAEStack;
 import appeng.container.AEBaseContainer;
 import appeng.container.implementations.ContainerPatternTerm;
 import appeng.helpers.IContainerCraftingPacket;
+import appeng.parts.reporting.PartPatternTerminal;
 import appeng.util.item.AEFluidStack;
 import appeng.util.item.AEItemStack;
 import codechicken.nei.recipe.StackInfo;
@@ -42,17 +44,28 @@ public class PacketNEIPatternRecipe implements IMessage {
 
     NBTTagCompound input;
     NBTTagCompound output;
+    NBTTagCompound extraTags;
 
     public PacketNEIPatternRecipe() {}
 
-    public PacketNEIPatternRecipe(@Nonnull NBTTagCompound input, NBTTagCompound output) {
+    public PacketNEIPatternRecipe(@Nonnull NBTTagCompound input, NBTTagCompound output, NBTTagCompound extraTags) {
         this.input = input;
         this.output = output;
+        this.extraTags = extraTags;
+    }
+
+    static public PacketNEIPatternRecipe CreatePacket(@Nonnull NBTTagCompound input, NBTTagCompound output,
+            NBTTagCompound extraTags) {
+        if (!NEEConfig.enableExtraPatternTags) {
+            extraTags = null;
+        }
+        return new PacketNEIPatternRecipe(input, output, extraTags);
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         this.input = ByteBufUtils.readTag(buf);
+        this.extraTags = ByteBufUtils.readTag(buf);
         if (buf.readBoolean()) {
             this.output = ByteBufUtils.readTag(buf);
         }
@@ -61,6 +74,7 @@ public class PacketNEIPatternRecipe implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         ByteBufUtils.writeTag(buf, this.input);
+        ByteBufUtils.writeTag(buf, this.extraTags);
         if (this.output != null) {
             buf.writeBoolean(true);
             ByteBufUtils.writeTag(buf, this.output);
@@ -136,6 +150,21 @@ public class PacketNEIPatternRecipe implements IMessage {
                 }
 
                 updateVirtualSlots(container, StorageName.CRAFTING_INPUT, list);
+                encodeAndTagPattern(container, message.extraTags);
+            }
+        }
+
+        private void encodeAndTagPattern(ContainerPatternTerm container, NBTTagCompound extraTags) {
+            container.encode();
+            if (container.getPatternTerminal() instanceof PartPatternTerminal terminal) {
+                var stack = terminal.getInventoryByName("pattern").getStackInSlot(1);
+                if (stack != null && extraTags != null) {
+                    if (!stack.hasTagCompound()) {
+                        stack.setTagCompound(new NBTTagCompound());
+                    }
+                    var nbt = stack.getTagCompound();
+                    nbt.setTag("neeExtraTags", extraTags);
+                }
             }
         }
 
@@ -195,6 +224,7 @@ public class PacketNEIPatternRecipe implements IMessage {
                 container.clear();
                 updateVirtualSlots(container, StorageName.CRAFTING_INPUT, input);
                 updateVirtualSlots(container, StorageName.CRAFTING_OUTPUT, output);
+                encodeAndTagPattern(container, message.extraTags);
             }
         }
 

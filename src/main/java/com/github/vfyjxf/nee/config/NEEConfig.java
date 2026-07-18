@@ -35,6 +35,7 @@ public class NEEConfig {
     public static boolean useStackSizeFromNEI = true;
     public static boolean keepGhostitems = true;
     public static boolean includeNonConsumableIngredients = false;
+    public static boolean enableExtraPatternTags = true;
 
     public static int draggedStackDefaultSize = 1;
 
@@ -93,6 +94,12 @@ public class NEEConfig {
                     false,
                     "If true, include non-consumable ingredients (NEI stackSize = 0) when transferring NEI recipes to ME patterns.")
                     .getBoolean();
+
+            enableExtraPatternTags = config.get(
+                    CATEGORY_PATTERN_TRANSFER,
+                    "enableExtraPatternTags",
+                    true,
+                    "If true, add extra tags when transferring NEI recipes to ME patterns.").getBoolean();
         }
 
         {
@@ -201,6 +208,12 @@ public class NEEConfig {
                     false,
                     "If true, include non-consumable ingredients (NEI stackSize = 0) when transferring NEI recipes to ME patterns.")
                     .getBoolean();
+
+            enableExtraPatternTags = config.get(
+                    CATEGORY_PATTERN_TRANSFER,
+                    "enableExtraPatternTags",
+                    true,
+                    "If true, add extra tags when transferring NEI recipes to ME patterns.").getBoolean();
         }
 
         {
