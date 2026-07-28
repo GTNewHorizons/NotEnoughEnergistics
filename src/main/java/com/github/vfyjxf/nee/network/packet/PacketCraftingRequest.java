@@ -247,6 +247,7 @@ public class PacketCraftingRequest implements IMessage {
                         actionSource,
                         requireToCraftStack,
                         CraftingMode.STANDARD,
+                        false,
                         null);
             } else {
                 futureJob = cg.beginCraftingJob(player.worldObj, grid, actionSource, requireToCraftStack, null);
