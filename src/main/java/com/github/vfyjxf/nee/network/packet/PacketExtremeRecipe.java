@@ -61,6 +61,7 @@ public class PacketExtremeRecipe implements IMessage {
                 for (int i = 0; i < recipeInputs.length; i++) {
                     currentStack = (NBTTagCompound) message.input.getTag("#" + i);
                     recipeInputs[i] = currentStack == null ? null : ItemUtils.loadItemStackFromNBT(currentStack);
+                    if (recipeInputs[i] != null) recipeInputs[i].stackSize = 0;
                 }
                 int inputIndex = 0;
                 for (int i = 81; i < 162; i++) {
