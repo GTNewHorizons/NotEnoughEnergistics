@@ -214,7 +214,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
                         if (areItemStackEqual
                                 && (firstStack.stackSize + currentStack.stackSize) <= firstStack.getMaxStackSize()) {
-                            storedStack.items[0].stackSize = firstStack.stackSize + currentStack.stackSize;
+                            firstStack.stackSize = firstStack.stackSize + currentStack.stackSize;
                             find = true;
                         }
                     }
