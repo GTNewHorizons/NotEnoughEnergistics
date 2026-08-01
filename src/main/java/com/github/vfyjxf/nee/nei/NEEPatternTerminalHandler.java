@@ -25,6 +25,7 @@ import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import appeng.util.Platform;
+import codechicken.nei.NEIClientUtils;
 import codechicken.nei.NEIServerUtils;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
@@ -122,9 +123,12 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
                     for (PositionedStack positionedStack : mergedInputs) {
                         ItemStack currentStack = positionedStack.getFilteredPermutations().get(0);
-                        ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                         int stackSize = currentStack.stackSize;
-
+                        if (NEIClientUtils.shiftKey()) {
+                            currentStack = positionedStack.item;
+                            currentStack.stackSize = stackSize;
+                        }
+                        ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                         if (preferModItem != null) {
                             currentStack = preferModItem;
                             currentStack.stackSize = stackSize;
@@ -218,7 +222,9 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
             }
 
             if (!find) {
-                mergedInputs.add(positionedStack.copy());
+                PositionedStack stack = positionedStack.copy();
+                stack.setPermutationToRender(positionedStack.item);
+                mergedInputs.add(stack);
             }
         }
 
@@ -236,8 +242,11 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
             int slotIndex = col + row * 3;
 
             if (positionedStack.items != null && positionedStack.items.length > 0) {
+                ItemStack selected = positionedStack.item;
                 positionedStack = positionedStack.copy();
-                ItemStack stack = positionedStack.getFilteredPermutations().get(0);
+                positionedStack.setPermutationToRender(selected);
+                ItemStack stack = NEIClientUtils.shiftKey() ? positionedStack.item
+                        : positionedStack.getFilteredPermutations().get(0);
 
                 ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                 if (preferModItem != null) {
