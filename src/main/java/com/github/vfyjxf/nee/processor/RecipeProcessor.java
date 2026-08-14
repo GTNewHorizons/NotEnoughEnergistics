@@ -98,6 +98,11 @@ public class RecipeProcessor {
             recipeProcessors.add(new GoodGeneratorRecipeProcessor());
         }
 
+        if (Loader.isModLoaded("betterquesting") && Loader.isModLoaded("bq_standard")) {
+            NotEnoughEnergistics.logger.info("Found BetterQuesting, install BetterQuesting support");
+            recipeProcessors.add(new BetterQuestingRecipeProcessor());
+        }
+
         NotEnoughEnergistics.logger.info("-----Not Enough Energistics Init  Finished-----");
     }
 }
