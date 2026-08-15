@@ -42,7 +42,6 @@ public class BetterQuestingRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutput = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutput.add(recipe.getOtherStacks(recipeIndex).get(0));
-            return recipeOutput;
         }
         return recipeOutput;
     }
