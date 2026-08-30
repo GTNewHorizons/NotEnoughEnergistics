@@ -34,7 +34,10 @@ public class VanillaRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeInputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
-            recipeInputs.addAll(recipe.getOtherStacks(recipeIndex));
+            // for furnace recipes the other stack is the cycling fuel, which is not part of the pattern
+            if (!"smelting".equals(identifier)) {
+                recipeInputs.addAll(recipe.getOtherStacks(recipeIndex));
+            }
         }
         return recipeInputs;
     }
