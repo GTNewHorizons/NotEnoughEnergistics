@@ -164,7 +164,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                     }
 
                     for (PositionedStack positionedStack : outputs) {
-                        if (outputIndex >= 4 || positionedStack == null || positionedStack.item == null) {
+                        if (positionedStack == null || positionedStack.item == null) {
                             continue;
                         }
 
