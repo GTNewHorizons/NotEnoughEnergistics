@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import com.github.vfyjxf.nee.utils.ItemUtils;
+
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 
@@ -62,8 +64,8 @@ public class GTPPRecipeProcessor implements IRecipeProcessor {
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeInputs.addAll(recipe.getIngredientStacks(recipeIndex));
             recipeInputs.removeIf(
-                    positionedStack -> GregTech5RecipeProcessor.getFluidFromDisplayStack(positionedStack.items[0])
-                            != null || positionedStack.item.stackSize == 0);
+                    positionedStack -> ItemUtils.getFluidFromDisplayStack(positionedStack.items[0]) != null
+                            || positionedStack.item.stackSize == 0);
             return recipeInputs;
         }
         return recipeInputs;
@@ -75,9 +77,8 @@ public class GTPPRecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutputs = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutputs.addAll(recipe.getOtherStacks(recipeIndex));
-            recipeOutputs.removeIf(
-                    positionedStack -> GregTech5RecipeProcessor.getFluidFromDisplayStack(positionedStack.items[0])
-                            != null);
+            recipeOutputs
+                    .removeIf(positionedStack -> ItemUtils.getFluidFromDisplayStack(positionedStack.items[0]) != null);
             return recipeOutputs;
         }
         return recipeOutputs;

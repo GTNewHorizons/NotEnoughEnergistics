@@ -9,16 +9,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.FluidStack;
-
 import com.github.vfyjxf.nee.config.NEEConfig;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
-import gregtech.api.enums.ItemList;
 import gregtech.api.recipe.RecipeCategory;
 
 /**
@@ -43,23 +37,6 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
 
     public GregTech5RecipeProcessor(boolean isNH) {
         this.isNH = isNH;
-    }
-
-    /**
-     * For resolving NoSuchMethodError Copied from GTNewHorizons/GT5-Unofficial.
-     */
-    public static FluidStack getFluidFromDisplayStack(ItemStack aDisplayStack) {
-        if (!isStackValid(aDisplayStack) || aDisplayStack.getItem() != ItemList.Display_Fluid.getItem()
-                || !aDisplayStack.hasTagCompound()) {
-            return null;
-        }
-        Fluid tFluid = FluidRegistry.getFluid(ItemList.Display_Fluid.getItem().getDamage(aDisplayStack));
-        return new FluidStack(tFluid, (int) aDisplayStack.getTagCompound().getLong("mFluidDisplayAmount"));
-    }
-
-    public static boolean isStackValid(Object aStack) {
-        return (aStack instanceof ItemStack) && ((ItemStack) aStack).getItem() != null
-                && ((ItemStack) aStack).stackSize >= 0;
     }
 
     @Nonnull
