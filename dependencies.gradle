@@ -1,7 +1,7 @@
 dependencies {
 
     api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-1023-GTNH:dev")
-    api("com.github.GTNewHorizons:NotEnoughItems:2.8.116-GTNH:dev")
+    api("com.github.GTNewHorizons:NotEnoughItems:2.8.134-GTNH:dev")
     api('com.github.GTNewHorizons:CodeChickenCore:1.4.17:dev')
 
     implementation("com.github.GTNewHorizons:Baubles-Expanded:2.2.21-GTNH:dev")

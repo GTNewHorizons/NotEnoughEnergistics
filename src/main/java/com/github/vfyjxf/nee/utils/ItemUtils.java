@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fluids.FluidStack;
 
 import com.github.vfyjxf.nee.NotEnoughEnergistics;
 import com.github.vfyjxf.nee.processor.IRecipeProcessor;
@@ -20,12 +21,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import codechicken.nei.NEIServerUtils;
+import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 public final class ItemUtils {
-
-    private static final String GT_DISPLAY_FLUID_ITEM_ID = "gt.GregTech_FluidDisplay";
 
     public static Gson gson = new Gson();
     public static List<StackProcessor> transformItemBlacklist = getTransformItemBlacklist();
@@ -42,6 +42,15 @@ public final class ItemUtils {
     public static void reloadConfig() {
         transformItemBlacklist = getTransformItemBlacklist();
         transformItemPriorityList = getTransformItemPriorityList();
+    }
+
+    public static FluidStack getFluidFromDisplayStack(ItemStack aDisplayStack) {
+
+        if (aDisplayStack != null && aDisplayStack.getItem() != null && StackInfo.isFluidDisplayItem(aDisplayStack)) {
+            return StackInfo.getFluid(aDisplayStack);
+        }
+
+        return null;
     }
 
     public static List<StackProcessor> getTransformItemBlacklist() {
@@ -186,12 +195,11 @@ public final class ItemUtils {
     }
 
     public static boolean areStacksSameType(ItemStack aStack, ItemStack bStack) {
-        if (Loader.isModLoaded(ModIDs.GT) && aStack != null && bStack != null) {
-            Item displayFluidItem = GameRegistry.findItem(ModIDs.GT, GT_DISPLAY_FLUID_ITEM_ID);
-            if (displayFluidItem != null && aStack.getItem() == displayFluidItem
-                    && bStack.getItem() == displayFluidItem) {
-                return displayFluidItem.getDamage(aStack) == displayFluidItem.getDamage(bStack);
-            }
+        final FluidStack aFluid = getFluidFromDisplayStack(aStack);
+        final FluidStack bFluid = getFluidFromDisplayStack(bStack);
+
+        if (aFluid != null && bFluid != null) {
+            return aFluid.isFluidEqual(bFluid);
         }
 
         return NEIServerUtils.areStacksSameTypeCraftingWithNBT(aStack, bStack);

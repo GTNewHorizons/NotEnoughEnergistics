@@ -13,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fluids.FluidStack;
 
 import com.djgiannuzz.thaumcraftneiplugin.items.ItemAspect;
 import com.github.vfyjxf.nee.utils.GuiUtils;
@@ -30,7 +31,6 @@ import appeng.container.implementations.ContainerPatternTerm;
 import appeng.helpers.IContainerCraftingPacket;
 import appeng.util.item.AEFluidStack;
 import appeng.util.item.AEItemStack;
-import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -206,8 +206,9 @@ public class PacketNEIPatternRecipe implements IMessage {
         }
 
         private IAEStack<?> getAEStack(final ItemStack is) {
-            if (StackInfo.itemStackToNBT(is).hasKey("gtFluidName")) {
-                return AEFluidStack.create(StackInfo.getFluid(is));
+            final FluidStack fluidStack = ItemUtils.getFluidFromDisplayStack(is);
+            if (fluidStack != null) {
+                return AEFluidStack.create(fluidStack);
             } else if (ThaumicEnergistics_isLoaded && isAspect(is)) {
                 return AEStackTypeRegistry.getType(ESSENTIA_STACK_ID).convertStackFromItem(is);
             } else {
