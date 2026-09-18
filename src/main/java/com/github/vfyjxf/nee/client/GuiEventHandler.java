@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -35,9 +32,7 @@ import com.github.vfyjxf.nee.network.NEENetworkHandler;
 import com.github.vfyjxf.nee.network.packet.PacketSlotStackChange;
 import com.github.vfyjxf.nee.network.packet.PacketStackCountChange;
 import com.github.vfyjxf.nee.network.packet.PacketValueConfigServer;
-import com.github.vfyjxf.nee.processor.GregTech5RecipeProcessor;
 import com.github.vfyjxf.nee.utils.ItemUtils;
-import com.github.vfyjxf.nee.utils.ModIDs;
 import com.glodblock.github.client.gui.GuiLevelMaintainer;
 
 import appeng.api.events.GuiScrollEvent;
@@ -67,7 +62,6 @@ import codechicken.nei.recipe.RecipeInfo;
 import codechicken.nei.util.NEIMouseUtils;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import gregtech.api.enums.ItemList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
@@ -349,10 +343,10 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
             if (currentStackIndex < 0) return;
             final ItemStack nextStack = items.get(Math.floorMod(currentStackIndex - dWheel, items.size())).copy();
 
-            final FluidStack nextFluidStack = getFluidStackOrNull(nextStack);
+            final FluidStack nextFluidStack = ItemUtils.getFluidFromDisplayStack(nextStack);
 
             final ItemStack baseStack = baseIngredients.item;
-            final FluidStack baseFluidStack = getFluidStackOrNull(baseStack);
+            final FluidStack baseFluidStack = ItemUtils.getFluidFromDisplayStack(baseStack);
             final long baseStackSize = baseFluidStack == null ? baseStack.stackSize : baseFluidStack.amount;
 
             final Int2ObjectMap<IAEStack<?>> craftingSlots = new Int2ObjectOpenHashMap<>();
@@ -363,7 +357,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                     final ItemStack slotStack = slotAEStack.getItemStackForNEI();
                     if (slotStack == null) continue;
 
-                    final FluidStack slotFluidStack = getFluidStackOrNull(slotStack);
+                    final FluidStack slotFluidStack = ItemUtils.getFluidFromDisplayStack(slotStack);
                     final long slotStackSize = slotFluidStack == null ? slotStack.stackSize : slotFluidStack.amount;
 
                     final PositionedStack slotIngredients = NEEPatternTerminalHandler.ingredients
@@ -393,7 +387,7 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
                     }
                 }
             } else {
-                FluidStack baseSlotFluidStack = getFluidStackOrNull(baseSlotStack);
+                FluidStack baseSlotFluidStack = ItemUtils.getFluidFromDisplayStack(baseSlotStack);
                 final long baseSlotStackSize = baseSlotFluidStack == null ? baseSlotStack.stackSize
                         : baseSlotFluidStack.amount;
 
@@ -441,12 +435,4 @@ public class GuiEventHandler extends INEIGuiAdapter implements IContainerTooltip
         return uniqueItems;
     }
 
-    @Nullable
-    private FluidStack getFluidStackOrNull(@Nonnull ItemStack displayStack) {
-        if (Loader.isModLoaded(ModIDs.GT) && displayStack.getItem() == ItemList.Display_Fluid.getItem()) {
-            return GregTech5RecipeProcessor.getFluidFromDisplayStack(displayStack);
-        }
-
-        return null;
-    }
 }
