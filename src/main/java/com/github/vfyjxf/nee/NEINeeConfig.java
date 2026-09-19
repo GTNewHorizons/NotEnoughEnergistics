@@ -78,14 +78,6 @@ public class NEINeeConfig implements IConfigureNEI {
         installPatternTerminalExSupport(new HashSet<>(identifiers));
 
         installlBookmarkContainerHandler();
-
-        if (Loader.isModLoaded("gregapi") && Loader.isModLoaded("gregapi_post")) {
-            installGregTech6Support();
-        }
-    }
-
-    private void installGregTech6Support() {
-        API.registerStackStringifyHandler(new com.github.vfyjxf.nee.nei.GT6StackStringifyHandler());
     }
 
     private void installlBookmarkContainerHandler() {
