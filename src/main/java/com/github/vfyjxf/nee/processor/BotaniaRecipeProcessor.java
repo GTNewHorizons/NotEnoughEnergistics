@@ -19,12 +19,12 @@ public class BotaniaRecipeProcessor implements IRecipeProcessor {
     public Set<String> getAllOverlayIdentifier() {
         return new HashSet<>(
                 Arrays.asList(
-                    "botania.brewery",
-                    "botania.elvenTrade",
-                    "botania.manaPool",
-                    "botania.petalApothecary",
-                    "botania.pureDaisy",
-                    "botania.runicAltar"));
+                        "botania.brewery",
+                        "botania.elvenTrade",
+                        "botania.manaPool",
+                        "botania.petalApothecary",
+                        "botania.pureDaisy",
+                        "botania.runicAltar"));
     }
 
     @Nonnull
