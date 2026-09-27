@@ -1,7 +1,8 @@
 package com.github.vfyjxf.nee.processor;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,14 @@ public class BotaniaRecipeProcessor implements IRecipeProcessor {
     @Nonnull
     @Override
     public Set<String> getAllOverlayIdentifier() {
-        return Collections.singleton(RecipeProcessor.NULL_IDENTIFIER);
+        return new HashSet<>(
+                Arrays.asList(
+                        "botania.brewery",
+                        "botania.elvenTrade",
+                        "botania.manaPool",
+                        "botania.petalApothecary",
+                        "botania.pureDaisy",
+                        "botania.runicAltar"));
     }
 
     @Nonnull

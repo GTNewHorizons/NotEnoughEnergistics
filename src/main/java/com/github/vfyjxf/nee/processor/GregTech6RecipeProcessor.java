@@ -17,7 +17,6 @@ import codechicken.nei.recipe.IRecipeHandler;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import gregapi.NEI_RecipeMap;
 import gregapi.NEI_RecipeMap.FixedPositionedStack;
-import gregapi.data.FL;
 import gregapi.recipes.Recipe;
 
 /**
@@ -54,11 +53,9 @@ public class GregTech6RecipeProcessor implements IRecipeProcessor {
                     positionedStack.item.stackSize = 1;
                 }
             }
-            // remove fluid
             recipeInputs.removeIf(
-                    positionedStack -> FL.getFluid(positionedStack.item, true) != null
-                            || (positionedStack.item.stackSize == 0 && !NEEConfig.includeNonConsumableIngredients));
-            // try to remove machine
+                    positionedStack -> positionedStack.item.stackSize == 0
+                            && !NEEConfig.includeNonConsumableIngredients);
             if (recipe instanceof NEI_RecipeMap) {
                 Field mRecipeMapField = ReflectionHelper.findField(NEI_RecipeMap.class, "mRecipeMap");
                 Recipe.RecipeMap mRecipeMap = null;
@@ -67,14 +64,21 @@ public class GregTech6RecipeProcessor implements IRecipeProcessor {
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
-                if (mRecipeMap != null) {
-                    ItemStack lastItem = (recipeInputs.get(recipeInputs.size() - 1)).items[0];
-                    for (ItemStack stack : mRecipeMap.mRecipeMachineList) {
-                        if (ItemStack.areItemStackTagsEqual(lastItem, stack)) {
-                            recipeInputs.remove(recipeInputs.size() - 1);
-                            break;
+                final List<ItemStack> machineList = mRecipeMap != null ? mRecipeMap.mRecipeMachineList : null;
+                if (machineList != null && !machineList.isEmpty()) {
+                    recipeInputs.removeIf(positionedStack -> {
+                        if (positionedStack == null || positionedStack.items == null) return false;
+                        for (ItemStack item : positionedStack.items) {
+                            if (item == null) continue;
+                            for (ItemStack machine : machineList) {
+                                if (machine == null) continue;
+                                if (item.isItemEqual(machine) && ItemStack.areItemStackTagsEqual(item, machine)) {
+                                    return true;
+                                }
+                            }
                         }
-                    }
+                        return false;
+                    });
                 }
             }
             return recipeInputs;
@@ -88,10 +92,7 @@ public class GregTech6RecipeProcessor implements IRecipeProcessor {
         List<PositionedStack> recipeOutput = new ArrayList<>();
         if (this.getAllOverlayIdentifier().contains(identifier)) {
             recipeOutput.addAll(recipe.getOtherStacks(recipeIndex));
-            recipeOutput.removeIf(
-                    positionedStack -> FL.getFluid(positionedStack.item, true) != null
-                            || positionedStack.item.stackSize == 0);
-            // try to remove item output if it's chance != 100%
+            recipeOutput.removeIf(positionedStack -> positionedStack.item.stackSize == 0);
             recipeOutput.removeIf(
                     positionedStack -> positionedStack instanceof FixedPositionedStack
                             && ((FixedPositionedStack) positionedStack).mChance > 0
