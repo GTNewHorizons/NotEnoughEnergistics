@@ -25,7 +25,6 @@ import com.github.vfyjxf.nee.utils.IngredientTracker;
 import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 
-import appeng.api.storage.data.IAEItemStack;
 import appeng.api.storage.data.IAEStack;
 import appeng.client.gui.implementations.GuiAmount;
 import appeng.client.gui.implementations.GuiCraftAmount;
@@ -36,7 +35,6 @@ import appeng.core.sync.network.NetworkHandler;
 import appeng.core.sync.packets.PacketInventoryAction;
 import appeng.helpers.InventoryAction;
 import appeng.util.Platform;
-import appeng.util.item.AEItemStack;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
@@ -55,13 +53,14 @@ public class NEECraftingPreviewHandler {
     private IngredientTracker tracker = null;
     private boolean isAutoStart = false;
     private boolean isRequesting = false;
-    private int resultStackSize = 0;
+    private long resultStackSize = 0;
     private String modID = "";
 
     private NEECraftingPreviewHandler() {}
 
     public boolean handle(GuiContainer firstGui, IRecipeHandler recipe, int recipeIndex) {
         final PositionedStack pStack = recipe.getResultStack(recipeIndex);
+        final IAEStack<?> aeStack = pStack != null ? ItemUtils.toAEStack(pStack.item) : null;
         this.isAutoStart = NEIClientConfig.isKeyHashDown("nee.nopreview");
         this.modID = getModID(firstGui.inventorySlots);
         this.resultStackSize = 0;
@@ -72,28 +71,26 @@ public class NEECraftingPreviewHandler {
         if ((this.isAutoStart || NEIClientConfig.isKeyHashDown("nee.preview")) && !this.modID.isEmpty()) {
             firstGui.mc.displayGuiScreen(firstGui);
 
-            if (pStack != null) {
-                this.resultStackSize = pStack.item.stackSize;
+            if (aeStack != null) {
+                this.resultStackSize = aeStack.getStackSize();
             }
 
-            if (pStack != null && existsRecipeResult(firstGui, pStack)) {
-
-                IAEStack<?> stack = ItemUtils.toAEStack(pStack.item);
+            if (aeStack != null && existsRecipeResult(firstGui, aeStack)) {
 
                 if (this.isAutoStart) {
                     final PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
                             this.modID,
                             PacketCraftingRequest.COMMAND_OPEN_CRAFT_CONFIRM,
-                            stack.toNBTGeneric(),
-                            stack.getStackSize(),
+                            aeStack.toNBTGeneric(),
+                            aeStack.getStackSize(),
                             true);
                     NEENetworkHandler.getInstance().sendToServer(craftingRequest);
                 } else {
-                    openCraftAmount(firstGui, pStack.item);
+                    openCraftAmount(firstGui, aeStack);
                 }
 
                 return true;
-            } else if (pStack != null && this.isPatternInterfaceExists && isCraftingTableRecipe(recipe)) {
+            } else if (aeStack != null && this.isPatternInterfaceExists && isCraftingTableRecipe(recipe)) {
                 this.patternCompound = getPatternStack(recipe, recipeIndex, Minecraft.getMinecraft().theWorld);
 
                 if (this.isAutoStart) {
@@ -101,11 +98,11 @@ public class NEECraftingPreviewHandler {
                             this.modID,
                             PacketCraftingRequest.COMMAND_CREATE_PATTERN,
                             this.patternCompound,
-                            pStack.item.stackSize,
+                            aeStack.getStackSize(),
                             true);
                     NEENetworkHandler.getInstance().sendToServer(craftingRequest);
                 } else {
-                    openCraftAmount(firstGui, pStack.item);
+                    openCraftAmount(firstGui, aeStack);
                 }
 
                 return true;
@@ -117,8 +114,8 @@ public class NEECraftingPreviewHandler {
 
                     if (this.isAutoStart) {
                         requestNextIngredient();
-                    } else if (pStack != null) {
-                        openCraftAmount(firstGui, pStack.item);
+                    } else if (aeStack != null) {
+                        openCraftAmount(firstGui, aeStack);
                     } else {
                         PositionedStack otherStack = null;
 
@@ -128,8 +125,9 @@ public class NEECraftingPreviewHandler {
                         }
 
                         if (otherStack != null) {
-                            this.resultStackSize = otherStack.item.stackSize;
-                            openCraftAmount(firstGui, otherStack.item);
+                            IAEStack<?> aeOtherStack = ItemUtils.toAEStack(otherStack.item);
+                            this.resultStackSize = aeOtherStack.getStackSize();
+                            openCraftAmount(firstGui, aeOtherStack);
                         } else {
                             return false;
                         }
@@ -148,14 +146,11 @@ public class NEECraftingPreviewHandler {
         return false;
     }
 
-    private void openCraftAmount(GuiContainer firstGui, ItemStack itemstack) {
-        final IAEItemStack aeItemStack = AEItemStack.create(itemstack);
-
-        if (firstGui.inventorySlots instanceof AEBaseContainer baseContainer) {
-            baseContainer.setTargetStack(aeItemStack);
+    private void openCraftAmount(GuiContainer firstGui, IAEStack<?> stack) {
+        if (stack != null && firstGui.inventorySlots instanceof AEBaseContainer baseContainer) {
+            baseContainer.setTargetStack(stack);
             NetworkHandler.instance.sendToServer(new PacketInventoryAction(InventoryAction.AUTO_CRAFT, 0, 0));
         }
-
     }
 
     @SubscribeEvent
@@ -197,18 +192,18 @@ public class NEECraftingPreviewHandler {
     public void onCraftConfirmActionPerformed(GuiScreenEvent.ActionPerformedEvent.Pre event) {
 
         if ((this.tracker != null || this.patternCompound != null) && event.gui instanceof GuiContainer gui) {
-            final int craftAmount = getCraftAmount(gui, event.button);
+            final long craftAmount = getCraftAmount(gui, event.button);
 
-            if (craftAmount == -1) {
+            if (craftAmount == -1 || this.resultStackSize <= 0) {
                 return;
             }
 
             if (this.tracker != null) {
-                final int craftMultiplier = (int) Math.ceil((1f * craftAmount) / this.resultStackSize);
+                final long craftMultiplier = (craftAmount + this.resultStackSize - 1) / this.resultStackSize;
                 this.isAutoStart = this.isAutoStart || GuiScreen.isShiftKeyDown();
 
                 for (Ingredient ingr : this.tracker.getIngredients()) {
-                    ingr.setRequireCount(ingr.getRequireCount() * craftMultiplier);
+                    ingr.setRequireCount(ingr.getDefaultRequireCount() * craftMultiplier);
                 }
 
                 this.tracker.calculateIngredients();
@@ -262,13 +257,13 @@ public class NEECraftingPreviewHandler {
         }
     }
 
-    private static int getCraftAmount(GuiContainer screen, GuiButton button) {
+    private static long getCraftAmount(GuiContainer screen, GuiButton button) {
 
         try {
             if (screen instanceof GuiCraftAmount gui) {
 
                 if (ReflectionHelper.getPrivateValue(GuiAmount.class, gui, "nextBtn") == button) {
-                    return (int) ReflectionHelper.findMethod(GuiAmount.class, gui, new String[] { "getAmount" })
+                    return (long) ReflectionHelper.findMethod(GuiAmount.class, gui, new String[] { "getAmountLong" })
                             .invoke(gui);
                 }
 
@@ -400,13 +395,12 @@ public class NEECraftingPreviewHandler {
             return true;
         }
 
-        return existsRecipeResult(firstGui, pStack);
+        return existsRecipeResult(firstGui, ItemUtils.toAEStack(pStack.item));
     }
 
-    private boolean existsRecipeResult(GuiContainer firstGui, PositionedStack pStack) {
-        return pStack != null && !GuiUtils
-                .getStorageItemStacks(firstGui, aestack -> aestack.isCraftable() && aestack.isSameType(pStack.item))
-                .isEmpty();
+    private boolean existsRecipeResult(GuiContainer firstGui, IAEStack<?> stack) {
+        return stack != null
+                && !GuiUtils.getStorageStacks(firstGui, s -> s.isCraftable() && s.isSameType(stack)).isEmpty();
     }
 
 }

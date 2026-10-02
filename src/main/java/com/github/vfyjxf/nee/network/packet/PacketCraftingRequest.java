@@ -64,6 +64,14 @@ public class PacketCraftingRequest implements IMessage {
         this.isAutoStart = isAutoStart;
     }
 
+    public long getCraftAmount() {
+        return Math.max(1, this.craftAmount);
+    }
+
+    public void setCraftAmount(long craftAmount) {
+        this.craftAmount = craftAmount;
+    }
+
     public boolean isAutoStart() {
         return this.isAutoStart;
     }
@@ -130,7 +138,7 @@ public class PacketCraftingRequest implements IMessage {
                         final IAEStack<?> requireToCraftStack = findCraftable(inv, resultStack);
 
                         if (requireToCraftStack != null) {
-                            requireToCraftStack.setStackSize(message.craftAmount);
+                            requireToCraftStack.setStackSize(message.getCraftAmount());
                             message.openCraftConfirm(container, grid, requireToCraftStack, player);
                         }
                     }
@@ -144,7 +152,7 @@ public class PacketCraftingRequest implements IMessage {
                             resultStack);
 
                     if (requireToCraftStack != null) {
-                        requireToCraftStack.setStackSize(message.craftAmount);
+                        requireToCraftStack.setStackSize(message.getCraftAmount());
                         message.openCraftConfirm(container, grid, requireToCraftStack, player);
                     }
 
