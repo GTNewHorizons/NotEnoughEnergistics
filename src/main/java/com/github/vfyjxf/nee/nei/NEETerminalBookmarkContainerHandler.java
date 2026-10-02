@@ -23,7 +23,7 @@ public class NEETerminalBookmarkContainerHandler implements IBookmarkContainerHa
 
     @Override
     public List<ItemStack> getStorageStacks(GuiContainer guiContainer) {
-        return GuiUtils.getStorageStacks(guiContainer, stack -> stack.getStackSize() > 0).stream()
+        return GuiUtils.getStorageItemStacks(guiContainer, stack -> stack.getStackSize() > 0).stream()
                 .map(stack -> stack.getItemStack().copy()).collect(Collectors.toList());
     }
 

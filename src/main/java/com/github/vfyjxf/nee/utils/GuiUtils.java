@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import appeng.util.item.AEItemStackType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -66,8 +67,8 @@ public class GuiUtils {
         return repo;
     }
 
-    public static List<IAEItemStack> getStorageStacks(GuiContainer termGui, Predicate<IAEItemStack> predicate) {
-        final List<IAEItemStack> storageStacks = new ArrayList<>();
+    public static List<IAEStack<?>> getStorageStacks(GuiContainer termGui, Predicate<? super IAEStack<?>> predicate) {
+        final List<IAEStack<?>> storageStacks = new ArrayList<>();
 
         if (termGui != null) {
             final ItemRepo repo = GuiUtils.getItemRepo(termGui);
@@ -80,29 +81,26 @@ public class GuiUtils {
                             .findField(ItemRepo.class, "list").get(repo);
 
                     for (IAEStack<?> stack : list) {
-                        if (stack instanceof IAEItemStack ais && predicate.test(ais)) {
-                            storageStacks.add(ais.copy());
+                        if (predicate.test(stack)) {
+                            storageStacks.add(stack.copy());
                         }
                     }
 
                 } catch (Exception ignored) {}
-
-                try {
-                    final IAEStack<?>[] pins = (IAEStack<?>[]) ReflectionHelper.findField(ItemRepo.class, "pinsRepo")
-                            .get(repo);
-
-                    for (final IAEStack<?> stack : pins) {
-                        if (stack instanceof IAEItemStack ais && predicate.test(ais)) {
-                            storageStacks.add(ais.copy());
-                        }
-                    }
-
-                } catch (Exception ignored) {}
-
             }
         }
 
         return storageStacks;
+    }
+
+    public static List<IAEItemStack> getStorageItemStacks(GuiContainer termGui, Predicate<IAEItemStack> predicate) {
+        final List<IAEItemStack> storageItemStacks = new ArrayList<>();
+
+        for (IAEStack<?> stack : getStorageStacks(termGui, s -> s instanceof IAEItemStack ias && predicate.test(ias))) {
+            storageItemStacks.add((IAEItemStack) stack);
+        }
+
+        return storageItemStacks;
     }
 
     public static IGrid getGrid(Container container) {

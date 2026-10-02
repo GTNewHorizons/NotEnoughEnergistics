@@ -7,6 +7,10 @@ import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityModList;
 import java.util.ArrayList;
 import java.util.List;
 
+import appeng.api.storage.data.AEStackTypeRegistry;
+import appeng.api.storage.data.IAEStack;
+import appeng.api.storage.data.IAEStackType;
+import appeng.util.item.AEItemStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -288,5 +292,20 @@ public final class ItemUtils {
                 stack.setTagCompound(NBT);
             }
         }
+    }
+
+    public static IAEStack<?> toTypedStack(ItemStack is) {
+        for (IAEStackType<?> type : AEStackTypeRegistry.getAllTypes()) {
+            final IAEStack<?> converted = type.convertStackFromItem(is);   // null for the item type
+            if (converted != null) {
+                return converted;
+            }
+        }
+        return null;
+    }
+
+    public static IAEStack<?> toAEStack(ItemStack is) {
+        final IAEStack<?> typed = toTypedStack(is);
+        return typed != null ? typed : AEItemStack.create(is);
     }
 }

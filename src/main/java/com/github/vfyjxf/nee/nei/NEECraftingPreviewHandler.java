@@ -2,6 +2,7 @@ package com.github.vfyjxf.nee.nei;
 
 import java.util.List;
 
+import appeng.api.storage.data.IAEStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -77,12 +78,14 @@ public class NEECraftingPreviewHandler {
 
             if (pStack != null && existsRecipeResult(firstGui, pStack)) {
 
+                IAEStack<?> stack = ItemUtils.toAEStack(pStack.item);
+
                 if (this.isAutoStart) {
                     final PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
                             this.modID,
                             PacketCraftingRequest.COMMAND_OPEN_CRAFT_CONFIRM,
-                            pStack.item.writeToNBT(new NBTTagCompound()),
-                            pStack.item.stackSize,
+                            stack.toNBTGeneric(),
+                            stack.getStackSize(),
                             true);
                     NEENetworkHandler.getInstance().sendToServer(craftingRequest);
                 } else {
@@ -298,14 +301,14 @@ public class NEECraftingPreviewHandler {
     }
 
     private void requestNextIngredient() {
-        final ItemStack stack = this.tracker.getNextIngredient();
+        final IAEStack<?> stack = this.tracker.getNextIngredient();
 
         if (stack != null) {
             PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
                     this.modID,
                     PacketCraftingRequest.COMMAND_OPEN_CRAFT_CONFIRM,
-                    stack.writeToNBT(new NBTTagCompound()),
-                    stack.stackSize,
+                    stack.toNBTGeneric(),
+                    stack.getStackSize(),
                     this.isAutoStart);
             NEENetworkHandler.getInstance().sendToServer(craftingRequest);
         }
@@ -402,7 +405,7 @@ public class NEECraftingPreviewHandler {
 
     private boolean existsRecipeResult(GuiContainer firstGui, PositionedStack pStack) {
         return pStack != null && !GuiUtils
-                .getStorageStacks(firstGui, aestack -> aestack.isCraftable() && aestack.isSameType(pStack.item))
+                .getStorageItemStacks(firstGui, aestack -> aestack.isCraftable() && aestack.isSameType(pStack.item))
                 .isEmpty();
     }
 
