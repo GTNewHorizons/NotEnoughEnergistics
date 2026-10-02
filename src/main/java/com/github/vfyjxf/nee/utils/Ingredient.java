@@ -1,13 +1,13 @@
 package com.github.vfyjxf.nee.utils;
 
-import appeng.api.storage.data.IAEItemStack;
-import appeng.api.storage.data.IAEStack;
-import net.minecraft.item.ItemStack;
-
-import codechicken.nei.PositionedStack;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import net.minecraft.item.ItemStack;
+
+import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
+import codechicken.nei.PositionedStack;
 
 public class Ingredient {
 

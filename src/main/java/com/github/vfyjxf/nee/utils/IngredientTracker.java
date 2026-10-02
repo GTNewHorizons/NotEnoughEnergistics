@@ -3,7 +3,6 @@ package com.github.vfyjxf.nee.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import appeng.api.storage.data.IAEStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Slot;
@@ -12,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import com.github.vfyjxf.nee.config.NEEConfig;
 
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
 

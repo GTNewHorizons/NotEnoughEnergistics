@@ -7,10 +7,6 @@ import static com.github.vfyjxf.nee.config.NEEConfig.transformPriorityModList;
 import java.util.ArrayList;
 import java.util.List;
 
-import appeng.api.storage.data.AEStackTypeRegistry;
-import appeng.api.storage.data.IAEStack;
-import appeng.api.storage.data.IAEStackType;
-import appeng.util.item.AEItemStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -24,6 +20,10 @@ import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import appeng.api.storage.data.AEStackTypeRegistry;
+import appeng.api.storage.data.IAEStack;
+import appeng.api.storage.data.IAEStackType;
+import appeng.util.item.AEItemStack;
 import codechicken.nei.NEIServerUtils;
 import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.Loader;
@@ -296,7 +296,7 @@ public final class ItemUtils {
 
     public static IAEStack<?> toTypedStack(ItemStack is) {
         for (IAEStackType<?> type : AEStackTypeRegistry.getAllTypes()) {
-            final IAEStack<?> converted = type.convertStackFromItem(is);   // null for the item type
+            final IAEStack<?> converted = type.convertStackFromItem(is); // null for the item type
             if (converted != null) {
                 return converted;
             }

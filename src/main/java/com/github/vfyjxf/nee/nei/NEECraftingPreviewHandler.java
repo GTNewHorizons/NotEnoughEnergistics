@@ -2,7 +2,6 @@ package com.github.vfyjxf.nee.nei;
 
 import java.util.List;
 
-import appeng.api.storage.data.IAEStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -27,6 +26,7 @@ import com.github.vfyjxf.nee.utils.ItemUtils;
 import com.github.vfyjxf.nee.utils.ModIDs;
 
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import appeng.client.gui.implementations.GuiAmount;
 import appeng.client.gui.implementations.GuiCraftAmount;
 import appeng.client.gui.implementations.GuiCraftConfirm;

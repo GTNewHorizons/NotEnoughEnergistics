@@ -3,7 +3,6 @@ package com.github.vfyjxf.nee.network.packet;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import appeng.api.storage.data.IAEStack;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -25,6 +24,7 @@ import appeng.api.networking.security.ISecurityGrid;
 import appeng.api.networking.storage.IStorageGrid;
 import appeng.api.storage.IMEMonitor;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import appeng.container.AEBaseContainer;
 import appeng.container.ContainerOpenContext;
 import appeng.container.ContainerSubGui;
@@ -55,8 +55,8 @@ public class PacketCraftingRequest implements IMessage {
 
     public PacketCraftingRequest() {}
 
-    public PacketCraftingRequest(String modID, int command, NBTTagCompound compound,
-                                 long craftAmount, boolean isAutoStart) {
+    public PacketCraftingRequest(String modID, int command, NBTTagCompound compound, long craftAmount,
+            boolean isAutoStart) {
         this.modID = modID;
         this.command = command;
         this.compound = compound;
@@ -273,8 +273,8 @@ public class PacketCraftingRequest implements IMessage {
 
     }
 
-    private void openAEContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid,
-            IAEStack<?> requireToCraftStack, EntityPlayerMP player) {
+    private void openAEContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid, IAEStack<?> requireToCraftStack,
+            EntityPlayerMP player) {
 
         openContainerCraftConfirm(grid, requireToCraftStack, player, baseContainer.getActionSource(), job -> {
             final ContainerOpenContext openContext = baseContainer.getOpenContext();
