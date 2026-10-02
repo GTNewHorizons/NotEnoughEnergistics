@@ -156,5 +156,6 @@ public class IngredientTracker {
         }
 
         this.requireStacks = this.getRequireToCraftStacks();
+        this.currentIndex = 0;
     }
 }

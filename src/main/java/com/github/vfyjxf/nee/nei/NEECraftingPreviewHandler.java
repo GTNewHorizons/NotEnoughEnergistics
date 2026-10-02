@@ -202,8 +202,15 @@ public class NEECraftingPreviewHandler {
                 final long craftMultiplier = (craftAmount + this.resultStackSize - 1) / this.resultStackSize;
                 this.isAutoStart = this.isAutoStart || GuiScreen.isShiftKeyDown();
 
-                for (Ingredient ingr : this.tracker.getIngredients()) {
-                    ingr.setRequireCount(ingr.getDefaultRequireCount() * craftMultiplier);
+                try {
+                    for (Ingredient ingr : this.tracker.getIngredients()) {
+                        ingr.setRequireCount(Math.multiplyExact(ingr.getDefaultRequireCount(), craftMultiplier));
+                    }
+                } catch (ArithmeticException e) {
+                    this.tracker = null;
+                    this.isRequesting = false;
+                    event.setCanceled(true);
+                    return;
                 }
 
                 this.tracker.calculateIngredients();
