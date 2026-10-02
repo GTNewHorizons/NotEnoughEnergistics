@@ -64,20 +64,20 @@ public class PacketCraftingRequest implements IMessage {
         this.isAutoStart = isAutoStart;
     }
 
-    public long getCraftAmount() {
-        return Math.max(1, this.craftAmount);
-    }
-
-    public void setCraftAmount(long craftAmount) {
-        this.craftAmount = craftAmount;
-    }
-
     public boolean isAutoStart() {
         return this.isAutoStart;
     }
 
     public void setIsAutoStart(boolean isAutoStart) {
         this.isAutoStart = isAutoStart;
+    }
+
+    public long getCraftAmount() {
+        return Math.max(1, this.craftAmount);
+    }
+
+    public void setCraftAmount(long craftAmount) {
+        this.craftAmount = craftAmount;
     }
 
     public void getModID(String modID) {
