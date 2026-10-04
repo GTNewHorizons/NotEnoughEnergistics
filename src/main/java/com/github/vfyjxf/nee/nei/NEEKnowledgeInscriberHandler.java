@@ -128,6 +128,10 @@ public class NEEKnowledgeInscriberHandler implements IOverlayHandler {
     private static void addIndexedIngredient(PositionedStack ps, int i, NBTTagCompound recipeInputs) {
         if (ps.items != null && ps.items.length > 0) {
             ItemStack stack = getPrioritizedItem(ps.items);
+            if (NEIClientUtils.shiftKey()) {
+                stack = ps.item;
+                stack.stackSize = 1;
+            }
             if (stack == null) return;
             recipeInputs.setTag("#" + i, ItemUtils.writeItemStackToNBT(stack, stack.stackSize));
         }
