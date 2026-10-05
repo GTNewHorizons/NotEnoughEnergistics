@@ -199,7 +199,8 @@ public class NEECraftingPreviewHandler {
             }
 
             if (this.tracker != null) {
-                final long craftMultiplier = (craftAmount + this.resultStackSize - 1) / this.resultStackSize;
+                final long craftMultiplier = craftAmount / this.resultStackSize
+                        + (craftAmount % this.resultStackSize == 0 ? 0 : 1);
                 this.isAutoStart = this.isAutoStart || GuiScreen.isShiftKeyDown();
 
                 try {
