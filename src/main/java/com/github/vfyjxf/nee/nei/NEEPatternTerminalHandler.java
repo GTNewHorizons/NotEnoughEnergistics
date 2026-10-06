@@ -26,7 +26,6 @@ import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import appeng.util.Platform;
 import codechicken.nei.NEIClientUtils;
-import codechicken.nei.NEIServerUtils;
 import codechicken.nei.PositionedStack;
 import codechicken.nei.api.IOverlayHandler;
 import codechicken.nei.recipe.GuiOverlayButton.ItemOverlayState;
@@ -123,22 +122,18 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
 
                     for (PositionedStack positionedStack : mergedInputs) {
                         ItemStack currentStack = positionedStack.getFilteredPermutations().get(0);
-                        int stackSize = currentStack.stackSize;
                         if (NEIClientUtils.shiftKey()) {
                             currentStack = positionedStack.item;
-                            currentStack.stackSize = stackSize;
                         }
                         ItemStack preferModItem = ItemUtils.getPreferModItem(positionedStack.items);
                         if (preferModItem != null) {
                             currentStack = preferModItem;
-                            currentStack.stackSize = stackSize;
                         }
 
                         for (ItemStack stack : positionedStack.items) {
                             if (Platform.isRecipePrioritized(stack)
                                     || ItemUtils.isPreferItems(stack, recipeProcessorId, identifier)) {
-                                currentStack = stack.copy();
-                                currentStack.stackSize = stackSize;
+                                currentStack = stack;
                                 break;
                             }
                         }
@@ -147,6 +142,7 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                             continue;
                         }
 
+                        currentStack = currentStack.copy();
                         if (currentStack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
                             currentStack.setItemDamage(0);
                         }
@@ -197,7 +193,6 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
         List<PositionedStack> mergedInputs = new ArrayList<>();
 
         for (PositionedStack positionedStack : inputs) {
-            ItemStack currentStack = positionedStack.getFilteredPermutations().get(0);
             ItemCombination currentValue = ItemCombination.valueOf(NEEConfig.itemCombinationMode);
             boolean find = false;
 
@@ -208,14 +203,30 @@ public class NEEPatternTerminalHandler implements IOverlayHandler {
                 if (currentValue == ItemCombination.ENABLED || isWhitelist) {
                     for (PositionedStack storedStack : mergedInputs) {
 
-                        ItemStack firstStack = storedStack.getFilteredPermutations().get(0);
-                        boolean areItemStackEqual = NEIServerUtils
-                                .areStacksSameTypeCraftingWithNBT(firstStack, currentStack);
+                        if (storedStack.items.length != positionedStack.items.length) {
+                            continue;
+                        }
 
-                        if (areItemStackEqual
-                                && (firstStack.stackSize + currentStack.stackSize) <= firstStack.getMaxStackSize()) {
-                            firstStack.stackSize = firstStack.stackSize + currentStack.stackSize;
+                        boolean canMerge = true;
+                        for (int i = 0; i < storedStack.items.length; i++) {
+                            ItemStack storedItem = storedStack.items[i];
+                            ItemStack currentItem = positionedStack.items[i];
+                            if (!storedItem.isItemEqual(currentItem)
+                                    || !ItemStack.areItemStackTagsEqual(storedItem, currentItem)
+                                    || (long) storedItem.stackSize + currentItem.stackSize
+                                            > storedItem.getMaxStackSize()) {
+                                canMerge = false;
+                                break;
+                            }
+                        }
+
+                        if (canMerge) {
+                            for (int i = 0; i < storedStack.items.length; i++) {
+                                storedStack.items[i].stackSize += positionedStack.items[i].stackSize;
+                            }
+                            storedStack.setPermutationToRender(storedStack.item);
                             find = true;
+                            break;
                         }
                     }
                 }
