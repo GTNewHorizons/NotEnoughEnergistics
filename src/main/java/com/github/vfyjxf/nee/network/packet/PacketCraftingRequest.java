@@ -24,6 +24,7 @@ import appeng.api.networking.security.ISecurityGrid;
 import appeng.api.networking.storage.IStorageGrid;
 import appeng.api.storage.IMEMonitor;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import appeng.container.AEBaseContainer;
 import appeng.container.ContainerOpenContext;
 import appeng.container.ContainerSubGui;
@@ -50,11 +51,11 @@ public class PacketCraftingRequest implements IMessage {
     private int command = 3;
     private NBTTagCompound compound;
     private boolean isAutoStart;
-    private int craftAmount;
+    private long craftAmount;
 
     public PacketCraftingRequest() {}
 
-    public PacketCraftingRequest(String modID, int command, NBTTagCompound compound, int craftAmount,
+    public PacketCraftingRequest(String modID, int command, NBTTagCompound compound, long craftAmount,
             boolean isAutoStart) {
         this.modID = modID;
         this.command = command;
@@ -71,11 +72,11 @@ public class PacketCraftingRequest implements IMessage {
         this.isAutoStart = isAutoStart;
     }
 
-    public int getCraftAmount() {
+    public long getCraftAmount() {
         return Math.max(1, this.craftAmount);
     }
 
-    public void setCraftAmount(int craftAmount) {
+    public void setCraftAmount(long craftAmount) {
         this.craftAmount = craftAmount;
     }
 
@@ -89,7 +90,7 @@ public class PacketCraftingRequest implements IMessage {
         this.command = buf.readInt();
         this.compound = ByteBufUtils.readTag(buf);
         this.isAutoStart = buf.readBoolean();
-        this.craftAmount = buf.readInt();
+        this.craftAmount = buf.readLong();
     }
 
     @Override
@@ -98,7 +99,7 @@ public class PacketCraftingRequest implements IMessage {
         buf.writeInt(this.command);
         ByteBufUtils.writeTag(buf, this.compound);
         buf.writeBoolean(this.isAutoStart);
-        buf.writeInt(this.craftAmount);
+        buf.writeLong(this.craftAmount);
     }
 
     public static final class Handler implements IMessageHandler<PacketCraftingRequest, IMessage> {
@@ -131,14 +132,15 @@ public class PacketCraftingRequest implements IMessage {
 
                 if (message.command == COMMAND_OPEN_CRAFT_CONFIRM) {
                     final IStorageGrid inv = grid.getCache(IStorageGrid.class);
-                    final ItemStack resultStack = ItemStack.loadItemStackFromNBT(message.compound);
-                    final IAEItemStack requireToCraftStack = getrequireToCraftStack(
-                            inv.getItemInventory(),
-                            resultStack);
+                    final IAEStack<?> resultStack = IAEStack.fromNBTGeneric(message.compound);
 
-                    if (requireToCraftStack != null) {
-                        requireToCraftStack.setStackSize(message.getCraftAmount());
-                        message.openCraftConfirm(container, grid, requireToCraftStack, player);
+                    if (resultStack != null) {
+                        final IAEStack<?> requireToCraftStack = findCraftable(inv, resultStack);
+
+                        if (requireToCraftStack != null) {
+                            requireToCraftStack.setStackSize(message.getCraftAmount());
+                            message.openCraftConfirm(container, grid, requireToCraftStack, player);
+                        }
                     }
                 } else if (message.command == COMMAND_CREATE_PATTERN) {
                     final IStorageGrid inv = grid.getCache(IStorageGrid.class);
@@ -159,6 +161,14 @@ public class PacketCraftingRequest implements IMessage {
             }
 
             return null;
+        }
+
+        private static IAEStack<?> findCraftable(IStorageGrid inv, IAEStack<?> requested) {
+            final IMEMonitor monitor = inv.getMEMonitor(requested.getStackType());
+            if (monitor == null) return null;
+
+            final IAEStack<?> found = (IAEStack<?>) monitor.getStorageList().findPrecise(requested);
+            return found != null && found.isCraftable() ? found.copy() : null;
         }
 
         /*
@@ -226,14 +236,14 @@ public class PacketCraftingRequest implements IMessage {
 
     }
 
-    public void openCraftConfirm(Container container, IGrid grid, IAEItemStack requireToCraftStack,
+    public void openCraftConfirm(Container container, IGrid grid, IAEStack<?> requireToCraftStack,
             EntityPlayerMP player) {
         if (container instanceof AEBaseContainer baseContainer) {
             openAEContainerCraftConfirm(baseContainer, grid, requireToCraftStack, player);
         }
     }
 
-    private void openContainerCraftConfirm(IGrid grid, IAEItemStack requireToCraftStack, EntityPlayerMP player,
+    private void openContainerCraftConfirm(IGrid grid, IAEStack<?> requireToCraftStack, EntityPlayerMP player,
             BaseActionSource actionSource, Consumer<Future<ICraftingJob>> consumer) {
         Future<ICraftingJob> futureJob = null;
 
@@ -271,8 +281,8 @@ public class PacketCraftingRequest implements IMessage {
 
     }
 
-    private void openAEContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid,
-            IAEItemStack requireToCraftStack, EntityPlayerMP player) {
+    private void openAEContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid, IAEStack<?> requireToCraftStack,
+            EntityPlayerMP player) {
 
         openContainerCraftConfirm(grid, requireToCraftStack, player, baseContainer.getActionSource(), job -> {
             final ContainerOpenContext openContext = baseContainer.getOpenContext();

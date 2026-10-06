@@ -20,6 +20,10 @@ import com.github.vfyjxf.nee.processor.RecipeProcessor;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import appeng.api.storage.data.AEStackTypeRegistry;
+import appeng.api.storage.data.IAEStack;
+import appeng.api.storage.data.IAEStackType;
+import appeng.util.item.AEItemStack;
 import codechicken.nei.NEIServerUtils;
 import codechicken.nei.recipe.StackInfo;
 import cpw.mods.fml.common.Loader;
@@ -288,5 +292,20 @@ public final class ItemUtils {
                 stack.setTagCompound(NBT);
             }
         }
+    }
+
+    public static IAEStack<?> toTypedStack(ItemStack is) {
+        for (IAEStackType<?> type : AEStackTypeRegistry.getAllTypes()) {
+            final IAEStack<?> converted = type.convertStackFromItem(is); // null for the item type
+            if (converted != null) {
+                return converted;
+            }
+        }
+        return null;
+    }
+
+    public static IAEStack<?> toAEStack(ItemStack is) {
+        final IAEStack<?> typed = toTypedStack(is);
+        return typed != null ? typed : AEItemStack.create(is);
     }
 }

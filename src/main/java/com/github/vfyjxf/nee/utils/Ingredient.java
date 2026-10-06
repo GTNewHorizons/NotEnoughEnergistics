@@ -1,7 +1,12 @@
 package com.github.vfyjxf.nee.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.item.ItemStack;
 
+import appeng.api.storage.data.IAEItemStack;
+import appeng.api.storage.data.IAEStack;
 import codechicken.nei.PositionedStack;
 
 public class Ingredient {
@@ -9,24 +14,45 @@ public class Ingredient {
     private long requireCount;
     private final long defaultRequireCount;
     private final PositionedStack ingredient;
-    private ItemStack craftableIngredient;
+    private IAEStack<?> craftableIngredient;
     private long currentCount = 0;
+    private final List<IAEStack<?>> typedStacks = new ArrayList<>();
 
     public Ingredient(PositionedStack ingredients) {
         this.ingredient = ingredients;
-        this.requireCount = ingredients.items[0].stackSize;
-        this.defaultRequireCount = ingredients.items[0].stackSize;
+
+        for (ItemStack is : ingredients.items) {
+            final IAEStack<?> typed = ItemUtils.toTypedStack(is);
+            if (typed != null) {
+                this.typedStacks.add(typed);
+            }
+        }
+
+        final long count = isItem() ? ingredients.items[0].stackSize : typedStacks.get(0).getStackSize();
+        this.requireCount = count;
+        this.defaultRequireCount = count;
+    }
+
+    public boolean isItem() {
+        return typedStacks.isEmpty();
     }
 
     public PositionedStack getIngredient() {
         return ingredient;
     }
 
-    public ItemStack getCraftableIngredient() {
+    public boolean matches(IAEStack<?> stack) {
+        if (isItem()) {
+            return stack instanceof IAEItemStack ias && ingredient.contains(ias.getItemStack());
+        }
+        return typedStacks.stream().anyMatch(t -> t.isSameType(stack));
+    }
+
+    public IAEStack<?> getCraftableIngredient() {
         return craftableIngredient;
     }
 
-    public void setCraftableIngredient(ItemStack craftableIngredient) {
+    public void setCraftableIngredient(IAEStack<?> craftableIngredient) {
         this.craftableIngredient = craftableIngredient;
     }
 
