@@ -9,10 +9,14 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import net.minecraftforge.fluids.FluidStack;
+
 import com.github.vfyjxf.nee.config.NEEConfig;
+import com.github.vfyjxf.nee.utils.ItemUtils;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
+import gregtech.api.enums.CondensateType;
 import gregtech.api.recipe.RecipeCategory;
 
 /**
@@ -86,6 +90,10 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
             recipeInputs.removeIf(
                     positionedStack -> positionedStack.item.stackSize == 0
                             && !NEEConfig.includeNonConsumableIngredients);
+            if (isNH) {
+                // Replace BEC fluids with their source fluid
+                recipeInputs.replaceAll(GregTech5RecipeProcessor::disentangle);
+            }
         }
 
         return recipeInputs;
@@ -110,5 +118,27 @@ public class GregTech5RecipeProcessor implements IRecipeProcessor {
     private boolean canProcessRecipe(IRecipeHandler recipe) {
         return (gtDefaultClz != null && gtDefaultClz.isInstance(recipe))
                 || (gtAssLineClz != null && gtAssLineClz.isInstance(recipe));
+    }
+
+    private static PositionedStack disentangle(PositionedStack positionedStack) {
+        FluidStack fluidStack = ItemUtils.getFluidFromDisplayStack(positionedStack.item);
+        if (fluidStack == null) {
+            return positionedStack;
+        }
+
+        CondensateType condensate = CondensateType.getCondensateType(fluidStack.getFluid());
+        if (condensate == null) {
+            return positionedStack;
+        }
+
+        FluidStack source = condensate.getSourceFluid();
+        if (source == null) {
+            return positionedStack;
+        }
+
+        return new PositionedStack(
+                new FluidStack(source.getFluid(), fluidStack.amount),
+                positionedStack.relx,
+                positionedStack.rely);
     }
 }
