@@ -1,5 +1,8 @@
 package com.github.vfyjxf.nee.network.packet;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -8,6 +11,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants;
 
 import com.github.vfyjxf.nee.block.tile.TilePatternInterface;
 import com.github.vfyjxf.nee.utils.GuiUtils;
@@ -46,6 +51,8 @@ public class PacketCraftingRequest implements IMessage {
     public static int COMMAND_CREATE_PATTERN = 0;
     public static int COMMAND_REMOVE_PATTERN = 1;
     public static int COMMAND_OPEN_CRAFT_CONFIRM = 2;
+    // 3 is the default value of the command field, which does nothing
+    public static int COMMAND_OPEN_CRAFT_CONFIRM_MULTIPLE = 4;
 
     private String modID = "";
     private int command = 3;
@@ -141,6 +148,32 @@ public class PacketCraftingRequest implements IMessage {
                             requireToCraftStack.setStackSize(message.getCraftAmount());
                             message.openCraftConfirm(container, grid, requireToCraftStack, player);
                         }
+                    }
+                } else if (message.command == COMMAND_OPEN_CRAFT_CONFIRM_MULTIPLE) {
+                    final IStorageGrid inv = grid.getCache(IStorageGrid.class);
+                    final NBTTagList stackTags = message.compound.getTagList("stacks", Constants.NBT.TAG_COMPOUND);
+                    final List<IAEStack<?>> requireToCraftStacks = new ArrayList<>(stackTags.tagCount());
+
+                    for (int i = 0; i < stackTags.tagCount(); i++) {
+                        final IAEStack<?> resultStack = IAEStack.fromNBTGeneric(stackTags.getCompoundTagAt(i));
+
+                        if (resultStack != null) {
+                            final IAEStack<?> requireToCraftStack = findCraftable(inv, resultStack);
+
+                            if (requireToCraftStack != null) {
+                                requireToCraftStack.setStackSize(Math.max(1, resultStack.getStackSize()));
+                                requireToCraftStacks.add(requireToCraftStack);
+                            }
+                        }
+                    }
+
+                    // only shown on the crafting CPU, so it doesn't have to be craftable
+                    final IAEStack<?> displayStack = message.compound.hasKey("display")
+                            ? IAEStack.fromNBTGeneric(message.compound.getCompoundTag("display"))
+                            : null;
+
+                    if (!requireToCraftStacks.isEmpty()) {
+                        message.openCraftConfirm(container, grid, requireToCraftStacks, displayStack, player);
                     }
                 } else if (message.command == COMMAND_CREATE_PATTERN) {
                     final IStorageGrid inv = grid.getCache(IStorageGrid.class);
@@ -238,19 +271,39 @@ public class PacketCraftingRequest implements IMessage {
 
     public void openCraftConfirm(Container container, IGrid grid, IAEStack<?> requireToCraftStack,
             EntityPlayerMP player) {
+        openCraftConfirm(container, grid, Collections.singletonList(requireToCraftStack), null, player);
+    }
+
+    /**
+     * Opens one crafting confirmation for all the given stacks, they are crafted as a single job.
+     *
+     * @param displayStack shown on the crafting CPU instead of the first stack, may be null
+     */
+    public void openCraftConfirm(Container container, IGrid grid, List<IAEStack<?>> requireToCraftStacks,
+            IAEStack<?> displayStack, EntityPlayerMP player) {
         if (container instanceof AEBaseContainer baseContainer) {
-            openAEContainerCraftConfirm(baseContainer, grid, requireToCraftStack, player);
+            openAEContainerCraftConfirm(baseContainer, grid, requireToCraftStacks, displayStack, player);
         }
     }
 
-    private void openContainerCraftConfirm(IGrid grid, IAEStack<?> requireToCraftStack, EntityPlayerMP player,
-            BaseActionSource actionSource, Consumer<Future<ICraftingJob>> consumer) {
+    private void openContainerCraftConfirm(IGrid grid, List<IAEStack<?>> requireToCraftStacks, IAEStack<?> displayStack,
+            EntityPlayerMP player, BaseActionSource actionSource, Consumer<Future<ICraftingJob>> consumer) {
         Future<ICraftingJob> futureJob = null;
+        final IAEStack<?> requireToCraftStack = requireToCraftStacks.get(0);
 
         try {
             final ICraftingGrid cg = grid.getCache(ICraftingGrid.class);
 
-            if (cg instanceof CraftingGridCache cgc) {
+            if (requireToCraftStacks.size() > 1 || displayStack != null) {
+                futureJob = cg.beginCraftingJob(
+                        player.worldObj,
+                        grid,
+                        actionSource,
+                        requireToCraftStacks,
+                        displayStack,
+                        CraftingMode.STANDARD,
+                        null);
+            } else if (cg instanceof CraftingGridCache cgc) {
                 futureJob = cgc.beginCraftingJob(
                         player.worldObj,
                         grid,
@@ -281,23 +334,29 @@ public class PacketCraftingRequest implements IMessage {
 
     }
 
-    private void openAEContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid, IAEStack<?> requireToCraftStack,
-            EntityPlayerMP player) {
+    private void openAEContainerCraftConfirm(AEBaseContainer baseContainer, IGrid grid,
+            List<IAEStack<?>> requireToCraftStacks, IAEStack<?> displayStack, EntityPlayerMP player) {
 
-        openContainerCraftConfirm(grid, requireToCraftStack, player, baseContainer.getActionSource(), job -> {
-            final ContainerOpenContext openContext = baseContainer.getOpenContext();
-            final PrimaryGui pGui = baseContainer instanceof ContainerSubGui ? baseContainer.getPrimaryGui()
-                    : baseContainer.createPrimaryGui();
-            Platform.openGUI(
-                    player,
-                    openContext.getTile(),
-                    openContext.getSide(),
-                    GuiBridge.GUI_CRAFTING_CONFIRM,
-                    baseContainer.getTargetSlotIndex());
+        openContainerCraftConfirm(
+                grid,
+                requireToCraftStacks,
+                displayStack,
+                player,
+                baseContainer.getActionSource(),
+                job -> {
+                    final ContainerOpenContext openContext = baseContainer.getOpenContext();
+                    final PrimaryGui pGui = baseContainer instanceof ContainerSubGui ? baseContainer.getPrimaryGui()
+                            : baseContainer.createPrimaryGui();
+                    Platform.openGUI(
+                            player,
+                            openContext.getTile(),
+                            openContext.getSide(),
+                            GuiBridge.GUI_CRAFTING_CONFIRM,
+                            baseContainer.getTargetSlotIndex());
 
-            if (player.openContainer instanceof ContainerCraftConfirm ccc) {
-                ccc.setPrimaryGui(pGui);
-            }
-        });
+                    if (player.openContainer instanceof ContainerCraftConfirm ccc) {
+                        ccc.setPrimaryGui(pGui);
+                    }
+                });
     }
 }
