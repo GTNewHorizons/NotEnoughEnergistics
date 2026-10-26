@@ -1,6 +1,5 @@
 package com.github.vfyjxf.nee.network.packet;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -9,6 +8,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import com.github.vfyjxf.nee.utils.ItemUtils;
 
+import appeng.api.config.Actionable;
 import appeng.api.networking.energy.IEnergySource;
 import appeng.api.networking.security.BaseActionSource;
 import appeng.api.storage.IMEMonitor;
@@ -21,8 +21,6 @@ import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 import io.netty.buffer.ByteBuf;
 
 public class PacketNEIBookmark implements IMessage {
@@ -61,50 +59,40 @@ public class PacketNEIBookmark implements IMessage {
                 if (monitor != null) {
                     final IEnergySource energy = monitorable.getPowerSource();
                     final BaseActionSource actionSource = monitorable.getActionSource();
+                    final InventoryAdaptor playerInventory = InventoryAdaptor
+                            .getAdaptor(player, ForgeDirection.UNKNOWN);
 
-                    for (Object key : message.bookmarkItems.func_150296_c()) {
+                    for (String key : message.bookmarkItems.func_150296_c()) {
                         final ItemStack bookmarkItem = ItemUtils
-                                .loadItemStackFromNBT(message.bookmarkItems.getCompoundTag((String) key));
-                        bookmarkItem.stackSize = getFreeStackSize(player, bookmarkItem);
+                                .loadItemStackFromNBT(message.bookmarkItems.getCompoundTag(key));
+                        if (bookmarkItem == null || bookmarkItem.stackSize <= 0) {
+                            continue;
+                        }
 
-                        if (bookmarkItem.stackSize > 0) {
-                            final AEItemStack requestStack = AEItemStack.create(bookmarkItem);
-                            final IAEItemStack extractedStack = Platform
-                                    .poweredExtraction(energy, monitor, requestStack, actionSource);
+                        final AEItemStack requestStack = AEItemStack.create(bookmarkItem);
+                        final ItemStack overflow = playerInventory.simulateAdd(bookmarkItem);
+                        if (overflow != null) {
+                            requestStack.decStackSize(overflow.stackSize);
+                        }
+                        if (requestStack.getStackSize() <= 0) {
+                            continue;
+                        }
 
-                            if (extractedStack != null) {
-                                InventoryAdaptor.getAdaptor(player, ForgeDirection.UNKNOWN)
-                                        .addItems(extractedStack.getItemStack());
+                        final IAEItemStack extractedStack = Platform
+                                .poweredExtraction(energy, monitor, requestStack, actionSource);
+                        if (extractedStack != null) {
+                            final ItemStack leftover = playerInventory.addItems(extractedStack.getItemStack());
+                            if (leftover != null) {
+                                final IAEItemStack rejected = monitor
+                                        .injectItems(AEItemStack.create(leftover), Actionable.MODULATE, actionSource);
+                                if (rejected != null) {
+                                    Platform.addToPlayerInvOrDrop(player, rejected.getItemStack());
+                                }
                             }
                         }
                     }
                 }
-
             }
-
-            return null;
-        }
-
-        private int getFreeStackSize(EntityPlayer player, ItemStack itemStack) {
-            int freeStackSize = 0;
-
-            for (ItemStack slotStack : player.inventory.mainInventory) {
-                if (slotStack == null) { // Empty slot, stack fits completely
-                    freeStackSize += itemStack.getMaxStackSize();
-                } else if (slotStack.isItemEqual(itemStack)) {
-                    freeStackSize += itemStack.getMaxStackSize() - slotStack.stackSize;
-                }
-            }
-
-            return Math.min(itemStack.stackSize, freeStackSize);
-        }
-
-        private IMEMonitor<IAEItemStack> getMonitor(Container container) {
-
-            try {
-                return (IMEMonitor<IAEItemStack>) ReflectionHelper.findField(container.getClass(), "monitor")
-                        .get(container);
-            } catch (UnableToFindFieldException | IllegalAccessException e) {}
 
             return null;
         }
