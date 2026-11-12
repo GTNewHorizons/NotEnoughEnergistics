@@ -83,8 +83,15 @@ public class IngredientTracker {
         return this.currentIndex < getRequireStacks().size();
     }
 
-    public IAEStack<?> getNextIngredient() {
-        return getRequiredStack(this.currentIndex++);
+    /**
+     * @return the stacks that weren't requested yet, they are marked as requested.
+     */
+    public List<IAEStack<?>> takeRemainingIngredients() {
+        final List<IAEStack<?>> requireStacks = getRequireStacks();
+        final List<IAEStack<?>> remaining = new ArrayList<>(
+                requireStacks.subList(this.currentIndex, requireStacks.size()));
+        this.currentIndex = requireStacks.size();
+        return remaining;
     }
 
     public IAEStack<?> getRequiredStack(int index) {

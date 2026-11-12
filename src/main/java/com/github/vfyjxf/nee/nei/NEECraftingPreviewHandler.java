@@ -54,6 +54,8 @@ public class NEECraftingPreviewHandler {
     private boolean isAutoStart = false;
     private boolean isRequesting = false;
     private long resultStackSize = 0;
+    // the recipe result the missing ingredients are requested for, shown on the crafting CPU
+    private IAEStack<?> requestedResult = null;
     private String modID = "";
 
     private NEECraftingPreviewHandler() {}
@@ -64,6 +66,7 @@ public class NEECraftingPreviewHandler {
         this.isAutoStart = NEIClientConfig.isKeyHashDown("nee.nopreview");
         this.modID = getModID(firstGui.inventorySlots);
         this.resultStackSize = 0;
+        this.requestedResult = aeStack != null ? aeStack.copy() : null;
         this.patternCompound = null;
         this.isRequesting = false;
         this.tracker = null;
@@ -113,7 +116,7 @@ public class NEECraftingPreviewHandler {
                 if (this.tracker.hasNext()) {
 
                     if (this.isAutoStart) {
-                        requestNextIngredient();
+                        requestRemainingIngredients();
                     } else if (aeStack != null) {
                         openCraftAmount(firstGui, aeStack);
                     } else {
@@ -127,6 +130,7 @@ public class NEECraftingPreviewHandler {
                         if (otherStack != null) {
                             IAEStack<?> aeOtherStack = ItemUtils.toAEStack(otherStack.item);
                             this.resultStackSize = aeOtherStack.getStackSize();
+                            this.requestedResult = aeOtherStack.copy();
                             openCraftAmount(firstGui, aeOtherStack);
                         } else {
                             return false;
@@ -180,7 +184,7 @@ public class NEECraftingPreviewHandler {
 
         if (this.tracker != null && old instanceof GuiCraftConfirm) {
             if (this.tracker.hasNext()) {
-                requestNextIngredient();
+                requestRemainingIngredients();
             } else {
                 this.tracker = null;
                 this.isRequesting = false;
@@ -203,6 +207,10 @@ public class NEECraftingPreviewHandler {
                         + (craftAmount % this.resultStackSize == 0 ? 0 : 1);
                 this.isAutoStart = this.isAutoStart || GuiScreen.isShiftKeyDown();
 
+                if (this.requestedResult != null) {
+                    this.requestedResult.setStackSize(craftAmount);
+                }
+
                 try {
                     for (Ingredient ingr : this.tracker.getIngredients()) {
                         ingr.setRequireCount(Math.multiplyExact(ingr.getDefaultRequireCount(), craftMultiplier));
@@ -217,7 +225,7 @@ public class NEECraftingPreviewHandler {
                 this.tracker.calculateIngredients();
 
                 if (this.tracker.hasNext()) {
-                    requestNextIngredient();
+                    requestRemainingIngredients();
                     event.setCanceled(true);
                 } else {
                     this.tracker = null;
@@ -303,15 +311,26 @@ public class NEECraftingPreviewHandler {
         return "";
     }
 
-    private void requestNextIngredient() {
-        final IAEStack<?> stack = this.tracker.getNextIngredient();
+    private void requestRemainingIngredients() {
+        final List<IAEStack<?>> stacks = this.tracker.takeRemainingIngredients();
 
-        if (stack != null) {
+        if (!stacks.isEmpty()) {
+            // all missing ingredients are requested as one crafting job, so they run on a single CPU
+            final NBTTagList stackTags = new NBTTagList();
+            for (IAEStack<?> stack : stacks) {
+                stackTags.appendTag(stack.toNBTGeneric());
+            }
+            final NBTTagCompound compound = new NBTTagCompound();
+            compound.setTag("stacks", stackTags);
+            if (this.requestedResult != null) {
+                compound.setTag("display", this.requestedResult.toNBTGeneric());
+            }
+
             PacketCraftingRequest craftingRequest = new PacketCraftingRequest(
                     this.modID,
-                    PacketCraftingRequest.COMMAND_OPEN_CRAFT_CONFIRM,
-                    stack.toNBTGeneric(),
-                    stack.getStackSize(),
+                    PacketCraftingRequest.COMMAND_OPEN_CRAFT_CONFIRM_MULTIPLE,
+                    compound,
+                    0,
                     this.isAutoStart);
             NEENetworkHandler.getInstance().sendToServer(craftingRequest);
         }
